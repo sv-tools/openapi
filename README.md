@@ -1,42 +1,31 @@
-# go-repo-template
+# OpenAPI v3.1 Specification
 
-[![Code Analysis](https://github.com/sv-tools/go-repo-template/actions/workflows/checks.yaml/badge.svg)](https://github.com/sv-tools/go-repo-template/actions/workflows/checks.yaml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/sv-tools/go-repo-template.svg)](https://pkg.go.dev/github.com/sv-tools/go-repo-template)
-[![codecov](https://codecov.io/gh/sv-tools/go-repo-template/branch/main/graph/badge.svg?token=0XVOTDR1CW)](https://codecov.io/gh/sv-tools/go-repo-template)
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/sv-tools/go-repo-template?style=flat)](https://github.com/sv-tools/go-repo-template/releases)
+[![Code Analysis](https://github.com/sv-tools/openapi/actions/workflows/checks.yaml/badge.svg)](https://github.com/sv-tools/openapi/actions/workflows/checks.yaml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/sv-tools/openapi.svg)](https://pkg.go.dev/github.com/sv-tools/openapi)
+[![codecov](https://codecov.io/gh/sv-tools/openapi/branch/main/graph/badge.svg?token=0XVOTDR1CW)](https://codecov.io/gh/sv-tools/openapi)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/sv-tools/openapi?style=flat)](https://github.com/sv-tools/openapi/releases)
 
-The template for new go repositories
+The implementation of OpenAPI v3.1 Specification for Go v1.18.
 
 ## Features
 
-1. `Makefile` to run some basic validations:
-   1. `golangci-lint`
-   2. `nancy`
-   3. unit and benchmarks tests
-   4. installing all needed tools on macOS using `brew`
-   5. cleaning up the `go.sum` file by removing it and re-creating by `go mod tidy`
-2. MIT License by default
-3. GitHub Action workflows:
-   1. testing all pull requests by running same tools and checking code coverage using `codecov` action
-   2. making a new release, triggered by closed milestone
-      1. creates a new tag using `bumptag` tool
-      2. creates new `Next` milestone
-      3. runs `goreleaser` to build a new release
+* The `spec` folder contains full implementation of the v3.1 Specification using generics, so the minimum supported version of Go is `v1.18beta1`.
+* The `validate` folder uses [jsonschema/v5](https://github.com/santhosh-tekuri/jsonschema) with draft 2020-12 to validate the specifications.
+* The official v3.0 and v3.1 [examples](https://github.com/OAI/OpenAPI-Specification/tree/main/examples) are tested.
+  In most cases v3.0 specification can be converted to v3.1 by changing the version's parameter only.
+  ```diff
+  @@ -1,4 +1,4 @@
+  -openapi: "3.0.0"
+  +openapi: "3.1.0"
+  ```
 
-## Usage
+**NOTE**: The descriptions of most structures and their fields are taken from the official documentations.
 
-1. Create a repository using this repo as template
-2. Replace in all files `go-repo-template` to the project's name
-3. In case of:
-   1. library
-       1. Remove `.github/Dockerfile`, `.github/goreleaser-cli.yml` files
-       2. Remove `release-cli` section in the `.github/workflows/release.yaml` file
-   2. command line tool (cli)
-      1. Remove `.github/goreleaser-lib.yml` file
-      2. Remove `release-lib` section in the `.github/workflows/release.yaml` file
-4. Modify `README.md` by removing this text
-5. Feel free to modify any other files
+## Links
 
+* OpenAPI Specification: <https://github.com/OAI/OpenAPI-Specification> and <https://spec.openapis.org/oas/v3.1.0>
+* JSON Schema: <https://json-schema.org/understanding-json-schema/index.html> and <https://json-schema.org/draft/2020-12/json-schema-core.html>
+* The list of most popular alternatives: <https://github.com/OAI/OpenAPI-Specification/blob/main/IMPLEMENTATIONS.md#low-level-tooling>
 
 ## License
 

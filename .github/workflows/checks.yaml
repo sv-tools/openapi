@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GO: "1.18beta1"
+  GO: "1.18.0-beta1"
 
 jobs:
   CodeQL:
@@ -42,9 +42,10 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
+          stable: false
           go-version: ${{ env.GO }}
       - name: Run Unit Tests
-        run: go test -race -cover -coverprofile=coverage.out -covermode=atomic
+        run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
         with:
@@ -59,6 +60,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
+          stable: false
           go-version: ${{ env.GO }}
       - name: Run GolangCi-Lint
         uses: golangci/golangci-lint-action@v2.5.2
