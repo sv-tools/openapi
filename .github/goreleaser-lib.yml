@@ -1,4 +1,4 @@
-project_name: go-repo-template
+project_name: openapi
 
 release:
   prerelease: auto

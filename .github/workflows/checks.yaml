@@ -15,15 +15,13 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GO: "1.17"
+  GO: "1.18beta1"
 
 jobs:
   CodeQL:
     runs-on: ubuntu-latest
-
     permissions:
       security-events: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -38,36 +36,30 @@ jobs:
 
   UnitTests:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - name: Install Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO }}
-
       - name: Run Unit Tests
         run: go test -race -cover -coverprofile=coverage.out -covermode=atomic
-
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
         with:
           file: ./coverage.out
 
   GolangCI-Lint:
+    if: "false"
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - name: Install Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO }}
-
       - name: Run GolangCi-Lint
         uses: golangci/golangci-lint-action@v2.5.2
         with:

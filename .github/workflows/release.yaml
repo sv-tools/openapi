@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  GO: "1.17"
+  GO: "1.18beta1"
 
 jobs:
   bump-version:
@@ -32,55 +32,6 @@ jobs:
 
       - name: Push Tag
         run: git push origin --tags
-
-  release-cli:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    env:
-      DOCKER_CLI_EXPERIMENTAL: "enabled"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO }}
-
-      - name: Prepare gpg
-        run: |
-          gpgconf --kill gpg-agent
-          gpg --quiet --batch --yes --decrypt --passphrase="${{ secrets.GPG_PASSPHRASE }}" --output .github/sv-tools-bot.asc .github/sv-tools-bot.asc.gpg
-          gpg --batch --yes --import .github/sv-tools-bot.asc
-          rm .github/sv-tools-bot.asc
-
-      - name: Allow arm Docker builds # https://github.com/linuxkit/linuxkit/tree/master/pkg/binfmt
-        run: sudo docker run --privileged linuxkit/binfmt:v0.8
-
-      - name: Docker Login
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: sv-tools-bot
-          password: ${{ secrets.BOT_TOKEN }}
-
-      - name: Docker Login
-        uses: docker/login-action@v1
-        with:
-          username: svtools
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          args: release --rm-dist --config .github/goreleaser-cli.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Clear
-        if: always()
-        run: rm -f ${HOME}/.docker/config.json
 
   release-lib:
     if: github.event_name == 'push'
