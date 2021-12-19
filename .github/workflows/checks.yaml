@@ -1,0 +1,76 @@
+name: "Code Analysis"
+
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 0 * * 0"
+
+concurrency:
+  group: ${{ format('{0}-{1}', github.workflow, github.head_ref) }}
+  cancel-in-progress: true
+
+env:
+  GO: "1.17"
+
+jobs:
+  CodeQL:
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: go
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+
+  UnitTests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO }}
+
+      - name: Run Unit Tests
+        run: go test -race -cover -coverprofile=coverage.out -covermode=atomic
+
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          file: ./coverage.out
+
+  GolangCI-Lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO }}
+
+      - name: Run GolangCi-Lint
+        uses: golangci/golangci-lint-action@v2.5.2
+        with:
+          version: latest
+          skip-build-cache: true
+          skip-go-installation: true

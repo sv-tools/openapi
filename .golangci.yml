@@ -1,0 +1,77 @@
+run:
+  skip-dirs-use-default: true
+
+linters:
+  enable: # keep in ascending order
+    - asciicheck
+    - bodyclose
+    - dupl
+    - durationcheck
+    - exhaustive
+    - exportloopref
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - goerr113
+    - gofumpt
+    - goprintffuncname
+    - gosec
+    - ifshort
+    - lll
+    - misspell
+    - nestif
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+linters-settings:
+  dupl:
+    threshold: 100
+  misspell:
+    locale: US
+  golint:
+    min-confidence: 0
+  govet:
+    enable-all: true
+    disable:
+      - shadow
+  gci:
+    local-prefixes: github.com/sv-tools/go-repo-template
+  gocognit:
+    min-complexity: 15
+  gocyclo:
+    min-complexity: 15
+  gofumpt:
+    extra-rules: true
+  lll:
+    line-length: 120
+    tab-width: 4
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  maligned:
+    suggest-new: true
+  prealloc:
+    for-loops: true
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - whyNoLint
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - should have a package comment

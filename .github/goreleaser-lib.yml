@@ -1,0 +1,10 @@
+project_name: go-repo-template
+
+release:
+  prerelease: auto
+
+changelog:
+  use: github
+
+builds:
+  - skip: true
