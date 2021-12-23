@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  GO: "1.18beta1"
+  GO: "1.18.0-beta1"
 
 jobs:
   bump-version:
@@ -43,6 +43,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
+          stable: false
           go-version: ${{ env.GO }}
 
       - name: Run GoReleaser
