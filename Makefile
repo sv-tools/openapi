@@ -4,8 +4,7 @@ ifeq ($(shell uname), Darwin)
 all: brew-install
 endif
 
-# +lint
-all: tidy test
+all: tidy lint test
 
 brew-install:
 	@brew bundle --file $(BREWFILE)
@@ -15,8 +14,9 @@ run-test:
 
 test: run-test
 
+# @golangci-lint run --fix ./...
 lint:
-	@golangci-lint run --fix ./...
+	@go vet ./...
 
 tidy:
 	@go mod tidy
