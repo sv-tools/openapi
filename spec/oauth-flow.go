@@ -17,6 +17,13 @@ package spec
 //       read:pets: read your pets
 type OAuthFlow struct {
 	// REQUIRED.
+	// The available scopes for the OAuth2 security scheme.
+	// A map between the scope name and a short description for it.
+	// The map MAY be empty.
+	//
+	// Applies To: oauth2
+	Scopes map[string]string `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	// REQUIRED.
 	// The authorization URL to be used for this flow.
 	// This MUST be in the form of a URL.
 	// The OAuth2 standard requires the use of TLS.
@@ -36,13 +43,6 @@ type OAuthFlow struct {
 	//
 	// Applies To: oauth2
 	RefreshURL string `json:"refreshUrl,omitempty" yaml:"refreshUrl,omitempty"`
-	// REQUIRED.
-	// The available scopes for the OAuth2 security scheme.
-	// A map between the scope name and a short description for it.
-	// The map MAY be empty.
-	//
-	// Applies To: oauth2
-	Scopes map[string]string `json:"scopes,omitempty" yaml:"scopes,omitempty"`
 }
 
 // NewOAuthFlow creates OAuthFlow object

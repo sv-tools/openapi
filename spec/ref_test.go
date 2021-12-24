@@ -19,9 +19,9 @@ func (o testRefOrSpec) OpenAPIConstraint() {}
 
 func TestNewRefOrSpec(t *testing.T) {
 	for _, tt := range []struct {
-		name    string
 		ref     *spec.Ref
 		spec    *testRefOrSpec
+		name    string
 		nilRef  bool
 		nilSpec bool
 	}{
@@ -97,19 +97,19 @@ func TestRefOrSpec_Marshal_Unmarshal(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("json", func(t *testing.T) {
-				var j *spec.RefOrSpec[testRefOrSpec]
-				require.NoError(t, json.Unmarshal([]byte(tt.data), &j))
+				var v *spec.RefOrSpec[testRefOrSpec]
+				require.NoError(t, json.Unmarshal([]byte(tt.data), &v))
 				if tt.nilRef {
-					require.Nil(t, j.Ref)
+					require.Nil(t, v.Ref)
 				} else {
-					require.NotNil(t, j.Ref)
+					require.NotNil(t, v.Ref)
 				}
 				if tt.nilSpec {
-					require.Nil(t, j.Spec)
+					require.Nil(t, v.Spec)
 				} else {
-					require.NotNil(t, j.Spec)
+					require.NotNil(t, v.Spec)
 				}
-				data, err := json.Marshal(&j)
+				data, err := json.Marshal(&v)
 				require.NoError(t, err)
 				if tt.expected == "" {
 					tt.expected = tt.data
@@ -118,19 +118,19 @@ func TestRefOrSpec_Marshal_Unmarshal(t *testing.T) {
 			})
 
 			t.Run("yaml", func(t *testing.T) {
-				var y *spec.RefOrSpec[testRefOrSpec]
-				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &y))
+				var v *spec.RefOrSpec[testRefOrSpec]
+				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &v))
 				if tt.nilRef {
-					require.Nil(t, y.Ref)
+					require.Nil(t, v.Ref)
 				} else {
-					require.NotNil(t, y.Ref)
+					require.NotNil(t, v.Ref)
 				}
 				if tt.nilSpec {
-					require.Nil(t, y.Spec)
+					require.Nil(t, v.Spec)
 				} else {
-					require.NotNil(t, y.Spec)
+					require.NotNil(t, v.Spec)
 				}
-				data, err := yaml.Marshal(&y)
+				data, err := yaml.Marshal(&v)
 				require.NoError(t, err)
 				if tt.expected == "" {
 					tt.expected = tt.data

@@ -21,11 +21,11 @@ package spec
 //         dog: '#/components/schemas/Dog'
 //         monster: 'https://gigantic-server.com/schemas/Monster/schema.json'
 type Discriminator struct {
+	// An object to hold mappings between payload values and schema names or references.
+	Mapping map[string]string `json:"mapping,omitempty" yaml:"mapping,omitempty"`
 	// REQUIRED.
 	// The name of the property in the payload that will hold the discriminator value.
 	PropertyName string `json:"propertyName" yaml:"propertyName"`
-	// An object to hold mappings between payload values and schema names or references.
-	Mapping map[string]string `json:"mapping,omitempty" yaml:"mapping,omitempty"`
 }
 
 // NewDiscriminator creates Discriminator object.

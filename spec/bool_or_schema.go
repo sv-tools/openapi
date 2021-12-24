@@ -11,8 +11,8 @@ import (
 // It MUST be used as a pointer,
 // otherwise the `false` can be omitted by json or yaml encoders in case of `omitempty` tag is set.
 type BoolOrSchema struct {
-	Allowed bool
 	Schema  *RefOrSpec[Schema]
+	Allowed bool
 }
 
 // NewBoolOrSchema creates BoolOrSchema object.
