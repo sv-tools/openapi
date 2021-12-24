@@ -4,9 +4,6 @@ package spec
 //
 // https://spec.openapis.org/oas/v3.1.0#server-variable-object
 type ServerVariable struct {
-	// An enumeration of string values to be used if the substitution options are from a limited set.
-	// The array MUST NOT be empty.
-	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 	// REQUIRED.
 	// The default value to use for substitution, which SHALL be sent if an alternate value is not supplied.
 	// Note this behavior is different than the Schema Object’s treatment of default values,
@@ -16,6 +13,9 @@ type ServerVariable struct {
 	// An optional description for the server variable.
 	// CommonMark syntax MAY be used for rich text representation.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	// An enumeration of string values to be used if the substitution options are from a limited set.
+	// The array MUST NOT be empty.
+	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 }
 
 // NewServerVariable creates ServerVariable object.

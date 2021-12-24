@@ -13,10 +13,6 @@ package spec
 //         items:
 //           $ref: '#/components/schemas/VeryComplexType'
 type Response struct {
-	// REQUIRED.
-	// A description of the response.
-	// CommonMark syntax MAY be used for rich text representation.
-	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	// Maps a header name to its definition.
 	// [RFC7230] states header names are case insensitive.
 	// If a response header is defined with the name "Content-Type", it SHALL be ignored.
@@ -28,6 +24,10 @@ type Response struct {
 	// A map of operations links that can be followed from the response.
 	// The key of the map is a short name for the link, following the naming constraints of the names for Component Objects.
 	Links map[string]*RefOrSpec[Extendable[Link]] `json:"links,omitempty" yaml:"links,omitempty"`
+	// REQUIRED.
+	// A description of the response.
+	// CommonMark syntax MAY be used for rich text representation.
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 // NewResponseSpec creates Response object.

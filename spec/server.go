@@ -13,6 +13,9 @@ package spec
 //   - url: https://api.gigantic-server.com/v1
 //     description: Production server
 type Server struct {
+	// A map between a variable name and its value.
+	// The value is used for substitution in the server’s URL template.
+	Variables map[string]*Extendable[ServerVariable] `json:"variables,omitempty" yaml:"variables,omitempty"`
 	// REQUIRED.
 	// A URL to the target host.
 	// This URL supports Server Variables and MAY be relative, to indicate that the host location is relative
@@ -22,9 +25,6 @@ type Server struct {
 	// An optional string describing the host designated by the URL.
 	// CommonMark syntax MAY be used for rich text representation.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	// A map between a variable name and its value.
-	// The value is used for substitution in the server’s URL template.
-	Variables map[string]*Extendable[ServerVariable] `json:"variables,omitempty" yaml:"variables,omitempty"`
 }
 
 // NewServer creates Server object.

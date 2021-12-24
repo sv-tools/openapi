@@ -9,14 +9,14 @@ package spec
 //   name: pet
 //   description: Pets operations
 type Tag struct {
+	// Additional external documentation for this tag.
+	ExternalDocs *Extendable[ExternalDocs] `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 	// REQUIRED.
 	// The name of the tag.
 	Name string `json:"name" yaml:"name"`
 	// A description for the tag.
 	// CommonMark syntax MAY be used for rich text representation.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	// Additional external documentation for this tag.
-	ExternalDocs *Extendable[ExternalDocs] `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 }
 
 // NewTag creates Tag object.
