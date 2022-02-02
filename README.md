@@ -9,7 +9,7 @@ The implementation of OpenAPI v3.1 Specification for Go v1.18.
 
 ## Features
 
-* The `spec` folder contains full implementation of the v3.1 Specification using generics, so the minimum supported version of Go is `v1.18beta1`.
+* The `spec` folder contains full implementation of the v3.1 Specification using generics, so the minimum supported version of Go is `v1.18beta2`.
 * The `validate` folder uses [jsonschema/v5](https://github.com/santhosh-tekuri/jsonschema) with draft 2020-12 to validate the specifications.
 * The official v3.0 and v3.1 [examples](https://github.com/OAI/OpenAPI-Specification/tree/main/examples) are tested.
   In most cases v3.0 specification can be converted to v3.1 by changing the version's parameter only.
