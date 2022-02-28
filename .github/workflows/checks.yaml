@@ -73,4 +73,3 @@ jobs:
         with:
           version: latest
           skip-build-cache: true
-          skip-go-installation: true
