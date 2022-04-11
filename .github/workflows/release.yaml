@@ -49,7 +49,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           stable: false
           go-version: ${{ env.GO }}
