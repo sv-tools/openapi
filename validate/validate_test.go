@@ -1,12 +1,14 @@
 package validate_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
 
+	"github.com/santhosh-tekuri/jsonschema/v5"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -82,4 +84,27 @@ func TestManuallyCreatedSpec(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestValidatePayload(t *testing.T) {
+	data, err := os.ReadFile(path.Join("testdata", "petstore.json"))
+	require.NoError(t, err)
+	c := jsonschema.NewCompiler()
+	err = c.AddResource("http://petstore.swagger.io/v1", bytes.NewBuffer(data))
+	require.NoError(t, err)
+	s, err := c.Compile("http://petstore.swagger.io/v1#/components/schemas/Pet")
+	require.NoError(t, err)
+
+	var v1 any
+	err = json.Unmarshal([]byte(`{"id": 123, "name": "foo", "tag": "bar"}`), &v1)
+	require.NoError(t, err)
+	err = s.Validate(v1)
+	require.NoError(t, err)
+
+	var v2 any
+	err = json.Unmarshal([]byte(`{"id": "123", "name": "foo", "tag": "bar"}`), &v2)
+	require.NoError(t, err)
+	err = s.Validate(v2)
+	require.Error(t, err)
+	require.EqualError(t, err, "jsonschema: '/id' does not validate with http://petstore.swagger.io/v1#/properties/id/type: expected integer, but got string")
 }

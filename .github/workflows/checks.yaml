@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GO: "1.18.0-beta2"
+  GO: "1.18"
 
 jobs:
   CodeQL:
