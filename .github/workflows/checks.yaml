@@ -69,7 +69,7 @@ jobs:
           stable: false
           go-version: ${{ env.GO }}
       - name: Run GolangCi-Lint
-        uses: golangci/golangci-lint-action@v3.1.0
+        uses: golangci/golangci-lint-action@v3.2.0
         with:
           version: latest
           skip-build-cache: true
