@@ -55,7 +55,7 @@ jobs:
           go-version: ${{ env.GO }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           args: release --rm-dist --config .github/goreleaser-lib.yml
