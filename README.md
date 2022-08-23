@@ -5,7 +5,12 @@
 [![codecov](https://codecov.io/gh/sv-tools/openapi/branch/main/graph/badge.svg?token=0XVOTDR1CW)](https://codecov.io/gh/sv-tools/openapi)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/sv-tools/openapi?style=flat)](https://github.com/sv-tools/openapi/releases)
 
-The implementation of OpenAPI v3.1 Specification for Go v1.18.
+The implementation of OpenAPI v3.1 Specification for Go using generics.
+
+## Supported Go versions:
+
+* v1.19
+* v1.18
 
 ## Features
 
