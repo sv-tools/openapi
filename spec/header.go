@@ -5,9 +5,10 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#header-object
 //
 // Example:
-//   description: The number of allowed requests in the current period
-//   schema:
-//     type: integer
+//
+//	description: The number of allowed requests in the current period
+//	schema:
+//	  type: integer
 //
 // All fields are copied from Parameter Object as is, except name and in fields.
 type Header struct {
@@ -75,5 +76,3 @@ func NewHeaderSpec() *RefOrSpec[Extendable[Header]] {
 func NewHeaderRef(ref *Ref) *RefOrSpec[Extendable[Header]] {
 	return NewRefOrSpec[Extendable[Header]](ref, nil)
 }
-
-func (o Header) OpenAPIConstraint() {}

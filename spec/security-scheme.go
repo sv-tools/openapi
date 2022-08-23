@@ -18,13 +18,14 @@ const (
 // https://spec.openapis.org/oas/v3.1.0#security-scheme-object
 //
 // Example:
-//   type: oauth2
-//   flows:
-//     implicit:
-//       authorizationUrl: https://example.com/api/oauth/dialog
-//       scopes:
-//         write:pets: modify pets in your account
-//         read:pets: read your pets
+//
+//	type: oauth2
+//	flows:
+//	  implicit:
+//	    authorizationUrl: https://example.com/api/oauth/dialog
+//	    scopes:
+//	      write:pets: modify pets in your account
+//	      read:pets: read your pets
 type SecurityScheme struct {
 	// REQUIRED.
 	// The type of the security scheme.
@@ -82,5 +83,3 @@ func NewSecuritySchemeSpec() *RefOrSpec[Extendable[SecurityScheme]] {
 func NewSecuritySchemeRef(ref *Ref) *RefOrSpec[Extendable[SecurityScheme]] {
 	return NewRefOrSpec[Extendable[SecurityScheme]](ref, nil)
 }
-
-func (o SecurityScheme) OpenAPIConstraint() {}

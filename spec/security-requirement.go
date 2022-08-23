@@ -10,7 +10,8 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#security-requirement-object
 //
 // Example:
-//   api_key: []
+//
+//	api_key: []
 type SecurityRequirement map[string][]string
 
 // NewSecurityRequirement creates SecurityRequirement object.

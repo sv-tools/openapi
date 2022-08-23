@@ -51,8 +51,6 @@ func NewSchemaRef(ref *Ref) *RefOrSpec[Schema] {
 	return NewRefOrSpec[Schema](ref, nil)
 }
 
-func (o Schema) OpenAPIConstraint() {}
-
 // returns the list of public fields for given tag and ignores `-` names
 func getFields(t reflect.Type, tag string) map[string]struct{} {
 	if t.Kind() == reflect.Pointer {

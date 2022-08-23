@@ -1,6 +1,6 @@
 package spec
 
-// JSONSchemaTypeString
+// JsonSchemaTypeString
 //
 // https://json-schema.org/understanding-json-schema/reference/string.html#string
 type JsonSchemaTypeString struct {
@@ -231,11 +231,10 @@ type JsonSchemaCore struct {
 	// https://json-schema.org/understanding-json-schema/structuring.html#id
 	ID string `json:"$id,omitempty" yaml:"$id,omitempty"`
 	// https://json-schema.org/understanding-json-schema/structuring.html#defs
-	Defs map[string]*RefOrSpec[Schema] `json:"$defs,omitempty" yaml:"$defs,omitempty"`
-	//Ref           string             `json:"$ref,omitempty" yaml:"$ref,omitempty"` is part of RefOrSpec object
-	DynamicRef    string          `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
-	Vocabulary    map[string]bool `json:"$vocabulary,omitempty" yaml:"$vocabulary,omitempty"`
-	DynamicAnchor string          `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
+	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty" yaml:"$defs,omitempty"`
+	DynamicRef    string                        `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
+	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty" yaml:"$vocabulary,omitempty"`
+	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
 	// https://json-schema.org/understanding-json-schema/reference/type.html
 	Type SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
 }

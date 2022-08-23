@@ -5,16 +5,17 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#oauth-flow-object
 //
 // Example:
-//   implicit:
-//     authorizationUrl: https://example.com/api/oauth/dialog
-//     scopes:
-//       write:pets: modify pets in your account
-//       read:pets: read your pets
-//   authorizationCode
-//     authorizationUrl: https://example.com/api/oauth/dialog
-//     scopes:
-//       write:pets: modify pets in your account
-//       read:pets: read your pets
+//
+//	implicit:
+//	  authorizationUrl: https://example.com/api/oauth/dialog
+//	  scopes:
+//	    write:pets: modify pets in your account
+//	    read:pets: read your pets
+//	authorizationCode
+//	  authorizationUrl: https://example.com/api/oauth/dialog
+//	  scopes:
+//	    write:pets: modify pets in your account
+//	    read:pets: read your pets
 type OAuthFlow struct {
 	// REQUIRED.
 	// The available scopes for the OAuth2 security scheme.
@@ -49,5 +50,3 @@ type OAuthFlow struct {
 func NewOAuthFlow() *Extendable[OAuthFlow] {
 	return NewExtendable(&OAuthFlow{})
 }
-
-func (o OAuthFlow) OpenAPIConstraint() {}

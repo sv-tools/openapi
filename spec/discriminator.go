@@ -9,17 +9,18 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#discriminator-object
 //
 // Example:
-//   MyResponseType:
-//     oneOf:
-//     - $ref: '#/components/schemas/Cat'
-//     - $ref: '#/components/schemas/Dog'
-//     - $ref: '#/components/schemas/Lizard'
-//     - $ref: 'https://gigantic-server.com/schemas/Monster/schema.json'
-//     discriminator:
-//       propertyName: petType
-//       mapping:
-//         dog: '#/components/schemas/Dog'
-//         monster: 'https://gigantic-server.com/schemas/Monster/schema.json'
+//
+//	MyResponseType:
+//	  oneOf:
+//	  - $ref: '#/components/schemas/Cat'
+//	  - $ref: '#/components/schemas/Dog'
+//	  - $ref: '#/components/schemas/Lizard'
+//	  - $ref: 'https://gigantic-server.com/schemas/Monster/schema.json'
+//	  discriminator:
+//	    propertyName: petType
+//	    mapping:
+//	      dog: '#/components/schemas/Dog'
+//	      monster: 'https://gigantic-server.com/schemas/Monster/schema.json'
 type Discriminator struct {
 	// An object to hold mappings between payload values and schema names or references.
 	Mapping map[string]string `json:"mapping,omitempty" yaml:"mapping,omitempty"`

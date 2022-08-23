@@ -11,49 +11,50 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#link-object
 //
 // Example:
-//   paths:
-//     /users/{id}:
-//       parameters:
-//       - name: id
-//         in: path
-//         required: true
-//         description: the user identifier, as userId
-//         schema:
-//           type: string
-//       get:
-//         responses:
-//           '200':
-//             description: the user being returned
-//             content:
-//               application/json:
-//                 schema:
-//                   type: object
-//                   properties:
-//                     uuid: # the unique user id
-//                       type: string
-//                       format: uuid
-//             links:
-//               address:
-//                 # the target link operationId
-//                 operationId: getUserAddress
-//                 parameters:
-//                   # get the `id` field from the request path parameter named `id`
-//                   userId: $request.path.id
-//     # the path item of the linked operation
-//     /users/{userid}/address:
-//       parameters:
-//       - name: userid
-//         in: path
-//         required: true
-//         description: the user identifier, as userId
-//         schema:
-//           type: string
-//       # linked operation
-//       get:
-//         operationId: getUserAddress
-//         responses:
-//           '200':
-//             description: the user's address
+//
+//	paths:
+//	  /users/{id}:
+//	    parameters:
+//	    - name: id
+//	      in: path
+//	      required: true
+//	      description: the user identifier, as userId
+//	      schema:
+//	        type: string
+//	    get:
+//	      responses:
+//	        '200':
+//	          description: the user being returned
+//	          content:
+//	            application/json:
+//	              schema:
+//	                type: object
+//	                properties:
+//	                  uuid: # the unique user id
+//	                    type: string
+//	                    format: uuid
+//	          links:
+//	            address:
+//	              # the target link operationId
+//	              operationId: getUserAddress
+//	              parameters:
+//	                # get the `id` field from the request path parameter named `id`
+//	                userId: $request.path.id
+//	  # the path item of the linked operation
+//	  /users/{userid}/address:
+//	    parameters:
+//	    - name: userid
+//	      in: path
+//	      required: true
+//	      description: the user identifier, as userId
+//	      schema:
+//	        type: string
+//	    # linked operation
+//	    get:
+//	      operationId: getUserAddress
+//	      responses:
+//	        '200':
+//	          description: the user's address
 type Link struct {
 	// A literal value or {expression} to use as a request body when calling the target operation.
 	RequestBody any `json:"requestBody,omitempty" yaml:"requestBody,omitempty"`
@@ -87,5 +88,3 @@ func NewLinkSpec() *RefOrSpec[Extendable[Link]] {
 func NewLinkRef(ref *Ref) *RefOrSpec[Extendable[Link]] {
 	return NewRefOrSpec[Extendable[Link]](ref, nil)
 }
-
-func (o Link) OpenAPIConstraint() {}

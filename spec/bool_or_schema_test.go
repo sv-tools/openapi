@@ -84,5 +84,4 @@ func TestAdditionalPropertiesJSON(t *testing.T) {
 			})
 		})
 	}
-
 }

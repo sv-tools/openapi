@@ -6,28 +6,29 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#example-object
 //
 // Example:
-//   requestBody:
-//     content:
-//       'application/json':
-//         schema:
-//           $ref: '#/components/schemas/Address'
-//         examples:
-//           foo:
-//             summary: A foo example
-//             value: {"foo": "bar"}
-//           bar:
-//             summary: A bar example
-//             value: {"bar": "baz"}
-//       'application/xml':
-//         examples:
-//           xmlExample:
-//             summary: This is an example in XML
-//             externalValue: 'https://example.org/examples/address-example.xml'
-//       'text/plain':
-//         examples:
-//           textExample:
-//             summary: This is a text example
-//             externalValue: 'https://foo.bar/examples/address-example.txt'
+//
+//	requestBody:
+//	  content:
+//	    'application/json':
+//	      schema:
+//	        $ref: '#/components/schemas/Address'
+//	      examples:
+//	        foo:
+//	          summary: A foo example
+//	          value: {"foo": "bar"}
+//	        bar:
+//	          summary: A bar example
+//	          value: {"bar": "baz"}
+//	    'application/xml':
+//	      examples:
+//	        xmlExample:
+//	          summary: This is an example in XML
+//	          externalValue: 'https://example.org/examples/address-example.xml'
+//	    'text/plain':
+//	      examples:
+//	        textExample:
+//	          summary: This is a text example
+//	          externalValue: 'https://foo.bar/examples/address-example.txt'
 type Example struct {
 	// Short description for the example.
 	Summary string `json:"summary,omitempty" yaml:"summary,omitempty"`
@@ -55,5 +56,3 @@ func NewExampleSpec() *RefOrSpec[Extendable[Example]] {
 func NewExampleRef(ref *Ref) *RefOrSpec[Extendable[Example]] {
 	return NewRefOrSpec[Extendable[Example]](ref, nil)
 }
-
-func (o Example) OpenAPIConstraint() {}

@@ -14,18 +14,18 @@ import (
 //
 // Example:
 //
-//   /pets:
-//     get:
-//       description: Returns all pets from the system that the user has access to
-//       responses:
-//         '200':
-//           description: A list of pets.
-//           content:
-//             application/json:
-//               schema:
-//                 type: array
-//                 items:
-//                   $ref: '#/components/schemas/pet'
+//	/pets:
+//	  get:
+//	    description: Returns all pets from the system that the user has access to
+//	    responses:
+//	      '200':
+//	        description: A list of pets.
+//	        content:
+//	          application/json:
+//	            schema:
+//	              type: array
+//	              items:
+//	                $ref: '#/components/schemas/pet'
 type Paths struct {
 	// A relative path to an individual endpoint.
 	// The field name MUST begin with a forward slash (/).
@@ -63,5 +63,3 @@ func (o *Paths) MarshalYAML() (any, error) {
 func (o *Paths) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &o.Paths)
 }
-
-func (o Paths) OpenAPIConstraint() {}

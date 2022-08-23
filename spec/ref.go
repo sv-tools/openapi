@@ -14,7 +14,8 @@ import (
 // https://spec.openapis.org/oas/v3.1.0#reference-object
 //
 // Example:
-//   $ref: '#/components/schemas/Pet'
+//
+//	$ref: '#/components/schemas/Pet'
 type Ref struct {
 	// REQUIRED.
 	// The reference identifier.
@@ -39,13 +40,13 @@ func NewRef(ref string) *Ref {
 // RefOrSpec holds either Ref or any OpenAPI spec type.
 //
 // NOTE: The Ref object takes precedent over Spec if using json or yaml Marshal and Unmarshal functions.
-type RefOrSpec[T openAPIConstraint] struct {
+type RefOrSpec[T any] struct {
 	Ref  *Ref `json:"-" yaml:"-"`
 	Spec *T   `json:"-" yaml:"-"`
 }
 
 // NewRefOrSpec creates an object of RefOrSpec type for either Ref or Spec
-func NewRefOrSpec[T openAPIConstraint](ref *Ref, spec *T) *RefOrSpec[T] {
+func NewRefOrSpec[T any](ref *Ref, spec *T) *RefOrSpec[T] {
 	o := RefOrSpec[T]{}
 	switch {
 	case ref != nil:

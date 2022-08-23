@@ -5,9 +5,10 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#contact-object
 //
 // Example:
-//   name: API Support
-//   url: https://www.example.com/support
-//   email: support@example.com
+//
+//	name: API Support
+//	url: https://www.example.com/support
+//	email: support@example.com
 type Contact struct {
 	// The identifying name of the contact person/organization.
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
@@ -23,5 +24,3 @@ type Contact struct {
 func NewContact() *Extendable[Contact] {
 	return NewExtendable(&Contact{})
 }
-
-func (o Contact) OpenAPIConstraint() {}

@@ -5,8 +5,9 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#license-object
 //
 // Example:
-//   name: Apache 2.0
-//   identifier: Apache-2.0
+//
+//	name: Apache 2.0
+//	identifier: Apache-2.0
 type License struct {
 	// REQUIRED.
 	// The license name used for the API.
@@ -24,5 +25,3 @@ type License struct {
 func NewLicense() *Extendable[License] {
 	return NewExtendable(&License{})
 }
-
-func (o License) OpenAPIConstraint() {}

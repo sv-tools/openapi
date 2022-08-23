@@ -18,21 +18,22 @@ const ExtensionPrefix = "x-"
 // https://spec.openapis.org/oas/v3.1.0#specification-extensions
 //
 // Example:
-//   openapi: 3.1.0
-//   info:
-//     title: Sample Pet Store App
-//     summary: A pet store manager.
-//     description: This is a sample server for a pet store.
-//     version: 1.0.1
-//     x-build-data: 2006-01-02T15:04:05Z07:00
-//	   x-build-commit-id: dac33af14d0d4a5f1c226141042ca7cefc6aeb75
-type Extendable[T openAPIConstraint] struct {
+//
+//	  openapi: 3.1.0
+//	  info:
+//	    title: Sample Pet Store App
+//	    summary: A pet store manager.
+//	    description: This is a sample server for a pet store.
+//	    version: 1.0.1
+//	    x-build-data: 2006-01-02T15:04:05Z07:00
+//		x-build-commit-id: dac33af14d0d4a5f1c226141042ca7cefc6aeb75
+type Extendable[T any] struct {
 	Spec       *T             `json:"-" yaml:"-"`
 	Extensions map[string]any `json:"-" yaml:"-"`
 }
 
 // NewExtendable creates new Extendable object for given spec
-func NewExtendable[T openAPIConstraint](spec *T) *Extendable[T] {
+func NewExtendable[T any](spec *T) *Extendable[T] {
 	ext := Extendable[T]{
 		Spec:       spec,
 		Extensions: make(map[string]any),
@@ -135,5 +136,3 @@ func (o *Extendable[T]) UnmarshalYAML(node *yaml.Node) error {
 
 	return nil
 }
-
-func (o Extendable[T]) OpenAPIConstraint() {}

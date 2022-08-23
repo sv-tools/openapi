@@ -6,18 +6,19 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#info-object
 //
 // Example:
-//   title: Sample Pet Store App
-//   summary: A pet store manager.
-//   description: This is a sample server for a pet store.
-//   termsOfService: https://example.com/terms/
-//   contact:
-//     name: API Support
-//     url: https://www.example.com/support
-//     email: support@example.com
-//   license:
-//     name: Apache 2.0
-//     url: https://www.apache.org/licenses/LICENSE-2.0.html
-//   version: 1.0.1
+//
+//	title: Sample Pet Store App
+//	summary: A pet store manager.
+//	description: This is a sample server for a pet store.
+//	termsOfService: https://example.com/terms/
+//	contact:
+//	  name: API Support
+//	  url: https://www.example.com/support
+//	  email: support@example.com
+//	license:
+//	  name: Apache 2.0
+//	  url: https://www.apache.org/licenses/LICENSE-2.0.html
+//	version: 1.0.1
 type Info struct {
 	// REQUIRED.
 	// The title of the API.
@@ -43,5 +44,3 @@ type Info struct {
 func NewInfo() *Extendable[Info] {
 	return NewExtendable(&Info{})
 }
-
-func (o Info) OpenAPIConstraint() {}

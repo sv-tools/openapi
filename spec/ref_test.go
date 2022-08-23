@@ -15,8 +15,6 @@ type testRefOrSpec struct {
 	B string `json:"b,omitempty" yaml:"b,omitempty"`
 }
 
-func (o testRefOrSpec) OpenAPIConstraint() {}
-
 func TestNewRefOrSpec(t *testing.T) {
 	for _, tt := range []struct {
 		ref     *spec.Ref

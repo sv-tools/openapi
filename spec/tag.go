@@ -6,8 +6,9 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#tag-object
 //
 // Example:
-//   name: pet
-//   description: Pets operations
+//
+//	name: pet
+//	description: Pets operations
 type Tag struct {
 	// Additional external documentation for this tag.
 	ExternalDocs *Extendable[ExternalDocs] `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
@@ -23,5 +24,3 @@ type Tag struct {
 func NewTag() *Extendable[Tag] {
 	return NewExtendable(&Tag{})
 }
-
-func (o Tag) OpenAPIConstraint() {}

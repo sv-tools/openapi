@@ -29,8 +29,9 @@ const (
 // https://spec.openapis.org/oas/v3.1.0#parameter-object
 //
 // Example:
-//   name: pet
-//   description: Pets operations
+//
+//	name: pet
+//	description: Pets operations
 type Parameter struct {
 	// Example of the parameter’s potential value.
 	// The example SHOULD match the specified schema and encoding properties if present.
@@ -109,5 +110,3 @@ func NewParameterSpec() *RefOrSpec[Extendable[Parameter]] {
 func NewParameterRef(ref *Ref) *RefOrSpec[Extendable[Parameter]] {
 	return NewRefOrSpec[Extendable[Parameter]](ref, nil)
 }
-
-func (o Parameter) OpenAPIConstraint() {}

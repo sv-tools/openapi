@@ -14,8 +14,6 @@ type testExtendable struct {
 	A string `json:"a,omitempty" yaml:"a,omitempty"`
 }
 
-func (o testExtendable) OpenAPIConstraint() {}
-
 func TestExtendable_Marshal_Unmarshal(t *testing.T) {
 	for _, tt := range []struct {
 		name            string

@@ -5,28 +5,29 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#media-type-object
 //
 // Example:
-//   application/json:
-//     schema:
-//       $ref: "#/components/schemas/Pet"
-//     examples:
-//       cat:
-//         summary: An example of a cat
-//         value:
-//           name: Fluffy
-//           petType: Cat
-//           color: White
-//           gender: male
-//           breed: Persian
-//       dog:
-//         summary: An example of a dog with a cat's name
-//         value:
-//           name: Puma
-//           petType: Dog
-//           color: Black
-//           gender: Female
-//           breed: Mixed
-//       frog:
-//         $ref: "#/components/examples/frog-example"
+//
+//	application/json:
+//	  schema:
+//	    $ref: "#/components/schemas/Pet"
+//	  examples:
+//	    cat:
+//	      summary: An example of a cat
+//	      value:
+//	        name: Fluffy
+//	        petType: Cat
+//	        color: White
+//	        gender: male
+//	        breed: Persian
+//	    dog:
+//	      summary: An example of a dog with a cat's name
+//	      value:
+//	        name: Puma
+//	        petType: Dog
+//	        color: Black
+//	        gender: Female
+//	        breed: Mixed
+//	    frog:
+//	      $ref: "#/components/examples/frog-example"
 type MediaType struct {
 	// The schema defining the content of the request, response, or parameter.
 	Schema *RefOrSpec[Schema] `json:"schema,omitempty" yaml:"schema,omitempty"`
@@ -49,5 +50,3 @@ type MediaType struct {
 func NewMediaType() *Extendable[MediaType] {
 	return NewExtendable(&MediaType{})
 }
-
-func (o MediaType) OpenAPIConstraint() {}
