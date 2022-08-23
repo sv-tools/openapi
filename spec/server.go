@@ -5,13 +5,14 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#server-object
 //
 // Example:
-//   servers:
-//   - url: https://development.gigantic-server.com/v1
-//     description: Development server
-//   - url: https://staging.gigantic-server.com/v1
-//     description: Staging server
-//   - url: https://api.gigantic-server.com/v1
-//     description: Production server
+//
+//	servers:
+//	- url: https://development.gigantic-server.com/v1
+//	  description: Development server
+//	- url: https://staging.gigantic-server.com/v1
+//	  description: Staging server
+//	- url: https://api.gigantic-server.com/v1
+//	  description: Production server
 type Server struct {
 	// A map between a variable name and its value.
 	// The value is used for substitution in the server’s URL template.
@@ -31,5 +32,3 @@ type Server struct {
 func NewServer() *Extendable[Server] {
 	return NewExtendable(&Server{})
 }
-
-func (o Server) OpenAPIConstraint() {}

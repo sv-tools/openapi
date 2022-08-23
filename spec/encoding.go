@@ -5,38 +5,39 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#encoding-object
 //
 // Example:
-//   requestBody:
-//     content:
-//       multipart/form-data:
-//         schema:
-//           type: object
-//           properties:
-//             id:
-//               # default is text/plain
-//               type: string
-//               format: uuid
-//             address:
-//               # default is application/json
-//               type: object
-//               properties: {}
-//             historyMetadata:
-//               # need to declare XML format!
-//               description: metadata in XML format
-//               type: object
-//               properties: {}
-//             profileImage: {}
-//         encoding:
-//           historyMetadata:
-//             # require XML Content-Type in utf-8 encoding
-//             contentType: application/xml; charset=utf-8
-//           profileImage:
-//             # only accept png/jpeg
-//             contentType: image/png, image/jpeg
-//             headers:
-//               X-Rate-Limit-Limit:
-//                 description: The number of allowed requests in the current period
-//                 schema:
-//                   type: integer
+//
+//	requestBody:
+//	  content:
+//	    multipart/form-data:
+//	      schema:
+//	        type: object
+//	        properties:
+//	          id:
+//	            # default is text/plain
+//	            type: string
+//	            format: uuid
+//	          address:
+//	            # default is application/json
+//	            type: object
+//	            properties: {}
+//	          historyMetadata:
+//	            # need to declare XML format!
+//	            description: metadata in XML format
+//	            type: object
+//	            properties: {}
+//	          profileImage: {}
+//	      encoding:
+//	        historyMetadata:
+//	          # require XML Content-Type in utf-8 encoding
+//	          contentType: application/xml; charset=utf-8
+//	        profileImage:
+//	          # only accept png/jpeg
+//	          contentType: image/png, image/jpeg
+//	          headers:
+//	            X-Rate-Limit-Limit:
+//	              description: The number of allowed requests in the current period
+//	              schema:
+//	                type: integer
 type Encoding struct {
 	// The Content-Type for encoding a specific property.
 	// Default value depends on the property type:
@@ -77,5 +78,3 @@ type Encoding struct {
 func NewEncoding() *Extendable[Encoding] {
 	return NewExtendable(&Encoding{})
 }
-
-func (o Encoding) OpenAPIConstraint() {}

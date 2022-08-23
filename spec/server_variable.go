@@ -22,5 +22,3 @@ type ServerVariable struct {
 func NewServerVariable() *Extendable[ServerVariable] {
 	return NewExtendable(&ServerVariable{})
 }
-
-func (o ServerVariable) OpenAPIConstraint() {}

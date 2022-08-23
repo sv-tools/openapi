@@ -16,18 +16,19 @@ import (
 // https://spec.openapis.org/oas/v3.1.0#callback-object
 //
 // Example:
-//   myCallback:
-//     '{$request.query.queryUrl}':
-//       post:
-//         requestBody:
-//           description: Callback payload
-//           content:
-//             'application/json':
-//               schema:
-//                 $ref: '#/components/schemas/SomePayload'
-//         responses:
-//           '200':
-//             description: callback successfully processed
+//
+//	myCallback:
+//	  '{$request.query.queryUrl}':
+//	    post:
+//	      requestBody:
+//	        description: Callback payload
+//	        content:
+//	          'application/json':
+//	            schema:
+//	              $ref: '#/components/schemas/SomePayload'
+//	      responses:
+//	        '200':
+//	          description: callback successfully processed
 type Callback struct {
 	Callback map[string]*RefOrSpec[Extendable[PathItem]]
 }
@@ -65,5 +66,3 @@ func (o *Callback) MarshalYAML() (any, error) {
 func (o *Callback) UnmarshalYAML(node *yaml.Node) error {
 	return node.Decode(&o.Callback)
 }
-
-func (o Callback) OpenAPIConstraint() {}

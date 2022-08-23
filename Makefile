@@ -1,23 +1,14 @@
-BREWFILE=./.github/Brewfile
+all: install tidy lint fmt test
 
-ifeq ($(shell uname), Darwin)
-all: brew-install
-endif
-
-all: go-install tidy lint test
-
-brew-install:
-	@brew bundle --file $(BREWFILE)
-
-go-install:
+install:
 	@go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest
 
-run-test:
+test:
 	@go test -cover -race ./...
 
-test: run-test
+fmt:
+	@go fmt ./...
 
-# @golangci-lint run --fix ./...
 lint:
 	@go vet ./...
 	@go vet -vettool=$(which fieldalignment) ./...

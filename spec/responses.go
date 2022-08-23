@@ -17,18 +17,19 @@ import (
 // https://spec.openapis.org/oas/v3.1.0#responses-object
 //
 // Example:
-//   '200':
-//     description: a pet to be returned
-//     content:
-//       application/json:
-//         schema:
-//           $ref: '#/components/schemas/Pet'
-//   default:
-//     description: Unexpected error
-//     content:
-//       application/json:
-//         schema:
-//           $ref: '#/components/schemas/ErrorModel'
+//
+//	'200':
+//	  description: a pet to be returned
+//	  content:
+//	    application/json:
+//	      schema:
+//	        $ref: '#/components/schemas/Pet'
+//	default:
+//	  description: Unexpected error
+//	  content:
+//	    application/json:
+//	      schema:
+//	        $ref: '#/components/schemas/ErrorModel'
 type Responses struct {
 	// The documentation of responses other than the ones declared for specific HTTP response codes.
 	// Use this field to cover undeclared responses.
@@ -127,5 +128,3 @@ func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
 	}
 	return yaml.Unmarshal(data, &o.Response)
 }
-
-func (o Responses) OpenAPIConstraint() {}

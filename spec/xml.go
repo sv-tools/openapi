@@ -8,23 +8,24 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#xml-object
 //
 // Example:
-//   Person:
-//     type: object
-//     properties:
-//       id:
-//         type: integer
-//         format: int32
-//         xml:
-//           attribute: true
-//       name:
-//         type: string
-//         xml:
-//           namespace: https://example.com/schema/sample
-//           prefix: sample
 //
-//   <Person id="123">
-//       <sample:name xmlns:sample="https://example.com/schema/sample">example</sample:name>
-//   </Person>
+//	Person:
+//	  type: object
+//	  properties:
+//	    id:
+//	      type: integer
+//	      format: int32
+//	      xml:
+//	        attribute: true
+//	    name:
+//	      type: string
+//	      xml:
+//	        namespace: https://example.com/schema/sample
+//	        prefix: sample
+//
+//	<Person id="123">
+//	    <sample:name xmlns:sample="https://example.com/schema/sample">example</sample:name>
+//	</Person>
 type XML struct {
 	// Replaces the name of the element/attribute used for the described schema property.
 	// When defined within items, it will affect the name of the individual XML elements within the list.
@@ -49,5 +50,3 @@ type XML struct {
 func NewXML() *Extendable[XML] {
 	return NewExtendable(&XML{})
 }
-
-func (o XML) OpenAPIConstraint() {}

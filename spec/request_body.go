@@ -5,32 +5,33 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#request-body-object
 //
 // Example:
-//   description: user to add to the system
-//   content:
-//     'application/json':
-//       schema:
-//         $ref: '#/components/schemas/User'
-//       examples:
-//         user:
-//           summary: User Example
-//           externalValue: 'https://foo.bar/examples/user-example.json'
-//     'application/xml':
-//       schema:
-//         $ref: '#/components/schemas/User'
-//       examples:
-//         user:
-//           summary: User example in XML
-//           externalValue: 'https://foo.bar/examples/user-example.xml'
-//     'text/plain':
-//       examples:
-//         user:
-//           summary: User example in Plain text
-//           externalValue: 'https://foo.bar/examples/user-example.txt'
-//     '*/*':
-//       examples:
-//         user:
-//           summary: User example in other format
-//           externalValue: 'https://foo.bar/examples/user-example.whatever'
+//
+//	description: user to add to the system
+//	content:
+//	  'application/json':
+//	    schema:
+//	      $ref: '#/components/schemas/User'
+//	    examples:
+//	      user:
+//	        summary: User Example
+//	        externalValue: 'https://foo.bar/examples/user-example.json'
+//	  'application/xml':
+//	    schema:
+//	      $ref: '#/components/schemas/User'
+//	    examples:
+//	      user:
+//	        summary: User example in XML
+//	        externalValue: 'https://foo.bar/examples/user-example.xml'
+//	  'text/plain':
+//	    examples:
+//	      user:
+//	        summary: User example in Plain text
+//	        externalValue: 'https://foo.bar/examples/user-example.txt'
+//	  '*/*':
+//	    examples:
+//	      user:
+//	        summary: User example in other format
+//	        externalValue: 'https://foo.bar/examples/user-example.whatever'
 type RequestBody struct {
 	// REQUIRED.
 	// The content of the request body.
@@ -55,5 +56,3 @@ func NewRequestBodySpec() *RefOrSpec[Extendable[RequestBody]] {
 func NewRequestBodyRef(ref *Ref) *RefOrSpec[Extendable[RequestBody]] {
 	return NewRefOrSpec[Extendable[RequestBody]](ref, nil)
 }
-
-func (o RequestBody) OpenAPIConstraint() {}

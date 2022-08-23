@@ -5,8 +5,9 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#external-documentation-object
 //
 // Example:
-//   description: Find more info here
-//   url: https://example.com
+//
+//	description: Find more info here
+//	url: https://example.com
 type ExternalDocs struct {
 	// A description of the target documentation.
 	// CommonMark syntax MAY be used for rich text representation.
@@ -21,5 +22,3 @@ type ExternalDocs struct {
 func NewExternalDocs() *Extendable[ExternalDocs] {
 	return NewExtendable(&ExternalDocs{})
 }
-
-func (o ExternalDocs) OpenAPIConstraint() {}

@@ -5,13 +5,14 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#response-object
 //
 // Example:
-//   description: A complex object array response
-//   content:
-//     application/json:
-//       schema:
-//         type: array
-//         items:
-//           $ref: '#/components/schemas/VeryComplexType'
+//
+//	description: A complex object array response
+//	content:
+//	  application/json:
+//	    schema:
+//	      type: array
+//	      items:
+//	        $ref: '#/components/schemas/VeryComplexType'
 type Response struct {
 	// Maps a header name to its definition.
 	// [RFC7230] states header names are case insensitive.
@@ -39,5 +40,3 @@ func NewResponseSpec() *RefOrSpec[Extendable[Response]] {
 func NewResponseRef(ref *Ref) *RefOrSpec[Extendable[Response]] {
 	return NewRefOrSpec[Extendable[Response]](ref, nil)
 }
-
-func (o Response) OpenAPIConstraint() {}

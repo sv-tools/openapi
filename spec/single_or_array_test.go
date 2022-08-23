@@ -152,7 +152,7 @@ func TestSingleOrArrayJSON(t *testing.T) {
 func testSingleOrArrayYAML[T any](t *testing.T, tests []singleOrArrayCase[T]) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 
 			var o spec.SingleOrArray[T]
 			err := yaml.Unmarshal(tt.data, &o)

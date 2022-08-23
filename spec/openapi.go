@@ -5,11 +5,12 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#openapi-object
 //
 // Example:
-//   openapi: 3.1.0
-//   info:
-//     title: Minimal OpenAPI example
-//     version: 1.0.0
-//   paths: { }
+//
+//	openapi: 3.1.0
+//	info:
+//	  title: Minimal OpenAPI example
+//	  version: 1.0.0
+//	paths: { }
 type OpenAPI struct {
 	// An element to hold various schemas for the document.
 	Components *Extendable[Components] `json:"components,omitempty" yaml:"components,omitempty"`
@@ -57,10 +58,3 @@ type OpenAPI struct {
 func NewOpenAPI() *Extendable[OpenAPI] {
 	return NewExtendable(&OpenAPI{})
 }
-
-// constraint to limit the usage of OpenAPI structs only in Extendable and RefOrSpec types
-type openAPIConstraint interface {
-	OpenAPIConstraint()
-}
-
-func (o OpenAPI) OpenAPIConstraint() {}

@@ -5,19 +5,20 @@ package spec
 // https://spec.openapis.org/oas/v3.1.0#oauth-flows-object
 //
 // Example:
-//   type: oauth2
-//   flows:
-//     implicit:
-//       authorizationUrl: https://example.com/api/oauth/dialog
-//       scopes:
-//         write:pets: modify pets in your account
-//         read:pets: read your pets
-//     authorizationCode:
-//       authorizationUrl: https://example.com/api/oauth/dialog
-//       tokenUrl: https://example.com/api/oauth/token
-//       scopes:
-//         write:pets: modify pets in your account
-//         read:pets: read your pets
+//
+//	type: oauth2
+//	flows:
+//	  implicit:
+//	    authorizationUrl: https://example.com/api/oauth/dialog
+//	    scopes:
+//	      write:pets: modify pets in your account
+//	      read:pets: read your pets
+//	  authorizationCode:
+//	    authorizationUrl: https://example.com/api/oauth/dialog
+//	    tokenUrl: https://example.com/api/oauth/token
+//	    scopes:
+//	      write:pets: modify pets in your account
+//	      read:pets: read your pets
 type OAuthFlows struct {
 	// Configuration for the OAuth Implicit flow.
 	Implicit *Extendable[OAuthFlow] `json:"implicit,omitempty" yaml:"implicit,omitempty"`
@@ -35,5 +36,3 @@ type OAuthFlows struct {
 func NewOAuthFlows() *Extendable[OAuthFlows] {
 	return NewExtendable(&OAuthFlows{})
 }
-
-func (o OAuthFlows) OpenAPIConstraint() {}
