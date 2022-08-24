@@ -3,7 +3,6 @@ package validate_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -17,7 +16,7 @@ import (
 )
 
 func TestValidation(t *testing.T) {
-	info, err := ioutil.ReadDir("testdata")
+	info, err := os.ReadDir("testdata")
 	require.NoError(t, err)
 
 	for _, f := range info {
