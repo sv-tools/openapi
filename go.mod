@@ -3,7 +3,7 @@ module github.com/sv-tools/openapi
 go 1.18
 
 require (
-	github.com/santhosh-tekuri/jsonschema/v5 v5.0.2
+	github.com/santhosh-tekuri/jsonschema/v5 v5.1.0
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
 )
