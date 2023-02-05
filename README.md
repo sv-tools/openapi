@@ -9,6 +9,7 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 
 ## Supported Go versions:
 
+* v1.20
 * v1.19
 * v1.18
 
