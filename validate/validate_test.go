@@ -89,21 +89,71 @@ func TestValidatePayload(t *testing.T) {
 	data, err := os.ReadFile(path.Join("testdata", "petstore.json"))
 	require.NoError(t, err)
 	c := jsonschema.NewCompiler()
-	err = c.AddResource("http://petstore.swagger.io/v1", bytes.NewBuffer(data))
-	require.NoError(t, err)
-	s, err := c.Compile("http://petstore.swagger.io/v1#/components/schemas/Pet")
+	err = c.AddResource("https://petstore.swagger.io/v1", bytes.NewBuffer(data))
 	require.NoError(t, err)
 
-	var v1 any
-	err = json.Unmarshal([]byte(`{"id": 123, "name": "foo", "tag": "bar"}`), &v1)
-	require.NoError(t, err)
-	err = s.Validate(v1)
-	require.NoError(t, err)
+	for _, tt := range []struct {
+		name          string
+		ref           string
+		compileError  string
+		validateError string
+	}{
+		{
+			name:          "by component",
+			ref:           "https://petstore.swagger.io/v1#/components/schemas/Pet",
+			validateError: "expected integer, but got string",
+		},
+		{
+			name:          "by route",
+			ref:           "https://petstore.swagger.io/v1#/paths/%2fpets%2f%7BpetId%7D/get/responses/200/content/application%2fjson/schema",
+			validateError: "expected integer, but got string",
+		},
+		{
+			name:         "not found",
+			ref:          "https://petstore.swagger.io/v1#/components/schemas/Fake",
+			compileError: "Fake not found",
+		},
+		{
+			name:         "wrong url",
+			ref:          "https://petstore.swagger.io/v2#/components/schemas/Fake",
+			compileError: "no Loader found for",
+		},
+		{
+			name:         "not absolute url",
+			ref:          "#/components/schemas/Fake",
+			compileError: "no Loader found for",
+		},
+		{
+			name:         "not absolute url",
+			ref:          "/components/schemas/Fake",
+			compileError: "no Loader found for",
+		},
+		{
+			name:         "not absolute url",
+			ref:          "components/schemas/Fake",
+			compileError: "no Loader found for",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := c.Compile(tt.ref)
+			if tt.compileError != "" {
+				require.ErrorContains(t, err, tt.compileError)
+				return
+			}
+			require.NoError(t, err)
 
-	var v2 any
-	err = json.Unmarshal([]byte(`{"id": "123", "name": "foo", "tag": "bar"}`), &v2)
-	require.NoError(t, err)
-	err = s.Validate(v2)
-	require.Error(t, err)
-	require.EqualError(t, err, "jsonschema: '/id' does not validate with http://petstore.swagger.io/v1#/properties/id/type: expected integer, but got string")
+			var v1 any
+			err = json.Unmarshal([]byte(`{"id": 123, "name": "foo", "tag": "bar"}`), &v1)
+			require.NoError(t, err)
+			err = s.Validate(v1)
+			require.NoError(t, err)
+
+			var v2 any
+			err = json.Unmarshal([]byte(`{"id": "123", "name": "foo", "tag": "bar"}`), &v2)
+			require.NoError(t, err)
+			err = s.Validate(v2)
+			require.Error(t, err)
+			require.ErrorContains(t, err, tt.validateError)
+		})
+	}
 }
