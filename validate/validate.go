@@ -25,6 +25,9 @@ var (
 )
 
 func init() {
+	// delete the file loader due to security issue
+	delete(jsonschema.Loaders, "file")
+
 	DefaultCompiler = jsonschema.NewCompiler()
 	for filename, url := range resources {
 		r, err := schemas.Open(filename)
