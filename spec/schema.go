@@ -51,6 +51,17 @@ func NewSchemaRef(ref *Ref) *RefOrSpec[Schema] {
 	return NewRefOrSpec[Schema](ref, nil)
 }
 
+// WithExt sets the extension and returns the current object (self|this).
+// Schema does not require special `x-` prefix.
+// The extension will be ignored if the name overlaps with a struct field during marshalling to JSON or YAML.
+func (o *Schema) WithExt(name string, value any) *Schema {
+	if o.Extensions == nil {
+		o.Extensions = make(map[string]any, 1)
+	}
+	o.Extensions[name] = value
+	return o
+}
+
 // returns the list of public fields for given tag and ignores `-` names
 func getFields(t reflect.Type, tag string) map[string]struct{} {
 	if t.Kind() == reflect.Pointer {

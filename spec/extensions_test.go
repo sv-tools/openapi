@@ -72,3 +72,35 @@ func TestExtendable_Marshal_Unmarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestExtendable_WithExt(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		key      string
+		value    any
+		expected map[string]any
+	}{
+		{
+			name:  "without prefix",
+			key:   "foo",
+			value: 42,
+			expected: map[string]any{
+				"x-foo": 42,
+			},
+		},
+		{
+			name:  "with prefix",
+			key:   "x-foo",
+			value: 43,
+			expected: map[string]any{
+				"x-foo": 43,
+			},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ext := spec.NewExtendable(&testExtendable{})
+			ext.WithExt(tt.key, tt.value)
+			require.Equal(t, tt.expected, ext.Extensions)
+		})
+	}
+}
