@@ -117,42 +117,42 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		}
 		o.Responses[name] = spec
 	case *RefOrSpec[Extendable[Parameter]]:
-		if o.Responses == nil {
+		if o.Parameters == nil {
 			o.Parameters = make(map[string]*RefOrSpec[Extendable[Parameter]], 1)
 		}
 		o.Parameters[name] = spec
 	case *RefOrSpec[Extendable[Example]]:
-		if o.Responses == nil {
+		if o.Examples == nil {
 			o.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
 		}
 		o.Examples[name] = spec
 	case *RefOrSpec[Extendable[RequestBody]]:
-		if o.Responses == nil {
+		if o.RequestBodies == nil {
 			o.RequestBodies = make(map[string]*RefOrSpec[Extendable[RequestBody]], 1)
 		}
 		o.RequestBodies[name] = spec
 	case *RefOrSpec[Extendable[Header]]:
-		if o.Responses == nil {
+		if o.Headers == nil {
 			o.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
 		}
 		o.Headers[name] = spec
 	case *RefOrSpec[Extendable[SecurityScheme]]:
-		if o.Responses == nil {
+		if o.SecuritySchemes == nil {
 			o.SecuritySchemes = make(map[string]*RefOrSpec[Extendable[SecurityScheme]], 1)
 		}
 		o.SecuritySchemes[name] = spec
 	case *RefOrSpec[Extendable[Link]]:
-		if o.Responses == nil {
+		if o.Links == nil {
 			o.Links = make(map[string]*RefOrSpec[Extendable[Link]], 1)
 		}
 		o.Links[name] = spec
 	case *RefOrSpec[Extendable[Callback]]:
-		if o.Responses == nil {
+		if o.Callbacks == nil {
 			o.Callbacks = make(map[string]*RefOrSpec[Extendable[Callback]], 1)
 		}
 		o.Callbacks[name] = spec
 	case *RefOrSpec[Extendable[PathItem]]:
-		if o.Responses == nil {
+		if o.Paths == nil {
 			o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]], 1)
 		}
 		o.Paths[name] = spec
