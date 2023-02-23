@@ -32,6 +32,19 @@ type Extendable[T any] struct {
 	Extensions map[string]any `json:"-" yaml:"-"`
 }
 
+// WithExt sets the extension and returns the current object (self|this).
+// The `x-` will be added automatically to given name.
+func (o *Extendable[T]) WithExt(name string, value any) *Extendable[T] {
+	if o.Extensions == nil {
+		o.Extensions = make(map[string]any, 1)
+	}
+	if !strings.HasPrefix(name, ExtensionPrefix) {
+		name = ExtensionPrefix + name
+	}
+	o.Extensions[name] = value
+	return o
+}
+
 // NewExtendable creates new Extendable object for given spec
 func NewExtendable[T any](spec *T) *Extendable[T] {
 	ext := Extendable[T]{
