@@ -3,6 +3,7 @@ package spec
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -37,6 +38,24 @@ func NewRef(ref string) *Ref {
 	}
 }
 
+// WithRef sets the Ref and returns the current object (self|this).
+func (o *Ref) WithRef(v string) *Ref {
+	o.Ref = v
+	return o
+}
+
+// WithSummary sets the Summary and returns the current object (self|this).
+func (o *Ref) WithSummary(v string) *Ref {
+	o.Summary = v
+	return o
+}
+
+// WithDescription sets the Description and returns the current object (self|this).
+func (o *Ref) WithDescription(v string) *Ref {
+	o.Description = v
+	return o
+}
+
 // RefOrSpec holds either Ref or any OpenAPI spec type.
 //
 // NOTE: The Ref object takes precedent over Spec if using json or yaml Marshal and Unmarshal functions.
@@ -55,6 +74,74 @@ func NewRefOrSpec[T any](ref *Ref, spec *T) *RefOrSpec[T] {
 		o.Spec = spec
 	}
 	return &o
+}
+
+// GetSpec return a Spec if it is set or loads it from Components in case of Ref or an error
+func (o *RefOrSpec[T]) GetSpec(c *Extendable[Components]) (*T, error) {
+	return o.getSpec(c, make(visitedRefs))
+}
+
+type visitedRefs map[string]bool
+
+func (o visitedRefs) String() string {
+	keys := make([]string, 0, len(o))
+	for k := range o {
+		keys = append(keys, k)
+	}
+	return strings.Join(keys, ", ")
+}
+
+func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedRefs) (*T, error) {
+	// some guards
+	switch {
+	case o.Spec != nil:
+		return o.Spec, nil
+	case o.Ref == nil:
+		return nil, fmt.Errorf("spect not found; all visited refs: %s", visited)
+	case visited[o.Ref.Ref]:
+		return nil, fmt.Errorf("cycle ref %q detected; all visited refs: %s", o.Ref.Ref, visited)
+	case !strings.HasPrefix(o.Ref.Ref, "#/components/"):
+		// TODO: support loading by url
+		return nil, fmt.Errorf("loading outside of components is not implemented for the ref %q; all visited refs: %s", o.Ref.Ref, visited)
+	case c == nil:
+		return nil, fmt.Errorf("components is required, but got nil; all visited refs: %s", visited)
+	}
+	visited[o.Ref.Ref] = true
+
+	parts := strings.SplitN(o.Ref.Ref[13:], "/", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("incorrect ref %q; all visited refs: %s", o.Ref.Ref, visited)
+	}
+	objName := parts[1]
+	var ref any
+	switch parts[0] {
+	case "schemas":
+		ref = c.Spec.Schemas[objName]
+	case "responses":
+		ref = c.Spec.Responses[objName]
+	case "parameters":
+		ref = c.Spec.Parameters[objName]
+	case "examples":
+		ref = c.Spec.Examples[objName]
+	case "requestBodies":
+		ref = c.Spec.RequestBodies[objName]
+	case "headers":
+		ref = c.Spec.Headers[objName]
+	case "links":
+		ref = c.Spec.Links[objName]
+	case "callbacks":
+		ref = c.Spec.Callbacks[objName]
+	case "paths":
+		ref = c.Spec.Paths[objName]
+	}
+	obj, ok := ref.(*RefOrSpec[T])
+	if !ok {
+		return nil, fmt.Errorf("expected spec of type %T, but got %T; all visited refs: %s", NewRefOrSpec[T](nil, nil), ref, visited)
+	}
+	if obj.Spec != nil {
+		return obj.Spec, nil
+	}
+	return obj.getSpec(c, visited)
 }
 
 // MarshalJSON implements json.Marshaler interface.
