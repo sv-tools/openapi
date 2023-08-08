@@ -2,6 +2,7 @@ package spec
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
@@ -42,6 +43,26 @@ type Paths struct {
 func NewPaths() *Extendable[Paths] {
 	p := map[string]*RefOrSpec[Extendable[PathItem]]{}
 	return NewExtendable(&Paths{Paths: p})
+}
+
+// WithPathItem adds the PathItem object to the Paths map.
+func (o *Paths) WithPathItem(name string, v any) *Paths {
+	var p *RefOrSpec[Extendable[PathItem]]
+	switch spec := v.(type) {
+	case *RefOrSpec[Extendable[PathItem]]:
+		p = spec
+	case *Extendable[PathItem]:
+		p = NewRefOrSpec[Extendable[PathItem]](nil, spec)
+	case *PathItem:
+		p = NewRefOrSpec[Extendable[PathItem]](nil, NewExtendable(spec))
+	default:
+		panic(fmt.Errorf("wrong PathItem type: %T", spec))
+	}
+	if o.Paths == nil {
+		o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]])
+	}
+	o.Paths[name] = p
+	return o
 }
 
 // MarshalJSON implements json.Marshaler interface.
