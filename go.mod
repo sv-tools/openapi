@@ -1,6 +1,6 @@
 module github.com/sv-tools/openapi
 
-go 1.18
+go 1.21
 
 require (
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
