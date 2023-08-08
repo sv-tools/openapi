@@ -2,6 +2,7 @@ package spec
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
@@ -45,6 +46,26 @@ func NewCallbackSpec() *RefOrSpec[Extendable[Callback]] {
 // NewCallbackRef creates Ref object.
 func NewCallbackRef(ref *Ref) *RefOrSpec[Extendable[Callback]] {
 	return NewRefOrSpec[Extendable[Callback]](ref, nil)
+}
+
+// WithPathItem adds the PathItem object to the Callback map.
+func (o *Callback) WithPathItem(name string, v any) *Callback {
+	var p *RefOrSpec[Extendable[PathItem]]
+	switch spec := v.(type) {
+	case *RefOrSpec[Extendable[PathItem]]:
+		p = spec
+	case *Extendable[PathItem]:
+		p = NewRefOrSpec[Extendable[PathItem]](nil, spec)
+	case *PathItem:
+		p = NewRefOrSpec[Extendable[PathItem]](nil, NewExtendable(spec))
+	default:
+		panic(fmt.Errorf("wrong Callback type: %T", spec))
+	}
+	if o.Callback == nil {
+		o.Callback = make(map[string]*RefOrSpec[Extendable[PathItem]])
+	}
+	o.Callback[name] = p
+	return o
 }
 
 // MarshalJSON implements json.Marshaler interface.
