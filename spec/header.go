@@ -12,7 +12,7 @@ package spec
 //
 // All fields are copied from Parameter Object as is, except name and in fields.
 type Header struct {
-	// Example of the parameter’s potential value.
+	// Example of the header’s potential value.
 	// The example SHOULD match the specified schema and encoding properties if present.
 	// The example field is mutually exclusive of the examples field.
 	// Furthermore, if referencing a schema that contains an example, the example value SHALL override the example provided by the schema.
