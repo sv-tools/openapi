@@ -19,7 +19,7 @@ type Response struct {
 	// If a response header is defined with the name "Content-Type", it SHALL be ignored.
 	Headers map[string]*RefOrSpec[Extendable[Header]] `json:"headers,omitempty" yaml:"headers,omitempty"`
 	// A map containing descriptions of potential response payloads.
-	// The key is a media type or [media type range]appendix-D) and the value describes it.
+	// The key is a media type or [media type range](appendix-D) and the value describes it.
 	// For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
 	Content map[string]*Extendable[MediaType] `json:"content,omitempty" yaml:"content,omitempty"`
 	// A map of operations links that can be followed from the response.

@@ -50,8 +50,8 @@ type Operation struct {
 	// The request body applicable for this operation.
 	// The requestBody is fully supported in HTTP methods where the HTTP 1.1 specification [RFC7231] has
 	// explicitly defined semantics for request bodies.
-	// In other cases where the HTTP spec is vague (such as [GET]section-4.3.1), [HEAD]section-4.3.2) and
-	// [DELETE]section-4.3.5)), requestBody is permitted but does not have well-defined semantics and SHOULD be avoided if possible.
+	// In other cases where the HTTP spec is vague (such as [GET](section-4.3.1), [HEAD](section-4.3.2) and
+	// [DELETE](section-4.3.5)), requestBody is permitted but does not have well-defined semantics and SHOULD be avoided if possible.
 	RequestBody *RefOrSpec[Extendable[RequestBody]] `json:"requestBody,omitempty" yaml:"requestBody,omitempty"`
 	// The list of possible responses as they are returned from executing this operation.
 	Responses *Extendable[Responses] `json:"responses,omitempty" yaml:"responses,omitempty"`

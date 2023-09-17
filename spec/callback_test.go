@@ -1,9 +1,11 @@
 package spec_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"github.com/sv-tools/openapi/spec"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/sv-tools/openapi/spec"
 )
 
 func TestCallback_WithPathItem(t *testing.T) {
