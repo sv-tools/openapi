@@ -11,7 +11,8 @@ type SingleOrArray[T any] []T
 
 // NewSingleOrArray creates SingleOrArray object.
 func NewSingleOrArray[T any](v ...T) SingleOrArray[T] {
-	return append([]T{}, v...)
+	a := append(SingleOrArray[T]{}, v...)
+	return a
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
@@ -29,10 +30,10 @@ func (o *SingleOrArray[T]) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON implements json.Marshaler interface.
-func (o SingleOrArray[T]) MarshalJSON() ([]byte, error) {
-	var v any = []T(o)
-	if len(o) == 1 {
-		v = o[0]
+func (o *SingleOrArray[T]) MarshalJSON() ([]byte, error) {
+	var v any = []T(*o)
+	if len(*o) == 1 {
+		v = (*o)[0]
 	}
 	return json.Marshal(&v)
 }
@@ -52,10 +53,10 @@ func (o *SingleOrArray[T]) UnmarshalYAML(node *yaml.Node) error {
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
-func (o SingleOrArray[T]) MarshalYAML() (any, error) {
-	var v any = []T(o)
-	if len(o) == 1 {
-		v = o[0]
+func (o *SingleOrArray[T]) MarshalYAML() (any, error) {
+	var v any = []T(*o)
+	if len(*o) == 1 {
+		v = (*o)[0]
 	}
 	return v, nil
 }

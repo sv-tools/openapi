@@ -61,7 +61,7 @@ func (o *BoolOrSchema) UnmarshalYAML(node *yaml.Node) error {
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
-func (o BoolOrSchema) MarshalYAML() (any, error) {
+func (o *BoolOrSchema) MarshalYAML() (any, error) {
 	var v any
 	if o.Schema != nil {
 		v = o.Schema

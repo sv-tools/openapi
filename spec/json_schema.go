@@ -236,7 +236,7 @@ type JsonSchemaCore struct {
 	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty" yaml:"$vocabulary,omitempty"`
 	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
 	// https://json-schema.org/understanding-json-schema/reference/type.html
-	Type SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
+	Type *SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
 }
 
 // JsonSchema fields

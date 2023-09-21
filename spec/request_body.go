@@ -35,7 +35,7 @@ package spec
 type RequestBody struct {
 	// REQUIRED.
 	// The content of the request body.
-	// The key is a media type or [media type range]appendix-D) and the value describes it.
+	// The key is a media type or [media type range](appendix-D) and the value describes it.
 	// For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
 	Content map[string]*Extendable[MediaType] `json:"content,omitempty" yaml:"content,omitempty"`
 	// A brief description of the request body.
