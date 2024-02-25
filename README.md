@@ -9,6 +9,7 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 
 ## Supported Go versions:
 
+* v1.22
 * v1.21
 * v1.20
 * v1.19
@@ -32,7 +33,7 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 
 * OpenAPI Specification: <https://github.com/OAI/OpenAPI-Specification> and <https://spec.openapis.org/oas/v3.1.0>
 * JSON Schema: <https://json-schema.org/understanding-json-schema/index.html> and <https://json-schema.org/draft/2020-12/json-schema-core.html>
-* The list of most popular alternatives: <https://github.com/OAI/OpenAPI-Specification/blob/main/IMPLEMENTATIONS.md#low-level-tooling>
+* The list of most popular alternatives: <https://tools.openapis.org>
 
 ## License
 
