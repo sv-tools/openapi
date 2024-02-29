@@ -22,3 +22,14 @@ type ExternalDocs struct {
 func NewExternalDocs() *Extendable[ExternalDocs] {
 	return NewExtendable(&ExternalDocs{})
 }
+
+func (o *ExternalDocs) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.URL == "" {
+		errs = append(errs, newValidationError(joinDot(path, "url"), ErrRequired))
+	}
+	if err := checkURL(o.URL); err != nil {
+		errs = append(errs, newValidationError(joinDot(path, "url"), err))
+	}
+	return errs
+}

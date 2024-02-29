@@ -1,5 +1,7 @@
 package spec
 
+import "strings"
+
 // Server is an object representing a Server.
 //
 // https://spec.openapis.org/oas/v3.1.0#server-object
@@ -31,4 +33,27 @@ type Server struct {
 // NewServer creates Server object.
 func NewServer() *Extendable[Server] {
 	return NewExtendable(&Server{})
+}
+
+func (o *Server) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.URL == "" {
+		errs = append(errs, newValidationError(joinDot(path, "url"), ErrRequired))
+	}
+	if l := len(o.Variables); l == 0 {
+		if err := checkURL(o.URL); err != nil {
+			errs = append(errs, newValidationError(joinDot(path, "url"), err))
+		}
+	} else {
+		oldnew := make([]string, 0, l*2)
+		for k, v := range o.Variables {
+			errs = append(errs, v.validateSpec(joinDot(path, "variables", k), opts)...)
+			oldnew = append(oldnew, "{"+k+"}", v.Spec.Default)
+		}
+		u := strings.NewReplacer(oldnew...).Replace(o.URL)
+		if err := checkURL(u); err != nil {
+			errs = append(errs, newValidationError(joinDot(path, "url"), err))
+		}
+	}
+	return errs
 }

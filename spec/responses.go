@@ -2,9 +2,12 @@ package spec
 
 import (
 	"encoding/json"
+	"regexp"
 
 	"gopkg.in/yaml.v3"
 )
+
+var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:[0-9]{2}|XX)$`)
 
 // Responses is a container for the expected responses of an operation.
 // The container maps a HTTP response code to the expected response.
@@ -127,4 +130,18 @@ func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
 		return err
 	}
 	return yaml.Unmarshal(data, &o.Response)
+}
+
+func (o *Responses) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Default != nil {
+		errs = append(errs, o.Default.validateSpec(joinDot(path, "default"), opts)...)
+	}
+	for k, v := range o.Response {
+		if !ResponseCodePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinArrayItem(path, k), "must match pattern '%s', but got '%s'", ResponseCodePattern, k))
+		}
+		errs = append(errs, v.validateSpec(joinArrayItem(path, k), opts)...)
+	}
+	return errs
 }

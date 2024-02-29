@@ -2,12 +2,9 @@ module github.com/sv-tools/openapi
 
 go 1.18
 
-retract (
-	v0.3.0 // due to a mistake, there is no real v0.3.0 release, it was pointed to v0.2.2 tag
-)
+retract v0.3.0 // due to a mistake, there is no real v0.3.0 release, it was pointed to v0.2.2 tag
 
 require (
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 )

@@ -78,3 +78,42 @@ func NewPathItemSpec() *RefOrSpec[Extendable[PathItem]] {
 func NewPathItemRef(ref *Ref) *RefOrSpec[Extendable[PathItem]] {
 	return NewRefOrSpec[Extendable[PathItem]](ref, nil)
 }
+
+func (o *PathItem) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if len(o.Parameters) > 0 {
+		for i, v := range o.Parameters {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "parameters"), i), opts)...)
+		}
+	}
+	if len(o.Servers) > 0 {
+		for i, v := range o.Servers {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "servers"), i), opts)...)
+		}
+	}
+	if o.Get != nil {
+		errs = append(errs, o.Get.validateSpec(joinDot(path, "get"), opts)...)
+	}
+	if o.Put != nil {
+		errs = append(errs, o.Put.validateSpec(joinDot(path, "put"), opts)...)
+	}
+	if o.Post != nil {
+		errs = append(errs, o.Post.validateSpec(joinDot(path, "post"), opts)...)
+	}
+	if o.Delete != nil {
+		errs = append(errs, o.Delete.validateSpec(joinDot(path, "delete"), opts)...)
+	}
+	if o.Options != nil {
+		errs = append(errs, o.Options.validateSpec(joinDot(path, "options"), opts)...)
+	}
+	if o.Head != nil {
+		errs = append(errs, o.Head.validateSpec(joinDot(path, "head"), opts)...)
+	}
+	if o.Patch != nil {
+		errs = append(errs, o.Patch.validateSpec(joinDot(path, "patch"), opts)...)
+	}
+	if o.Trace != nil {
+		errs = append(errs, o.Trace.validateSpec(joinDot(path, "trace"), opts)...)
+	}
+	return errs
+}

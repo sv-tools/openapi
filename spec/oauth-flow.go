@@ -50,3 +50,8 @@ type OAuthFlow struct {
 func NewOAuthFlow() *Extendable[OAuthFlow] {
 	return NewExtendable(&OAuthFlow{})
 }
+
+func (o *OAuthFlow) validateSpec(path string, opts *validationOptions) []*validationError {
+	// all the validations are done in the parent object
+	return nil
+}

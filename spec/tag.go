@@ -24,3 +24,15 @@ type Tag struct {
 func NewTag() *Extendable[Tag] {
 	return NewExtendable(&Tag{})
 }
+
+func (o *Tag) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Name == "" {
+		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+	}
+	if o.ExternalDocs != nil {
+		errs = append(errs, o.ExternalDocs.validateSpec(joinDot(path, "externalDocs"), opts)...)
+	}
+	opts.visited[joinDot("tags", o.Name)] = true
+	return errs
+}

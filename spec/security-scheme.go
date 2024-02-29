@@ -45,7 +45,7 @@ type SecurityScheme struct {
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 	// REQUIRED.
 	// The location of the API key.
-	//Valid values are "query", "header" or "cookie".
+	// Valid values are "query", "header" or "cookie".
 	//
 	// Applies To: apiKey
 	In string `json:"in,omitempty" yaml:"in,omitempty"`
@@ -82,4 +82,45 @@ func NewSecuritySchemeSpec() *RefOrSpec[Extendable[SecurityScheme]] {
 // NewSecuritySchemeRef creates a Ref object.
 func NewSecuritySchemeRef(ref *Ref) *RefOrSpec[Extendable[SecurityScheme]] {
 	return NewRefOrSpec[Extendable[SecurityScheme]](ref, nil)
+}
+
+func (o *SecurityScheme) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Type == "" {
+		errs = append(errs, newValidationError(joinDot(path, "type"), ErrRequired))
+	} else {
+		switch o.Type {
+		case TypeApiKey:
+			if o.Name == "" {
+				errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+			}
+			if o.In == "" {
+				errs = append(errs, newValidationError(joinDot(path, "in"), ErrRequired))
+			} else {
+				switch o.In {
+				case InQuery, InHeader, InCookie:
+				default:
+					errs = append(errs, newValidationError(joinDot(path, "in"), "must be one of [%s, %s, %s], but got '%s'", InQuery, InHeader, InCookie, o.In))
+				}
+			}
+		case TypeHTTP:
+			if o.Scheme == "" {
+				errs = append(errs, newValidationError(joinDot(path, "scheme"), ErrRequired))
+			}
+		case TypeOAuth2:
+			if o.Flows == nil {
+				errs = append(errs, newValidationError(joinDot(path, "flows"), ErrRequired))
+			} else {
+				errs = o.Flows.validateSpec(joinDot(path, "flows"), opts)
+			}
+		case TypeOpenIDConnect:
+			if o.OpenIDConnectURL == "" {
+				errs = append(errs, newValidationError(joinDot(path, "openIdConnectUrl"), ErrRequired))
+			}
+		case TypeMutualTLS:
+		default:
+			errs = append(errs, newValidationError(joinDot(path, "type"), "must be one of [%s, %s, %s, %s, %s], but got '%s'", TypeApiKey, TypeHTTP, TypeMutualTLS, TypeOAuth2, TypeOpenIDConnect, o.Type))
+		}
+	}
+	return errs
 }

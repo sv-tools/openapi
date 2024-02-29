@@ -56,3 +56,15 @@ func NewRequestBodySpec() *RefOrSpec[Extendable[RequestBody]] {
 func NewRequestBodyRef(ref *Ref) *RefOrSpec[Extendable[RequestBody]] {
 	return NewRefOrSpec[Extendable[RequestBody]](ref, nil)
 }
+
+func (o *RequestBody) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if len(o.Content) == 0 {
+		errs = append(errs, newValidationError(joinDot(path, "content"), ErrRequired))
+	} else {
+		for k, v := range o.Content {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "content"), k), opts)...)
+		}
+	}
+	return errs
+}

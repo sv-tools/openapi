@@ -40,3 +40,26 @@ func NewResponseSpec() *RefOrSpec[Extendable[Response]] {
 func NewResponseRef(ref *Ref) *RefOrSpec[Extendable[Response]] {
 	return NewRefOrSpec[Extendable[Response]](ref, nil)
 }
+
+func (o *Response) validateSpec(path string, opts *validationOptions) []*validationError {
+	errs := make([]*validationError, 0)
+	if o.Description == "" {
+		errs = append(errs, newValidationError(joinDot(path, "description"), ErrRequired))
+	}
+	if o.Content != nil {
+		for k, v := range o.Content {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "content"), k), opts)...)
+		}
+	}
+	if o.Links != nil {
+		for k, v := range o.Links {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "links"), k), opts)...)
+		}
+	}
+	if o.Headers != nil {
+		for k, v := range o.Headers {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "headers"), k), opts)...)
+		}
+	}
+	return errs
+}

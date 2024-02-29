@@ -33,3 +33,11 @@ type Discriminator struct {
 func NewDiscriminator() *Discriminator {
 	return &Discriminator{}
 }
+
+func (o *Discriminator) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.PropertyName == "" {
+		errs = append(errs, newValidationError(joinDot(path, "propertyName"), ErrRequired))
+	}
+	return errs
+}

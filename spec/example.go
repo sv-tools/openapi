@@ -56,3 +56,16 @@ func NewExampleSpec() *RefOrSpec[Extendable[Example]] {
 func NewExampleRef(ref *Ref) *RefOrSpec[Extendable[Example]] {
 	return NewRefOrSpec[Extendable[Example]](ref, nil)
 }
+
+func (o *Example) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Value != nil && o.ExternalValue != "" {
+		errs = append(errs, newValidationError(joinDot(path, "value&externalValue"), ErrMutuallyExclusive))
+	}
+	if err := checkURL(o.ExternalValue); err != nil {
+		errs = append(errs, newValidationError(joinDot(path, "externalValue"), err))
+	}
+	// no validation of Value field, because it needs a schema and
+	// should be validated in the object that defines the example and a schema
+	return errs
+}

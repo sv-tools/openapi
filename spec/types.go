@@ -1,5 +1,10 @@
 package spec
 
+import (
+	"fmt"
+	"reflect"
+)
+
 const (
 	// ******* Type-specific keywords *******
 	//
@@ -55,3 +60,38 @@ const (
 	Base32Encoding          = "base32"
 	Base64Encoding          = "base64"
 )
+
+// GetType returns the JSON Schema type of the given value.
+func GetType(v any) (string, error) {
+	if v == nil {
+		return NullType, nil
+	}
+	return kindToType(getKind(v))
+}
+
+func getKind(v any) reflect.Kind {
+	k := reflect.TypeOf(v).Kind()
+	if k == reflect.Ptr {
+		k = reflect.TypeOf(v).Elem().Kind()
+	}
+	return k
+}
+
+func kindToType(k reflect.Kind) (string, error) {
+	switch k {
+	case reflect.String:
+		return StringType, nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return IntegerType, nil
+	case reflect.Float32, reflect.Float64:
+		return NumberType, nil
+	case reflect.Bool:
+		return BooleanType, nil
+	case reflect.Map, reflect.Struct:
+		return ObjectType, nil
+	case reflect.Slice, reflect.Array:
+		return ArrayType, nil
+	default:
+		return "", fmt.Errorf("unsupported type: %s", k.String())
+	}
+}
