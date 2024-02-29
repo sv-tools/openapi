@@ -15,6 +15,10 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 * v1.19
 * v1.18
 
+## Versions:
+
+* v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See `v0` branch.
+
 ## Features
 
 * The `spec` folder contains full implementation of the v3.1 Specification using generics, so the minimum supported version of Go is `v1.18`.
