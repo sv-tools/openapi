@@ -6,6 +6,7 @@ on:
       - v*
     branches:
       - main
+      - v*
   pull_request:
   schedule:
     - cron: "0 0 * * 0"
