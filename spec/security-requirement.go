@@ -19,3 +19,10 @@ func NewSecurityRequirement() SecurityRequirement {
 	o := make(map[string][]string)
 	return o
 }
+
+func (o *SecurityRequirement) validateSpec(path string, opts *validationOptions) []*validationError {
+	for k := range *o {
+		opts.visited["#/components/securitySchemes/"+k] = true
+	}
+	return nil // nothing to validate
+}

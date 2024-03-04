@@ -71,3 +71,11 @@ func (o *BoolOrSchema) MarshalYAML() (any, error) {
 
 	return v, nil
 }
+
+func (o *BoolOrSchema) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Schema != nil {
+		errs = append(errs, o.Schema.validateSpec(path, opts)...)
+	}
+	return errs
+}

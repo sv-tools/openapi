@@ -92,13 +92,13 @@ type JsonSchemaTypeArray struct {
 	// List validation is useful for arrays of arbitrary length where each item matches the same schema.
 	// For this kind of array, set the items keyword to a single schema that will be used to validate all of the items in the array.
 	//
-	// https://json-schema.org/understanding-json-schema/reference/array.html#items
+	// https://json-schema.org/understanding-json-schema/reference/array#items
 	Items *BoolOrSchema `json:"items,omitempty" yaml:"items,omitempty"`
-	// https://json-schema.org/understanding-json-schema/reference/array.html#length
+	// https://json-schema.org/understanding-json-schema/reference/array#length
 	MaxItems *int `json:"maxItems,omitempty" yaml:"maxItems,omitempty"`
 	// The unevaluatedItems keyword is similar to unevaluatedProperties, but for items.
 	//
-	// https://json-schema.org/understanding-json-schema/reference/array.html#unevaluated-items
+	// https://json-schema.org/understanding-json-schema/reference/array#unevaluateditems
 	UnevaluatedItems *BoolOrSchema `json:"unevaluatedItems,omitempty" yaml:"unevaluatedItems,omitempty"`
 	// While the items schema must be valid for every item in the array, the contains schema only needs
 	// to validate against one or more items in the array.
@@ -131,7 +131,7 @@ type JsonSchemaGeneric struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	// The const keyword is used to restrict a value to a single value.
 	//
-	// https://json-schema.org/understanding-json-schema/reference/generic.html#constant-values
+	// https://json-schema.org/understanding-json-schema/reference/const
 	Const string `json:"const,omitempty" yaml:"const,omitempty"`
 	// The $comment keyword is strictly intended for adding comments to a schema.
 	// Its value must always be a string.
@@ -157,19 +157,19 @@ type JsonSchemaGeneric struct {
 
 // JsonSchemaMedia string-encoding non-JSON data
 //
-// https://json-schema.org/understanding-json-schema/reference/non_json_data.html
+// https://json-schema.org/understanding-json-schema/reference/non_json_data#media:-string-encoding-non-json-data
 type JsonSchemaMedia struct {
-	// https://json-schema.org/understanding-json-schema/reference/non_json_data.html#contentschema
+	// https://json-schema.org/understanding-json-schema/reference/non_json_data#contentschema
 	ContentSchema *RefOrSpec[Schema] `json:"contentSchema,omitempty" yaml:"contentSchema,omitempty"`
 	// The contentMediaType keyword specifies the MIME type of the contents of a string, as described in RFC 2046.
 	// There is a list of MIME types officially registered by the IANA, but the set of types supported will be
 	// application and operating system dependent.
 	//
-	// https://json-schema.org/understanding-json-schema/reference/non_json_data.html#contentmediatype
+	// https://json-schema.org/understanding-json-schema/reference/non_json_data#contentmediatype
 	ContentMediaType string `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
 	// The contentEncoding keyword specifies the encoding used to store the contents, as specified in RFC 2054, part 6.1 and RFC 4648.
 	//
-	// https://json-schema.org/understanding-json-schema/reference/non_json_data.html#contentencoding
+	// https://json-schema.org/understanding-json-schema/reference/non_json_data#contentencoding
 	ContentEncoding string `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
 }
 
@@ -226,16 +226,16 @@ type JsonSchemaConditionals struct {
 }
 
 type JsonSchemaCore struct {
-	// https://json-schema.org/understanding-json-schema/reference/schema.html#schema
+	// https://json-schema.org/understanding-json-schema/reference/schema#schema
 	Schema string `json:"$schema,omitempty" yaml:"$schema,omitempty"`
-	// https://json-schema.org/understanding-json-schema/structuring.html#id
+	// https://json-schema.org/understanding-json-schema/structuring#dollarid
 	ID string `json:"$id,omitempty" yaml:"$id,omitempty"`
-	// https://json-schema.org/understanding-json-schema/structuring.html#defs
+	// https://json-schema.org/understanding-json-schema/structuring#dollardefs
 	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty" yaml:"$defs,omitempty"`
 	DynamicRef    string                        `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
 	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty" yaml:"$vocabulary,omitempty"`
 	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
-	// https://json-schema.org/understanding-json-schema/reference/type.html
+	// https://json-schema.org/understanding-json-schema/reference/type#type-specific-keywords
 	Type *SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
 }
 

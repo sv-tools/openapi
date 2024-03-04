@@ -25,3 +25,17 @@ type License struct {
 func NewLicense() *Extendable[License] {
 	return NewExtendable(&License{})
 }
+
+func (o *License) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Name == "" {
+		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+	}
+	if o.Identifier != "" && o.URL != "" {
+		errs = append(errs, newValidationError(joinDot(path, "identifier&url"), ErrMutuallyExclusive))
+	}
+	if err := checkURL(o.URL); err != nil {
+		errs = append(errs, newValidationError(joinDot(path, "url"), err))
+	}
+	return errs
+}

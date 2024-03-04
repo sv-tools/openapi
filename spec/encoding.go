@@ -78,3 +78,19 @@ type Encoding struct {
 func NewEncoding() *Extendable[Encoding] {
 	return NewExtendable(&Encoding{})
 }
+
+func (o *Encoding) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if len(o.Headers) > 0 {
+		for k, v := range o.Headers {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "headers"), k), opts)...)
+		}
+	}
+
+	switch o.Style {
+	case "", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
+	default:
+		errs = append(errs, newValidationError(joinDot(path, "style"), "must be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+	}
+	return errs
+}

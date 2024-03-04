@@ -36,3 +36,36 @@ type OAuthFlows struct {
 func NewOAuthFlows() *Extendable[OAuthFlows] {
 	return NewExtendable(&OAuthFlows{})
 }
+
+func (o *OAuthFlows) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Implicit != nil {
+		errs = append(errs, o.Implicit.validateSpec(joinDot(path, "implicit"), opts)...)
+		if o.Implicit.Spec.AuthorizationURL == "" {
+			errs = append(errs, newValidationError(joinDot(path, "implicit", "authorizationUrl"), ErrRequired))
+		}
+	}
+	if o.Password != nil {
+		errs = append(errs, o.Password.validateSpec(joinDot(path, "password"), opts)...)
+		if o.Password.Spec.TokenURL == "" {
+			errs = append(errs, newValidationError(joinDot(path, "password", "tokenUrl"), ErrRequired))
+		}
+	}
+	if o.ClientCredentials != nil {
+		errs = append(errs, o.ClientCredentials.validateSpec(joinDot(path, "clientCredentials"), opts)...)
+		if o.ClientCredentials.Spec.TokenURL == "" {
+			errs = append(errs, newValidationError(joinDot(path, "clientCredentials", "tokenUrl"), ErrRequired))
+		}
+	}
+	if o.AuthorizationCode != nil {
+		errs = append(errs, o.AuthorizationCode.validateSpec(joinDot(path, "authorizationCode"), opts)...)
+		if o.AuthorizationCode.Spec.AuthorizationURL == "" {
+			errs = append(errs, newValidationError(joinDot(path, "authorizationCode", "authorizationUrl"), ErrRequired))
+		}
+		if o.AuthorizationCode.Spec.TokenURL == "" {
+			errs = append(errs, newValidationError(joinDot(path, "authorizationUrl", "tokenUrl"), ErrRequired))
+		}
+	}
+
+	return errs
+}

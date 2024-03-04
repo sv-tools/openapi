@@ -1,5 +1,10 @@
 package spec
 
+import (
+	"fmt"
+	"strings"
+)
+
 // OpenAPI is the root object of the OpenAPI document.
 //
 // https://spec.openapis.org/oas/v3.1.0#openapi-object
@@ -57,4 +62,94 @@ type OpenAPI struct {
 // NewOpenAPI creates OpenAPI object.
 func NewOpenAPI() *Extendable[OpenAPI] {
 	return NewExtendable(&OpenAPI{})
+}
+
+func checkUnusedComponent[T any](name string, m map[string]T, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	for k := range m {
+		if !opts.visited[fmt.Sprintf("#/components/%s/%s", name, k)] {
+			errs = append(errs, newValidationError(joinArrayItem(joinDot("components", name), k), ErrUnused))
+		}
+	}
+	return errs
+}
+
+func (o *OpenAPI) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.OpenAPI == "" {
+		errs = append(errs, newValidationError(joinDot(path, "openapi"), ErrRequired))
+	} else {
+		if !strings.HasPrefix(o.OpenAPI, "3.1.") {
+			errs = append(errs, newValidationError(joinDot(path, "openapi"), fmt.Errorf("unsupported version: %s", o.OpenAPI)))
+		}
+	}
+	if o.Info == nil {
+		errs = append(errs, newValidationError(joinDot(path, "info"), ErrRequired))
+	} else {
+		errs = append(errs, o.Info.validateSpec(joinDot(path, "info"), opts)...)
+	}
+
+	// validate tags first to memorize them for later checking
+	if o.Tags != nil {
+		for i, tag := range o.Tags {
+			errs = append(errs, tag.validateSpec(joinArrayItem(joinDot(path, "tag"), i), opts)...)
+		}
+	}
+
+	if err := checkURL(o.JsonSchemaDialect); err != nil {
+		errs = append(errs, newValidationError(joinDot(path, "jsonSchemaDialect"), err))
+	}
+	if o.Servers != nil {
+		for i, server := range o.Servers {
+			errs = append(errs, server.validateSpec(joinArrayItem(joinDot(path, "servers"), i), opts)...)
+		}
+	}
+	if o.Paths != nil {
+		errs = append(errs, o.Paths.validateSpec(joinDot(path, "paths"), opts)...)
+	}
+	if o.WebHooks != nil {
+		for name, webhook := range o.WebHooks {
+			errs = append(errs, webhook.validateSpec(joinDot(path, "webhooks", name), opts)...)
+		}
+	}
+	if o.Components != nil {
+		errs = append(errs, o.Components.validateSpec(joinDot(path, "components"), opts)...)
+	}
+	if o.Security != nil {
+		for i, security := range o.Security {
+			errs = append(errs, security.validateSpec(joinArrayItem(joinDot(path, "security"), i), opts)...)
+		}
+	}
+	if o.ExternalDocs != nil {
+		errs = append(errs, o.Components.validateSpec(joinDot(path, "externalDocs"), opts)...)
+	}
+	if o.Paths == nil && o.WebHooks == nil && o.Components == nil {
+		errs = append(errs, newValidationError(joinDot(path, "paths||webhooks||components"), ErrRequired))
+	}
+
+	// check for unused
+	for i, t := range o.Tags {
+		if !opts.visited[joinDot("tags", t.Spec.Name, "used")] {
+			errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "tags"), i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
+		}
+	}
+	if o.Components != nil {
+		errs = append(errs, checkUnusedComponent("schemas", o.Components.Spec.Schemas, opts)...)
+		errs = append(errs, checkUnusedComponent("responses", o.Components.Spec.Responses, opts)...)
+		errs = append(errs, checkUnusedComponent("parameters", o.Components.Spec.Parameters, opts)...)
+		errs = append(errs, checkUnusedComponent("examples", o.Components.Spec.Examples, opts)...)
+		errs = append(errs, checkUnusedComponent("requestBodies", o.Components.Spec.RequestBodies, opts)...)
+		errs = append(errs, checkUnusedComponent("headers", o.Components.Spec.Headers, opts)...)
+		errs = append(errs, checkUnusedComponent("securitySchemes", o.Components.Spec.SecuritySchemes, opts)...)
+		errs = append(errs, checkUnusedComponent("links", o.Components.Spec.Links, opts)...)
+		errs = append(errs, checkUnusedComponent("callbacks", o.Components.Spec.Callbacks, opts)...)
+		errs = append(errs, checkUnusedComponent("paths", o.Components.Spec.Paths, opts)...)
+	}
+
+	for k, v := range opts.linkToOperationID {
+		if !opts.visited[joinDot("operations", v)] {
+			errs = append(errs, newValidationError(k, "'%s' not found", v))
+		}
+	}
+	return errs
 }

@@ -2,6 +2,7 @@ package spec
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -148,4 +149,27 @@ func (o *Extendable[T]) UnmarshalYAML(node *yaml.Node) error {
 	}
 
 	return nil
+}
+
+var ErrExtensionNameMustStartWithPrefix = errors.New("extension name must start with `" + ExtensionPrefix + "`")
+
+func (o *Extendable[T]) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Spec != nil {
+		if spec, ok := any(o.Spec).(validatable); ok {
+			errs = append(errs, spec.validateSpec(path, opts)...)
+		} else {
+			errs = append(errs, newValidationError(path, fmt.Errorf("unsupported spec type: %T", o.Spec)))
+		}
+	}
+	if opts.allowExtensionNameWithoutPrefix {
+		return errs
+	}
+
+	for name, _ := range o.Extensions {
+		if !strings.HasPrefix(name, ExtensionPrefix) {
+			errs = append(errs, newValidationError(joinDot(path, name), ErrExtensionNameMustStartWithPrefix))
+		}
+	}
+	return errs
 }

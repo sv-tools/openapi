@@ -44,3 +44,23 @@ type Info struct {
 func NewInfo() *Extendable[Info] {
 	return NewExtendable(&Info{})
 }
+
+func (o *Info) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Title == "" {
+		errs = append(errs, newValidationError(joinDot(path, "title"), ErrRequired))
+	}
+	if o.Version == "" {
+		errs = append(errs, newValidationError(joinDot(path, "version"), ErrRequired))
+	}
+	if o.Contact != nil {
+		errs = append(errs, o.Contact.validateSpec(joinDot(path, "contact"), opts)...)
+	}
+	if o.License != nil {
+		errs = append(errs, o.License.validateSpec(joinDot(path, "license"), opts)...)
+	}
+	if err := checkURL(o.TermsOfService); err != nil {
+		errs = append(errs, newValidationError(joinDot(path, "termsOfService"), err))
+	}
+	return errs
+}

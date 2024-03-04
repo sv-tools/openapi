@@ -73,7 +73,7 @@ type Link struct {
 	OperationRef string `json:"operationRef,omitempty" yaml:"operationRef,omitempty"`
 	// The name of an existing, resolvable OAS operation, as defined with a unique operationId.
 	// This field is mutually exclusive of the operationRef field.
-	OperationId string `json:"operationId,omitempty" yaml:"operationId,omitempty"`
+	OperationID string `json:"operationId,omitempty" yaml:"operationId,omitempty"`
 	// A description of the link.
 	// CommonMark syntax MAY be used for rich text representation.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
@@ -87,4 +87,21 @@ func NewLinkSpec() *RefOrSpec[Extendable[Link]] {
 // NewLinkRef creates Ref object.
 func NewLinkRef(ref *Ref) *RefOrSpec[Extendable[Link]] {
 	return NewRefOrSpec[Extendable[Link]](ref, nil)
+}
+
+func (o *Link) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.OperationRef != "" && o.OperationID != "" {
+		errs = append(errs, newValidationError(joinDot(path, "operationRef&operationId"), ErrMutuallyExclusive))
+	}
+	if o.OperationID != "" {
+		id := joinDot("operations", o.OperationID)
+		if !opts.visited[id] {
+			opts.linkToOperationID[joinDot(path, "operationId")] = o.OperationID
+		}
+	}
+	if o.Server != nil {
+		errs = append(errs, o.Server.validateSpec(joinDot(path, "server"), opts)...)
+	}
+	return errs
 }

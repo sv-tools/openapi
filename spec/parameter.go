@@ -1,5 +1,10 @@
 package spec
 
+import (
+	"regexp"
+	"strings"
+)
+
 const (
 	// InPath used together with Path Templating, where the parameter value is actually part of the operation’s URL.
 	// This does not include the host or base path of the API.
@@ -21,7 +26,78 @@ const (
 	//
 	// https://spec.openapis.org/oas/v3.1.0#parameter-locations
 	InCookie = "cookie"
+
+	// StyleMatrix is the parameters defined by [RFC6570](https://www.rfc-editor.org/rfc/rfc6570#section-3.2.7)
+	//
+	// Supported types:
+	//   - primitive
+	//   - array
+	//   - object
+	//
+	// Can be used with `in: path` location.
+	StyleMatrix = "matrix"
+
+	// StyleLabel is the parameters defined by [RFC6570](https://www.rfc-editor.org/rfc/rfc6570#section-3.2.5)
+	//
+	// Supported types:
+	//   - primitive
+	//   - array
+	//   - object
+	//
+	// Can be used with `in: path` location.
+	StyleLabel = "label"
+
+	// StyleForm is the parameters defined by [RFC6570](https://www.rfc-editor.org/rfc/rfc6570#section-3.2.8)
+	//
+	// Supported types:
+	//   - primitive
+	//   - array
+	//   - object
+	//
+	// Can be used with `in: query` and `in: cookie` locations.
+	StyleForm = "form"
+
+	// StyleSimple is the parameters defined by [RFC6570](https://www.rfc-editor.org/rfc/rfc6570#section-3.2.2)
+	// This option replaces collectionFormat with a csv value from OpenAPI 2.0.
+	//
+	// Supported types:
+	//   - array
+	//
+	// Can be used with `in: path` and `in: header` locations.
+	StyleSimple = "simple"
+
+	// StyleSpaceDelimited is space separated array or object values.
+	// This option replaces collectionFormat with a ssv value from OpenAPI 2.0.
+	//
+	// Supported types:
+	//   - array
+	//   - object
+	//
+	// Can be used with `in: query` location.
+	StyleSpaceDelimited = "spaceDelimited"
+
+	// StylePipeDelimited is pipe separated array or object values.
+	// This option replaces collectionFormat with a pipes value from OpenAPI 2.0.
+	//
+	// Supported types:
+	//   - array
+	//   - object
+	//
+	// Can be used with `in: query` location.
+	StylePipeDelimited = "pipeDelimited"
+
+	// StyleDeepObject provides a simple way of rendering nested objects using form parameters.
+	//
+	// Supported types:
+	//   - object
+	//
+	// Can be used with `in: query` location.
+	StyleDeepObject = "deepObject"
+
+	ReservedCharacters = ":/?#[]@!$&'()*+,;="
 )
+
+var PathNamePattern = regexp.MustCompile(`[^/#?]+$`)
 
 // Parameter describes a single operation parameter.
 // A unique parameter is defined by a combination of a name and location.
@@ -109,4 +185,123 @@ func NewParameterSpec() *RefOrSpec[Extendable[Parameter]] {
 // NewParameterRef creates Ref object.
 func NewParameterRef(ref *Ref) *RefOrSpec[Extendable[Parameter]] {
 	return NewRefOrSpec[Extendable[Parameter]](ref, nil)
+}
+
+func (o *Parameter) validateSpec(path string, opts *validationOptions) []*validationError {
+	var errs []*validationError
+	if o.Schema != nil && o.Content != nil {
+		errs = append(errs, newValidationError(joinDot(path, "schema&content"), ErrMutuallyExclusive))
+	}
+	if o.Example != nil && len(o.Examples) > 0 {
+		errs = append(errs, newValidationError(joinDot(path, "example&examples"), ErrMutuallyExclusive))
+	}
+
+	if l := len(o.Content); l > 0 {
+		if l != 1 {
+			errs = append(errs, newValidationError(joinDot(path, "content"), "must be only one item, but got '%d'", l))
+		}
+		for k, v := range o.Content {
+			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "content"), k), opts)...)
+		}
+	}
+	if o.Schema != nil {
+		errs = append(errs, o.Schema.validateSpec(joinDot(path, "schema"), opts)...)
+	}
+
+	switch o.In {
+	case InQuery, InHeader, InPath, InCookie:
+	case "":
+		errs = append(errs, newValidationError(joinDot(path, "in"), ErrRequired))
+	default:
+		errs = append(errs, newValidationError(joinDot(path, "in"), "must be one of [%s, %s, %s, %s], but got '%s'", InQuery, InHeader, InPath, InCookie, o.In))
+	}
+
+	switch o.Style {
+	case "":
+	case StyleMatrix, StyleLabel:
+		if o.In != InPath {
+			errs = append(errs, newValidationError(joinDot(path, "style"), "only allowed when `in` is '%s'", InPath))
+		}
+	case StyleForm:
+		if o.In != InQuery && o.In != InCookie {
+			errs = append(errs, newValidationError(joinDot(path, "style"), "only allowed when `in` is '%s' or '%s' ", InQuery, InCookie))
+		}
+	case StyleSimple:
+		if o.In != InPath && o.In != InHeader {
+			errs = append(errs, newValidationError(joinDot(path, "style"), "only allowed when `in` is '%s' or '%s' ", InPath, InHeader))
+		}
+	case StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
+		if o.In != InQuery {
+			errs = append(errs, newValidationError(joinDot(path, "style"), "only allowed when `in` is '%s'", InQuery))
+		}
+	default:
+		errs = append(errs, newValidationError(joinDot(path, "style"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+	}
+
+	if o.Name == "" {
+		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+	} else if o.In == InPath && !PathNamePattern.MatchString(o.Name) {
+		errs = append(errs, newValidationError(joinDot(path, "name"), "must match pattern '%s', but got '%s'", PathNamePattern, o.Name))
+	} else if !o.AllowReserved && o.In == InQuery && strings.ContainsAny(o.Name, ReservedCharacters) {
+		errs = append(errs, newValidationError(joinDot(path, "name"), "'%s' contains reserved characters: '%s'", o.Name, ReservedCharacters))
+	}
+
+	if o.AllowReserved && o.In != InQuery {
+		errs = append(errs, newValidationError(joinDot(path, "allowReserved"), "only allowed when `in` is '%s'", InQuery))
+	}
+
+	if o.AllowEmptyValue && o.In != InQuery {
+		errs = append(errs, newValidationError(joinDot(path, "allowEmptyValue"), "only allowed when `in` is '%s'", InQuery))
+	}
+
+	if !o.Required && o.In == InPath {
+		errs = append(errs, newValidationError(joinDot(path, "required"), "must be `true` when `in` is '%s'", InPath))
+	}
+
+	if opts.doNotValidateExamples {
+		return errs
+	}
+	var spec *Schema
+	if o.Schema != nil {
+		var err error
+		spec, err = o.Schema.GetSpec(opts.spec.Spec.Components)
+		if err != nil {
+			// do not add the error, because it is already validated earlier
+			return errs
+		}
+	} else if o.Content != nil {
+		for _, v := range o.Content {
+			if v != nil {
+				var err error
+				spec, err = v.Spec.Schema.GetSpec(opts.spec.Spec.Components)
+				if err != nil {
+					// do not add the error, because it is already validated earlier
+					return errs
+				}
+				break
+			}
+		}
+	}
+	if spec != nil {
+		if o.Example != nil {
+			if e := ValidateData(o.Example, spec, opts.spec); e != nil {
+				errs = append(errs, newValidationError(joinDot(path, "example"), e))
+			}
+		}
+		if len(o.Examples) > 0 {
+			for k, v := range o.Examples {
+				example, err := v.GetSpec(opts.spec.Spec.Components)
+				if err != nil {
+					// do not add the error, because it is already validated earlier
+					continue
+				}
+				if value := example.Spec.Value; value != nil {
+					if e := ValidateData(o.Example, spec, opts.spec); e != nil {
+						errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "examples"), k), e))
+					}
+				}
+			}
+		}
+	}
+	return errs
 }
