@@ -1,1 +1,13 @@
 comment: false
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+        branches:
+          - main
+  individual_components:
+    - component_id: spec
+      name: Specification
+      paths:
+        - spec/**
