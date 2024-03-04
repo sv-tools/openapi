@@ -100,11 +100,6 @@ type Components struct {
 	Paths map[string]*RefOrSpec[Extendable[PathItem]] `json:"paths,omitempty" yaml:"paths,omitempty"`
 }
 
-// NewComponents creates new Components object.
-func NewComponents() *Extendable[Components] {
-	return NewExtendable(&Components{})
-}
-
 // WithRefOrSpec adds the given object to the appropriate list based on a type and returns the current object (self|this).
 func (o *Components) WithRefOrSpec(name string, v any) *Components {
 	switch spec := v.(type) {
@@ -117,7 +112,7 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Schemas == nil {
 			o.Schemas = make(map[string]*RefOrSpec[Schema], 1)
 		}
-		o.Schemas[name] = NewRefOrSpec(nil, spec)
+		o.Schemas[name] = NewRefOrSpec[Schema](spec)
 	case *RefOrSpec[Extendable[Response]]:
 		if o.Responses == nil {
 			o.Responses = make(map[string]*RefOrSpec[Extendable[Response]], 1)
@@ -127,12 +122,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Responses == nil {
 			o.Responses = make(map[string]*RefOrSpec[Extendable[Response]], 1)
 		}
-		o.Responses[name] = NewRefOrSpec(nil, spec)
+		o.Responses[name] = NewRefOrSpec[Extendable[Response]](spec)
 	case *Response:
 		if o.Responses == nil {
 			o.Responses = make(map[string]*RefOrSpec[Extendable[Response]], 1)
 		}
-		o.Responses[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Responses[name] = NewRefOrSpec[Extendable[Response]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[Parameter]]:
 		if o.Parameters == nil {
 			o.Parameters = make(map[string]*RefOrSpec[Extendable[Parameter]], 1)
@@ -142,12 +137,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Parameters == nil {
 			o.Parameters = make(map[string]*RefOrSpec[Extendable[Parameter]], 1)
 		}
-		o.Parameters[name] = NewRefOrSpec(nil, spec)
+		o.Parameters[name] = NewRefOrSpec[Extendable[Parameter]](spec)
 	case *Parameter:
 		if o.Parameters == nil {
 			o.Parameters = make(map[string]*RefOrSpec[Extendable[Parameter]], 1)
 		}
-		o.Parameters[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Parameters[name] = NewRefOrSpec[Extendable[Parameter]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[Example]]:
 		if o.Examples == nil {
 			o.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
@@ -157,12 +152,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Examples == nil {
 			o.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
 		}
-		o.Examples[name] = NewRefOrSpec(nil, spec)
+		o.Examples[name] = NewRefOrSpec[Extendable[Example]](spec)
 	case *Example:
 		if o.Examples == nil {
 			o.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
 		}
-		o.Examples[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Examples[name] = NewRefOrSpec[Extendable[Example]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[RequestBody]]:
 		if o.RequestBodies == nil {
 			o.RequestBodies = make(map[string]*RefOrSpec[Extendable[RequestBody]], 1)
@@ -172,12 +167,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.RequestBodies == nil {
 			o.RequestBodies = make(map[string]*RefOrSpec[Extendable[RequestBody]], 1)
 		}
-		o.RequestBodies[name] = NewRefOrSpec(nil, spec)
+		o.RequestBodies[name] = NewRefOrSpec[Extendable[RequestBody]](spec)
 	case *RequestBody:
 		if o.RequestBodies == nil {
 			o.RequestBodies = make(map[string]*RefOrSpec[Extendable[RequestBody]], 1)
 		}
-		o.RequestBodies[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.RequestBodies[name] = NewRefOrSpec[Extendable[RequestBody]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[Header]]:
 		if o.Headers == nil {
 			o.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
@@ -187,12 +182,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Headers == nil {
 			o.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
 		}
-		o.Headers[name] = NewRefOrSpec(nil, spec)
+		o.Headers[name] = NewRefOrSpec[Extendable[Header]](spec)
 	case *Header:
 		if o.Headers == nil {
 			o.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
 		}
-		o.Headers[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Headers[name] = NewRefOrSpec[Extendable[Header]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[SecurityScheme]]:
 		if o.SecuritySchemes == nil {
 			o.SecuritySchemes = make(map[string]*RefOrSpec[Extendable[SecurityScheme]], 1)
@@ -202,12 +197,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.SecuritySchemes == nil {
 			o.SecuritySchemes = make(map[string]*RefOrSpec[Extendable[SecurityScheme]], 1)
 		}
-		o.SecuritySchemes[name] = NewRefOrSpec(nil, spec)
+		o.SecuritySchemes[name] = NewRefOrSpec[Extendable[SecurityScheme]](spec)
 	case *SecurityScheme:
 		if o.SecuritySchemes == nil {
 			o.SecuritySchemes = make(map[string]*RefOrSpec[Extendable[SecurityScheme]], 1)
 		}
-		o.SecuritySchemes[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.SecuritySchemes[name] = NewRefOrSpec[Extendable[SecurityScheme]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[Link]]:
 		if o.Links == nil {
 			o.Links = make(map[string]*RefOrSpec[Extendable[Link]], 1)
@@ -217,12 +212,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Links == nil {
 			o.Links = make(map[string]*RefOrSpec[Extendable[Link]], 1)
 		}
-		o.Links[name] = NewRefOrSpec(nil, spec)
+		o.Links[name] = NewRefOrSpec[Extendable[Link]](spec)
 	case *Link:
 		if o.Links == nil {
 			o.Links = make(map[string]*RefOrSpec[Extendable[Link]], 1)
 		}
-		o.Links[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Links[name] = NewRefOrSpec[Extendable[Link]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[Callback]]:
 		if o.Callbacks == nil {
 			o.Callbacks = make(map[string]*RefOrSpec[Extendable[Callback]], 1)
@@ -232,12 +227,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Callbacks == nil {
 			o.Callbacks = make(map[string]*RefOrSpec[Extendable[Callback]], 1)
 		}
-		o.Callbacks[name] = NewRefOrSpec(nil, spec)
+		o.Callbacks[name] = NewRefOrSpec[Extendable[Callback]](spec)
 	case *Callback:
 		if o.Callbacks == nil {
 			o.Callbacks = make(map[string]*RefOrSpec[Extendable[Callback]], 1)
 		}
-		o.Callbacks[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Callbacks[name] = NewRefOrSpec[Extendable[Callback]](NewExtendable(spec))
 	case *RefOrSpec[Extendable[PathItem]]:
 		if o.Paths == nil {
 			o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]], 1)
@@ -247,12 +242,12 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 		if o.Paths == nil {
 			o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]], 1)
 		}
-		o.Paths[name] = NewRefOrSpec(nil, spec)
+		o.Paths[name] = NewRefOrSpec[Extendable[PathItem]](spec)
 	case *PathItem:
 		if o.Paths == nil {
 			o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]], 1)
 		}
-		o.Paths[name] = NewRefOrSpec(nil, NewExtendable(spec))
+		o.Paths[name] = NewRefOrSpec[Extendable[PathItem]](NewExtendable(spec))
 	default:
 		panic(fmt.Errorf("wrong component type: %T", spec))
 	}

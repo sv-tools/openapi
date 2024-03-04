@@ -32,11 +32,6 @@ type OAuthFlows struct {
 	AuthorizationCode *Extendable[OAuthFlow] `json:"authorizationCode,omitempty" yaml:"authorizationCode,omitempty"`
 }
 
-// NewOAuthFlows creates OAuthFlows object
-func NewOAuthFlows() *Extendable[OAuthFlows] {
-	return NewExtendable(&OAuthFlows{})
-}
-
 func (o *OAuthFlows) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Implicit != nil {

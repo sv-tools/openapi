@@ -46,7 +46,6 @@ type XML struct {
 	Wrapped bool `json:"wrapped,omitempty" yaml:"wrapped,omitempty"`
 }
 
-// NewXML creates XML object.
-func NewXML() *Extendable[XML] {
-	return NewExtendable(&XML{})
+func (o *XML) validateSpec(path string, opts *validationOptions) []*validationError {
+	return nil // nothing to validate
 }

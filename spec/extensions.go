@@ -33,7 +33,16 @@ type Extendable[T any] struct {
 	Extensions map[string]any `json:"-" yaml:"-"`
 }
 
-// WithExt sets the extension and returns the current object (self|this).
+// NewExtendable creates new Extendable object for given spec
+func NewExtendable[T any](spec *T) *Extendable[T] {
+	ext := Extendable[T]{
+		Spec:       spec,
+		Extensions: make(map[string]any),
+	}
+	return &ext
+}
+
+// WithExt sets the extension and returns the current object.
 // The `x-` will be added automatically to given name.
 func (o *Extendable[T]) WithExt(name string, value any) *Extendable[T] {
 	if o.Extensions == nil {
@@ -44,15 +53,6 @@ func (o *Extendable[T]) WithExt(name string, value any) *Extendable[T] {
 	}
 	o.Extensions[name] = value
 	return o
-}
-
-// NewExtendable creates new Extendable object for given spec
-func NewExtendable[T any](spec *T) *Extendable[T] {
-	ext := Extendable[T]{
-		Spec:       spec,
-		Extensions: make(map[string]any),
-	}
-	return &ext
 }
 
 // MarshalJSON implements json.Marshaler interface.

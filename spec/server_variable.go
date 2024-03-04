@@ -18,11 +18,6 @@ type ServerVariable struct {
 	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 }
 
-// NewServerVariable creates ServerVariable object.
-func NewServerVariable() *Extendable[ServerVariable] {
-	return NewExtendable(&ServerVariable{})
-}
-
 func (o *ServerVariable) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Default == "" {

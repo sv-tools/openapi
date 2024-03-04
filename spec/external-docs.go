@@ -18,11 +18,6 @@ type ExternalDocs struct {
 	URL string `json:"url" yaml:"url"`
 }
 
-// NewExternalDocs creates ExternalDocs object.
-func NewExternalDocs() *Extendable[ExternalDocs] {
-	return NewExtendable(&ExternalDocs{})
-}
-
 func (o *ExternalDocs) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {

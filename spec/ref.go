@@ -31,31 +31,6 @@ type Ref struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// NewRef creates an object of Ref type.
-func NewRef(ref string) *Ref {
-	return &Ref{
-		Ref: ref,
-	}
-}
-
-// WithRef sets the Ref and returns the current object (self|this).
-func (o *Ref) WithRef(v string) *Ref {
-	o.Ref = v
-	return o
-}
-
-// WithSummary sets the Summary and returns the current object (self|this).
-func (o *Ref) WithSummary(v string) *Ref {
-	o.Summary = v
-	return o
-}
-
-// WithDescription sets the Description and returns the current object (self|this).
-func (o *Ref) WithDescription(v string) *Ref {
-	o.Description = v
-	return o
-}
-
 // RefOrSpec holds either Ref or any OpenAPI spec type.
 //
 // NOTE: The Ref object takes precedent over Spec if using json or yaml Marshal and Unmarshal functions.
@@ -64,14 +39,40 @@ type RefOrSpec[T any] struct {
 	Spec *T   `json:"-" yaml:"-"`
 }
 
-// NewRefOrSpec creates an object of RefOrSpec type for either Ref or Spec
-func NewRefOrSpec[T any](ref *Ref, spec *T) *RefOrSpec[T] {
+// NewRefOrSpec creates an object of RefOrSpec type from given Ref or string or any form of Spec.
+func NewRefOrSpec[T any](v any) *RefOrSpec[T] {
 	o := RefOrSpec[T]{}
-	switch {
-	case ref != nil:
-		o.Ref = ref
-	case spec != nil:
-		o.Spec = spec
+	switch t := v.(type) {
+	case *Ref:
+		o.Ref = t
+	case Ref:
+		o.Ref = &t
+	case string:
+		o.Ref = &Ref{Ref: t}
+	case *T:
+		o.Spec = t
+	case T:
+		o.Spec = &t
+	case nil:
+	}
+	return &o
+}
+
+// NewRefOrExtSpec creates an object of RefOrSpec[Extendable[any]] type from given Ref or string or any form of Spec.
+func NewRefOrExtSpec[T any](v any) *RefOrSpec[Extendable[T]] {
+	o := RefOrSpec[Extendable[T]]{}
+	switch t := v.(type) {
+	case *Ref:
+		o.Ref = t
+	case Ref:
+		o.Ref = &t
+	case string:
+		o.Ref = &Ref{Ref: t}
+	case *T:
+		o.Spec = NewExtendable[T](t)
+	case T:
+		o.Spec = NewExtendable[T](&t)
+	case nil:
 	}
 	return &o
 }
@@ -126,7 +127,7 @@ func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedObjects
 	}
 	obj, ok := ref.(*RefOrSpec[T])
 	if !ok {
-		return nil, fmt.Errorf("expected spec of type %T, but got %T; all visited refs: %s", NewRefOrSpec[T](nil, nil), ref, visited)
+		return nil, fmt.Errorf("expected spec of type %T, but got %T; all visited refs: %s", RefOrSpec[T]{}, ref, visited)
 	}
 	if obj.Spec != nil {
 		return obj.Spec, nil

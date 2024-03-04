@@ -30,11 +30,6 @@ type Server struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// NewServer creates Server object.
-func NewServer() *Extendable[Server] {
-	return NewExtendable(&Server{})
-}
-
 func (o *Server) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {

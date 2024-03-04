@@ -59,11 +59,6 @@ type OpenAPI struct {
 	Servers []*Extendable[Server] `json:"servers,omitempty" yaml:"servers,omitempty"`
 }
 
-// NewOpenAPI creates OpenAPI object.
-func NewOpenAPI() *Extendable[OpenAPI] {
-	return NewExtendable(&OpenAPI{})
-}
-
 func checkUnusedComponent[T any](name string, m map[string]T, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	for k := range m {

@@ -20,11 +20,6 @@ type Contact struct {
 	Email string `json:"email,omitempty" yaml:"email,omitempty"`
 }
 
-// NewContact creates Contact object.
-func NewContact() *Extendable[Contact] {
-	return NewExtendable(&Contact{})
-}
-
 func (o *Contact) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if err := checkURL(o.URL); err != nil {

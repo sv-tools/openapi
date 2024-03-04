@@ -40,11 +40,6 @@ type Info struct {
 	Version string `json:"version" yaml:"version"`
 }
 
-// NewInfo creates Info object.
-func NewInfo() *Extendable[Info] {
-	return NewExtendable(&Info{})
-}
-
 func (o *Info) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Title == "" {

@@ -47,16 +47,6 @@ type RequestBody struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-// NewRequestBodySpec creates RequestBody object.
-func NewRequestBodySpec() *RefOrSpec[Extendable[RequestBody]] {
-	return NewRefOrSpec[Extendable[RequestBody]](nil, NewExtendable(&RequestBody{}))
-}
-
-// NewRequestBodyRef creates Ref object.
-func NewRequestBodyRef(ref *Ref) *RefOrSpec[Extendable[RequestBody]] {
-	return NewRefOrSpec[Extendable[RequestBody]](ref, nil)
-}
-
 func (o *RequestBody) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Content) == 0 {

@@ -31,16 +31,6 @@ type Response struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// NewResponseSpec creates Response object.
-func NewResponseSpec() *RefOrSpec[Extendable[Response]] {
-	return NewRefOrSpec[Extendable[Response]](nil, NewExtendable(&Response{}))
-}
-
-// NewResponseRef creates Ref object.
-func NewResponseRef(ref *Ref) *RefOrSpec[Extendable[Response]] {
-	return NewRefOrSpec[Extendable[Response]](ref, nil)
-}
-
 func (o *Response) validateSpec(path string, opts *validationOptions) []*validationError {
 	errs := make([]*validationError, 0)
 	if o.Description == "" {
