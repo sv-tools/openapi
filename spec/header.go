@@ -14,10 +14,9 @@ package spec
 type Header struct {
 	// The schema defining the type used for the parameter.
 	Schema *RefOrSpec[Schema] `json:"schema,omitempty" yaml:"schema,omitempty"`
-	// Examples of the parameter’s potential value.
-	// Each example SHOULD contain a value in the correct format as specified in the parameter encoding.
-	// The examples field is mutually exclusive of the example field.
-	// Furthermore, if referencing a schema that contains an example, the examples value SHALL override the example provided by the schema.
+	// A map containing the representations for the parameter. 
+	// The key is the media type and the value describes it. 
+	// The map MUST only contain one entry.
 	Content map[string]*Extendable[MediaType] `json:"content,omitempty" yaml:"content,omitempty"`
 	// A brief description of the header.
 	// This could contain examples of use.
