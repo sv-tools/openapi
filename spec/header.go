@@ -12,24 +12,19 @@ package spec
 //
 // All fields are copied from Parameter Object as is, except name and in fields.
 type Header struct {
-	// The schema defining the type used for the parameter.
+	// The schema defining the type used for the header.
 	Schema *RefOrSpec[Schema] `json:"schema,omitempty" yaml:"schema,omitempty"`
-	// A map containing the representations for the parameter. 
-	// The key is the media type and the value describes it. 
+	// A map containing the representations for the header.
+	// The key is the media type and the value describes it.
 	// The map MUST only contain one entry.
 	Content map[string]*Extendable[MediaType] `json:"content,omitempty" yaml:"content,omitempty"`
 	// A brief description of the header.
 	// This could contain examples of use.
 	// CommonMark syntax MAY be used for rich text representation.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	// Describes how the parameter value will be serialized depending on the type of the parameter value.
-	// Default values (based on value of in):
-	//   for query - form;
-	//   for path - simple;
-	//   for header - simple;
-	//   for cookie - form.
+	// Describes how the header value will be serialized.
 	Style string `json:"style,omitempty" yaml:"style,omitempty"`
-	// When this is true, parameter values of type array or object generate separate parameters
+	// When this is true, header values of type array or object generate separate headers
 	// for each value of the array or key-value pair of the map.
 	// For other types of parameters this property has no effect.
 	// When style is form, the default value is true.
