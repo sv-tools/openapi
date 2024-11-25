@@ -49,6 +49,9 @@ jobs:
           go-version: ${{ matrix.go }}
       - name: gofmt
         run: diff -u <(echo -n) <(gofmt -l . )
+      - name: show diff
+        if: ${{ failure() }}
+        run: git diff
       - name: go vet
         run: go vet ./...
       - name: fieldalignment
