@@ -22,29 +22,29 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@f09c1c0a94de965c15400f5634aa42fac8fb8f88 # v3.27.5
         with:
           languages: go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@f09c1c0a94de965c15400f5634aa42fac8fb8f88 # v3.27.5
 
-  UnitTests:
+  UnitTestJob:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
-          - "1.20"
           - "1.21"
           - "1.22"
+          - "1.23"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
         with:
           go-version: ${{ matrix.go }}
       - name: gofmt
@@ -56,8 +56,12 @@ jobs:
       - name: Run Unit Tests
         run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
       - name: Codecov
-        uses: codecov/codecov-action@v5.0.7
+        uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a # v5.0.7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          file: ./coverage.out
+
+  UnitTests:
+    needs: UnitTestJob
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Unit Tests Passed"
