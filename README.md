@@ -9,15 +9,15 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 
 ## Supported Go versions:
 
+* v1.23
 * v1.22
 * v1.21
-* v1.20
 
 ## Versions:
 
 * v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See `v0` branch.
 * v1 - The current version with the in-place validation of the specification. 
-  The minimal version of Go is `v1.20` and the `github.com/santhosh-tekuri/jsonschema/v5` package is not used anymore. 
+  The minimal version of Go is `v1.21` and the `github.com/santhosh-tekuri/jsonschema/v5` package is not used anymore. 
   See `main` branch.
 
 ## Features

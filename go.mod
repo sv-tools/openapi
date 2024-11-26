@@ -1,6 +1,6 @@
 module github.com/sv-tools/openapi
 
-go 1.20
+go 1.21.0
 
 retract v0.3.0 // due to a mistake, there is no real v0.3.0 release, it was pointed to v0.2.2 tag
 
