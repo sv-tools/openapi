@@ -1,5 +1,7 @@
 package spec
 
+import "errors"
+
 // XML is a metadata object that allows for more fine-tuned XML model definitions.
 // When using arrays, XML element names are not inferred (for singular/plural forms) and the name property SHOULD
 // be used to add that information.
@@ -47,6 +49,42 @@ type XML struct {
 }
 
 // NewXML creates XML object.
-func NewXML() *Extendable[XML] {
-	return NewExtendable(&XML{})
+func NewXML(spec ...*XML) *Extendable[XML] {
+	switch len(spec) {
+	case 0:
+		return NewExtendable(&XML{})
+	case 1:
+		return NewExtendable(spec[0])
+	default:
+		panic(errors.New("NewXML is called with more than one spec"))
+	}
+}
+
+func (o *XML) WithName(name string) *XML {
+	o.Name = name
+	return o
+}
+
+func (o *XML) WithNamespace(namespace string) *XML {
+	o.Namespace = namespace
+	return o
+}
+
+func (o *XML) WithPrefix(prefix string) *XML {
+	o.Prefix = prefix
+	return o
+}
+
+func (o *XML) WithAttribute(attribute bool) *XML {
+	o.Attribute = attribute
+	return o
+}
+
+func (o *XML) WithWrapped(wrapped bool) *XML {
+	o.Wrapped = wrapped
+	return o
+}
+
+func (o *XML) validateSpec(path string, opts *validationOptions) []*validationError {
+	return nil // nothing to validate
 }

@@ -45,16 +45,10 @@ func TestValidation(t *testing.T) {
 }
 
 func TestManuallyCreatedSpec(t *testing.T) {
-	minSpec := spec.NewOpenAPI()
-	minSpec.Spec.OpenAPI = "3.1.0"
-	minSpec.Spec.Info = spec.NewInfo()
-	minSpec.Spec.Info.Spec.Title = "Minimal Valid Spec"
-	minSpec.Spec.Info.Spec.Version = "1.0.0"
-	minSpec.Spec.Paths = spec.NewPaths()
-
 	for _, tt := range []struct {
 		name string
 		spec *spec.Extendable[spec.OpenAPI]
+		opts []spec.ValidationOption
 		err  string
 	}{
 		{
@@ -63,12 +57,72 @@ func TestManuallyCreatedSpec(t *testing.T) {
 			err:  "openapi: required",
 		},
 		{
-			name: "minimal valid",
-			spec: minSpec,
+			name: "minimal valid with empty paths",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Paths: spec.NewPaths(),
+			}),
+		},
+		{
+			name: "minimal valid with empty components",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Components: spec.NewComponents(),
+			}),
+		},
+		{
+			name: "minimal valid with empty webhooks",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				WebHooks: make(map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]),
+			}),
+		},
+		{
+			name: "xml component",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Components: spec.NewExtendable(&spec.Components{
+					Schemas: map[string]*spec.RefOrSpec[spec.Schema]{
+						"Person": spec.NewSchemaSpec((&spec.Schema{}).
+							WithType("object").
+							WithProperty("id", spec.NewSchemaSpec((&spec.Schema{}).
+								WithType("integer").
+								WithFormat("int32").
+								WithXML(spec.NewXML((&spec.XML{}).
+									WithAttribute(true),
+								)),
+							)).
+							WithProperty("name", spec.NewSchemaSpec((&spec.Schema{}).
+								WithType("string").
+								WithXML(spec.NewXML((&spec.XML{}).
+									WithNamespace("https://example.com/schema/sample").
+									WithPrefix("sample"),
+								)),
+							)),
+						),
+					},
+				}),
+			}),
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			err := spec.ValidateSpec(tt.spec)
+			err := spec.ValidateSpec(tt.spec, tt.opts...)
 			t.Log("error: ", err)
 			if tt.err == "" {
 				require.NoError(t, err)

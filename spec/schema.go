@@ -2,6 +2,7 @@ package spec
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -48,8 +49,15 @@ type Schema struct {
 }
 
 // NewSchemaSpec creates Schema object.
-func NewSchemaSpec() *RefOrSpec[Schema] {
-	return NewRefOrSpec[Schema](nil, &Schema{})
+func NewSchemaSpec(spec ...*Schema) *RefOrSpec[Schema] {
+	switch len(spec) {
+	case 0:
+		return NewRefOrSpec[Schema](nil, &Schema{})
+	case 1:
+		return NewRefOrSpec[Schema](nil, spec[0])
+	default:
+		panic(errors.New("NewSchemaSpec is called with more than one spec"))
+	}
 }
 
 // NewSchemaRef creates Ref object.
@@ -65,6 +73,35 @@ func (o *Schema) WithExt(name string, value any) *Schema {
 		o.Extensions = make(map[string]any, 1)
 	}
 	o.Extensions[name] = value
+	return o
+}
+
+func (o *Schema) WithType(v ...string) *Schema {
+	if len(v) == 0 {
+		return o
+	}
+	if o.Type == nil {
+		o.Type = NewSingleOrArray(v...)
+	}
+	*o.Type = append(*o.Type, v...)
+	return o
+}
+
+func (o *Schema) WithProperty(name string, spec *RefOrSpec[Schema]) *Schema {
+	if o.Properties == nil {
+		o.Properties = make(map[string]*RefOrSpec[Schema])
+	}
+	o.Properties[name] = spec
+	return o
+}
+
+func (o *Schema) WithFormat(value string) *Schema {
+	o.Format = value
+	return o
+}
+
+func (o *Schema) WithXML(spec *Extendable[XML]) *Schema {
+	o.XML = spec
 	return o
 }
 
