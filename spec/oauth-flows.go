@@ -58,7 +58,7 @@ func (o *OAuthFlows) validateSpec(path string, opts *validationOptions) []*valid
 			errs = append(errs, newValidationError(joinDot(path, "authorizationCode", "authorizationUrl"), ErrRequired))
 		}
 		if o.AuthorizationCode.Spec.TokenURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "authorizationUrl", "tokenUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinDot(path, "authorizationCode", "tokenUrl"), ErrRequired))
 		}
 	}
 

@@ -124,6 +124,8 @@ func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedObjects
 		ref = c.Spec.Callbacks[objName]
 	case "paths":
 		ref = c.Spec.Paths[objName]
+	default:
+		return nil, fmt.Errorf("unexpected component %q; all visited refs: %s", ref, visited)
 	}
 	obj, ok := ref.(*RefOrSpec[T])
 	if !ok {

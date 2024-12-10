@@ -36,7 +36,7 @@ func TestNewRefOrSpec(t *testing.T) {
 		},
 		{
 			name:        "ref by value",
-			ref_or_spec: &spec.Ref{Ref: "foo"},
+			ref_or_spec: spec.Ref{Ref: "foo"},
 			nilRef:      false,
 			nilSpec:     true,
 		},
@@ -304,6 +304,20 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 				WithRefOrSpec("Pet2", spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet")),
 			),
 			expErr: "cycle ref",
+		},
+		{
+			name:   "ref to unexpected component",
+			ref:    spec.NewRefOrSpec[testRefOrSpec]("#/components/test/Pet"),
+			c:      spec.NewExtendable(&spec.Components{}),
+			expErr: "unexpected component",
+		},
+		{
+			name: "ref to unexpected component",
+			ref:  spec.NewRefOrSpec[spec.Operation]("#/components/schemas/Pet"),
+			c: spec.NewExtendable((&spec.Components{}).
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](&spec.Schema{Title: "foo"})),
+			),
+			expErr: "expected spec of type",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
