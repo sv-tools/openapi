@@ -18,11 +18,10 @@ type testRefOrSpec struct {
 
 func TestNewRefOrSpec(t *testing.T) {
 	for _, tt := range []struct {
-		ref     *spec.Ref
-		spec    *testRefOrSpec
-		name    string
-		nilRef  bool
-		nilSpec bool
+		ref_or_spec any
+		name        string
+		nilRef      bool
+		nilSpec     bool
 	}{
 		{
 			name:    "empty",
@@ -30,37 +29,141 @@ func TestNewRefOrSpec(t *testing.T) {
 			nilSpec: true,
 		},
 		{
-			name:    "ref",
-			ref:     spec.NewRef("foo"),
-			nilRef:  false,
-			nilSpec: true,
+			name:        "ref by reference",
+			ref_or_spec: &spec.Ref{Ref: "foo"},
+			nilRef:      false,
+			nilSpec:     true,
 		},
 		{
-			name:    "spec",
-			spec:    &testRefOrSpec{A: "foo", B: "bar"},
-			nilRef:  true,
-			nilSpec: false,
+			name:        "ref by value",
+			ref_or_spec: spec.Ref{Ref: "foo"},
+			nilRef:      false,
+			nilSpec:     true,
 		},
 		{
-			name:    "both",
-			ref:     spec.NewRef("foo"),
-			spec:    &testRefOrSpec{A: "foo", B: "bar"},
-			nilRef:  false,
-			nilSpec: true,
+			name:        "string",
+			ref_or_spec: "foo",
+			nilRef:      false,
+			nilSpec:     true,
+		},
+		{
+			name:        "spec by reference",
+			ref_or_spec: &testRefOrSpec{A: "foo", B: "bar"},
+			nilRef:      true,
+			nilSpec:     false,
+		},
+		{
+			name:        "spec by value",
+			ref_or_spec: testRefOrSpec{A: "foo", B: "bar"},
+			nilRef:      true,
+			nilSpec:     false,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			o := spec.NewRefOrSpec(tt.ref, tt.spec)
+			o := spec.NewRefOrSpec[testRefOrSpec](tt.ref_or_spec)
 			require.NotNil(t, o)
 			if tt.nilRef {
 				require.Nil(t, o.Ref)
 			} else {
-				require.Equal(t, tt.ref, o.Ref)
+				switch v := tt.ref_or_spec.(type) {
+				case string:
+					require.Equal(t, v, o.Ref.Ref)
+				case *spec.Ref:
+					require.Equal(t, v, o.Ref)
+				case spec.Ref:
+					require.Equal(t, &v, o.Ref)
+				default:
+					t.Fatal("unexpected ref type")
+				}
 			}
 			if tt.nilSpec {
 				require.Nil(t, o.Spec)
 			} else {
-				require.Equal(t, tt.spec, o.Spec)
+				switch v := tt.ref_or_spec.(type) {
+				case *testRefOrSpec:
+					require.Equal(t, v, o.Spec)
+				case testRefOrSpec:
+					require.Equal(t, &v, o.Spec)
+				default:
+					t.Fatal("unexpected spec type")
+				}
+			}
+		})
+	}
+}
+
+func TestNewRefOrExtSpec(t *testing.T) {
+	for _, tt := range []struct {
+		ref_or_spec any
+		name        string
+		nilRef      bool
+		nilSpec     bool
+	}{
+		{
+			name:    "empty",
+			nilRef:  true,
+			nilSpec: true,
+		},
+		{
+			name:        "ref by reference",
+			ref_or_spec: &spec.Ref{Ref: "foo"},
+			nilRef:      false,
+			nilSpec:     true,
+		},
+		{
+			name:        "ref by value",
+			ref_or_spec: spec.Ref{Ref: "foo"},
+			nilRef:      false,
+			nilSpec:     true,
+		},
+		{
+			name:        "string",
+			ref_or_spec: "foo",
+			nilRef:      false,
+			nilSpec:     true,
+		},
+		{
+			name:        "spec by reference",
+			ref_or_spec: &testRefOrSpec{A: "foo", B: "bar"},
+			nilRef:      true,
+			nilSpec:     false,
+		},
+		{
+			name:        "spec by value",
+			ref_or_spec: testRefOrSpec{A: "foo", B: "bar"},
+			nilRef:      true,
+			nilSpec:     false,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			o := spec.NewRefOrExtSpec[testRefOrSpec](tt.ref_or_spec)
+			require.NotNil(t, o)
+			if tt.nilRef {
+				require.Nil(t, o.Ref)
+			} else {
+				switch v := tt.ref_or_spec.(type) {
+				case string:
+					require.Equal(t, v, o.Ref.Ref)
+				case *spec.Ref:
+					require.Equal(t, v, o.Ref)
+				case spec.Ref:
+					require.Equal(t, &v, o.Ref)
+				default:
+					t.Fatal("unexpected ref type")
+				}
+			}
+			if tt.nilSpec {
+				require.Nil(t, o.Spec)
+			} else {
+				require.IsType(t, &spec.Extendable[testRefOrSpec]{}, o.Spec)
+				switch v := tt.ref_or_spec.(type) {
+				case *testRefOrSpec:
+					require.Equal(t, v, o.Spec.Spec)
+				case testRefOrSpec:
+					require.Equal(t, &v, o.Spec.Spec)
+				default:
+					t.Fatal("unexpected spec type")
+				}
 			}
 		})
 	}
@@ -150,57 +253,71 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 	}{
 		{
 			name: "with spec",
-			ref:  spec.NewRefOrSpec(nil, &testRefOrSpec{A: "foo"}),
+			ref:  spec.NewRefOrSpec[testRefOrSpec](&testRefOrSpec{A: "foo"}),
 			exp:  &testRefOrSpec{A: "foo"},
 		},
 		{
 			name:   "empty",
-			ref:    spec.NewRefOrSpec[testRefOrSpec](nil, nil),
+			ref:    spec.NewRefOrSpec[testRefOrSpec](nil),
 			expErr: "not found",
 		},
 		{
 			name:   "no components prefix if ref",
-			ref:    spec.NewRefOrSpec[testRefOrSpec](spec.NewRef("fooo"), nil),
+			ref:    spec.NewRefOrSpec[testRefOrSpec]("fooo"),
 			expErr: "is not implemented",
 		},
 		{
 			name:   "no components but with correct ref",
-			ref:    spec.NewRefOrSpec[testRefOrSpec](spec.NewRef("#/components/schemas/Pet"), nil),
+			ref:    spec.NewRefOrSpec[testRefOrSpec]("#/components/schemas/Pet"),
 			expErr: "components is required",
 		},
 		{
 			name: "correct ref and components",
-			ref:  spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet"), nil),
+			ref:  spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet"),
 			c: spec.NewExtendable((&spec.Components{}).
-				WithRefOrSpec("Pet", spec.NewRefOrSpec(nil, &spec.Schema{JsonSchema: spec.JsonSchema{JsonSchemaGeneric: spec.JsonSchemaGeneric{Title: "foo"}}})),
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](&spec.Schema{Title: "foo"})),
 			),
-			exp: &spec.Schema{JsonSchema: spec.JsonSchema{JsonSchemaGeneric: spec.JsonSchemaGeneric{Title: "foo"}}},
+			exp: &spec.Schema{Title: "foo"},
 		},
 		{
 			name: "ref to ref",
-			ref:  spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet"), nil),
+			ref:  spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet"),
 			c: spec.NewExtendable((&spec.Components{}).
-				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet2"), nil)).
-				WithRefOrSpec("Pet2", spec.NewRefOrSpec(nil, &spec.Schema{JsonSchema: spec.JsonSchema{JsonSchemaGeneric: spec.JsonSchemaGeneric{Title: "foo"}}})),
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet2")).
+				WithRefOrSpec("Pet2", spec.NewRefOrSpec[spec.Schema](&spec.Schema{Title: "foo"})),
 			),
-			exp: &spec.Schema{JsonSchema: spec.JsonSchema{JsonSchemaGeneric: spec.JsonSchemaGeneric{Title: "foo"}}},
+			exp: &spec.Schema{Title: "foo"},
 		},
 		{
 			name: "ref to incorrect ref",
-			ref:  spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet"), nil),
+			ref:  spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet"),
 			c: spec.NewExtendable((&spec.Components{}).
-				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](spec.NewRef("fooo"), nil)),
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema]("fooo")),
 			),
 			expErr: "is not implemented",
 		},
 		{
 			name: "cycle ref",
-			ref:  spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet"), nil),
+			ref:  spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet"),
 			c: spec.NewExtendable((&spec.Components{}).
-				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet2"), nil)).
-				WithRefOrSpec("Pet2", spec.NewRefOrSpec[spec.Schema](spec.NewRef("#/components/schemas/Pet"), nil)),
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet2")).
+				WithRefOrSpec("Pet2", spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Pet")),
 			),
 			expErr: "cycle ref",
+		},
+		{
+			name:   "ref to unexpected component",
+			ref:    spec.NewRefOrSpec[testRefOrSpec]("#/components/test/Pet"),
+			c:      spec.NewExtendable(&spec.Components{}),
+			expErr: "unexpected component",
+		},
+		{
+			name: "ref to unexpected component",
+			ref:  spec.NewRefOrSpec[spec.Operation]("#/components/schemas/Pet"),
+			c: spec.NewExtendable((&spec.Components{}).
+				WithRefOrSpec("Pet", spec.NewRefOrSpec[spec.Schema](&spec.Schema{Title: "foo"})),
+			),
+			expErr: "expected spec of type",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

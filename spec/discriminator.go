@@ -29,11 +29,6 @@ type Discriminator struct {
 	PropertyName string `json:"propertyName" yaml:"propertyName"`
 }
 
-// NewDiscriminator creates Discriminator object.
-func NewDiscriminator() *Discriminator {
-	return &Discriminator{}
-}
-
 func (o *Discriminator) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.PropertyName == "" {

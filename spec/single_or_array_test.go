@@ -14,7 +14,7 @@ import (
 type singleOrArrayCase[T any] struct {
 	name     string
 	data     []byte
-	expected spec.SingleOrArray[T]
+	expected *spec.SingleOrArray[T]
 	wantErr  bool
 }
 
@@ -24,7 +24,7 @@ func testSingleOrArrayJSON[T any](t *testing.T, tests []singleOrArrayCase[T]) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var o spec.SingleOrArray[T]
+			var o *spec.SingleOrArray[T]
 			err := json.Unmarshal(tt.data, &o)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -156,7 +156,7 @@ func testSingleOrArrayYAML[T any](t *testing.T, tests []singleOrArrayCase[T]) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var o spec.SingleOrArray[T]
+			var o *spec.SingleOrArray[T]
 			err := yaml.Unmarshal(tt.data, &o)
 			if tt.wantErr {
 				require.Error(t, err)

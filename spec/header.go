@@ -38,16 +38,6 @@ type Header struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-// NewHeaderSpec creates Header object.
-func NewHeaderSpec() *RefOrSpec[Extendable[Header]] {
-	return NewRefOrSpec[Extendable[Header]](nil, NewExtendable(&Header{}))
-}
-
-// NewHeaderRef creates Ref object.
-func NewHeaderRef(ref *Ref) *RefOrSpec[Extendable[Header]] {
-	return NewRefOrSpec[Extendable[Header]](ref, nil)
-}
-
 func (o *Header) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {

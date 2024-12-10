@@ -46,11 +46,6 @@ type OAuthFlow struct {
 	RefreshURL string `json:"refreshUrl,omitempty" yaml:"refreshUrl,omitempty"`
 }
 
-// NewOAuthFlow creates OAuthFlow object
-func NewOAuthFlow() *Extendable[OAuthFlow] {
-	return NewExtendable(&OAuthFlow{})
-}
-
 func (o *OAuthFlow) validateSpec(path string, opts *validationOptions) []*validationError {
 	// all the validations are done in the parent object
 	return nil

@@ -21,11 +21,6 @@ type License struct {
 	URL string `json:"url,omitempty" yaml:"url,omitempty"`
 }
 
-// NewLicense creates License object.
-func NewLicense() *Extendable[License] {
-	return NewExtendable(&License{})
-}
-
 func (o *License) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {

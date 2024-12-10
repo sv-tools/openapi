@@ -45,30 +45,103 @@ func TestValidation(t *testing.T) {
 }
 
 func TestManuallyCreatedSpec(t *testing.T) {
-	minSpec := spec.NewOpenAPI()
-	minSpec.Spec.OpenAPI = "3.1.0"
-	minSpec.Spec.Info = spec.NewInfo()
-	minSpec.Spec.Info.Spec.Title = "Minimal Valid Spec"
-	minSpec.Spec.Info.Spec.Version = "1.0.0"
-	minSpec.Spec.Paths = spec.NewPaths()
-
 	for _, tt := range []struct {
 		name string
 		spec *spec.Extendable[spec.OpenAPI]
+		opts []spec.ValidationOption
 		err  string
 	}{
 		{
 			name: "empty",
-			spec: spec.NewOpenAPI(),
+			spec: spec.NewExtendable(&spec.OpenAPI{}),
 			err:  "openapi: required",
 		},
 		{
-			name: "minimal valid",
-			spec: minSpec,
+			name: "minimal valid with empty paths",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Paths: spec.NewExtendable[spec.Paths](&spec.Paths{}),
+			}),
+		},
+		{
+			name: "minimal valid with empty components",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Components: spec.NewExtendable[spec.Components](&spec.Components{}),
+			}),
+		},
+		{
+			name: "minimal valid with empty webhooks",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				WebHooks: make(map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]),
+			}),
+		},
+		{
+			name: "xml component",
+			spec: spec.NewExtendable(&spec.OpenAPI{
+				OpenAPI: "3.1.0",
+				Info: spec.NewExtendable(&spec.Info{
+					Title:   "Minimal Valid Spec",
+					Version: "1.0.0",
+				}),
+				Paths: spec.NewExtendable(&spec.Paths{
+					Paths: map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]{
+						"/persons": spec.NewRefOrExtSpec[spec.PathItem](&spec.PathItem{
+							Get: spec.NewExtendable(&spec.Operation{
+								Responses: spec.NewExtendable(&spec.Responses{
+									Default: spec.NewRefOrExtSpec[spec.Response](&spec.Response{
+										Description: "A person",
+										Content: map[string]*spec.Extendable[spec.MediaType]{
+											"application/json": spec.NewExtendable(&spec.MediaType{
+												Schema: spec.NewRefOrSpec[spec.Schema]("#/components/schemas/Person"),
+											}),
+										},
+									}),
+								}),
+							}),
+						}),
+					},
+				}),
+				Components: spec.NewExtendable[spec.Components]((&spec.Components{}).WithRefOrSpec(
+					"Person",
+					&spec.Schema{
+						Type: spec.NewSingleOrArray[string]("object"),
+						Properties: map[string]*spec.RefOrSpec[spec.Schema]{
+							"id": spec.NewRefOrSpec[spec.Schema](&spec.Schema{
+								Type:   spec.NewSingleOrArray[string]("integer"),
+								Format: "int32",
+								XML: spec.NewExtendable(&spec.XML{
+									Attribute: true,
+								}),
+							}),
+							"name": spec.NewRefOrSpec[spec.Schema](&spec.Schema{
+								Type: spec.NewSingleOrArray[string]("string"),
+								XML: spec.NewExtendable(&spec.XML{
+									Namespace: "https://example.com/schema/sample",
+									Prefix:    "sample",
+								}),
+							}),
+						},
+					},
+				)),
+			}),
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			err := spec.ValidateSpec(tt.spec)
+			err := spec.ValidateSpec(tt.spec, tt.opts...)
 			t.Log("error: ", err)
 			if tt.err == "" {
 				require.NoError(t, err)

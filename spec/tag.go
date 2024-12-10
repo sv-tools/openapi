@@ -20,11 +20,6 @@ type Tag struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// NewTag creates Tag object.
-func NewTag() *Extendable[Tag] {
-	return NewExtendable(&Tag{})
-}
-
 func (o *Tag) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {

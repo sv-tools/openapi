@@ -17,9 +17,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "schema spec",
 			create: func() (string, any) {
-				o := spec.NewSchemaSpec()
-				o.Spec.Title = "test"
-				return "testSchema", o.Spec
+				o := &spec.Schema{
+					Title: "test",
+				}
+				return "testSchema", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Schemas, 1)
@@ -31,9 +32,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "schema ref or spec",
 			create: func() (string, any) {
-				o := spec.NewSchemaSpec()
-				o.Spec.Title = "test"
-				return "testSchema", o
+				o := &spec.Schema{
+					Title: "test",
+				}
+				return "testSchema", spec.NewRefOrSpec[spec.Schema](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Schemas, 1)
@@ -45,9 +47,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "response spec",
 			create: func() (string, any) {
-				o := spec.NewResponseSpec()
-				o.Spec.Spec.Description = "test"
-				return "testResponse", o.Spec.Spec
+				o := &spec.Response{
+					Description: "test",
+				}
+				return "testResponse", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Responses, 1)
@@ -60,9 +63,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "response ext spec",
 			create: func() (string, any) {
-				o := spec.NewResponseSpec()
-				o.Spec.Spec.Description = "test"
-				return "testResponse", o.Spec
+				o := &spec.Response{
+					Description: "test",
+				}
+				return "testResponse", spec.NewExtendable[spec.Response](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Responses, 1)
@@ -75,9 +79,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "response ref or spec",
 			create: func() (string, any) {
-				o := spec.NewResponseSpec()
-				o.Spec.Spec.Description = "test"
-				return "testResponse", o
+				o := &spec.Response{
+					Description: "test",
+				}
+				return "testResponse", spec.NewRefOrExtSpec[spec.Response](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Responses, 1)
@@ -90,9 +95,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "parameter spec",
 			create: func() (string, any) {
-				o := spec.NewParameterSpec()
-				o.Spec.Spec.Description = "test"
-				return "testParameter", o.Spec.Spec
+				o := &spec.Parameter{
+					Description: "test",
+				}
+				return "testParameter", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Parameters, 1)
@@ -105,9 +111,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "parameter ext spec",
 			create: func() (string, any) {
-				o := spec.NewParameterSpec()
-				o.Spec.Spec.Description = "test"
-				return "testParameter", o.Spec
+				o := &spec.Parameter{
+					Description: "test",
+				}
+				return "testParameter", spec.NewExtendable[spec.Parameter](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Parameters, 1)
@@ -120,9 +127,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "parameter ref or spec",
 			create: func() (string, any) {
-				o := spec.NewParameterSpec()
-				o.Spec.Spec.Description = "test"
-				return "testParameter", o
+				o := &spec.Parameter{
+					Description: "test",
+				}
+				return "testParameter", spec.NewRefOrExtSpec[spec.Parameter](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Parameters, 1)
@@ -135,9 +143,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "examples spec",
 			create: func() (string, any) {
-				o := spec.NewExampleSpec()
-				o.Spec.Spec.Description = "test"
-				return "testExamples", o.Spec.Spec
+				o := &spec.Example{
+					Description: "test",
+				}
+				return "testExamples", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Examples, 1)
@@ -150,9 +159,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "examples ext spec",
 			create: func() (string, any) {
-				o := spec.NewExampleSpec()
-				o.Spec.Spec.Description = "test"
-				return "testExamples", o.Spec
+				o := &spec.Example{
+					Description: "test",
+				}
+				return "testExamples", spec.NewExtendable[spec.Example](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Examples, 1)
@@ -165,9 +175,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "examples ref or spec",
 			create: func() (string, any) {
-				o := spec.NewExampleSpec()
-				o.Spec.Spec.Description = "test"
-				return "testExamples", o
+				o := &spec.Example{
+					Description: "test",
+				}
+				return "testExamples", spec.NewRefOrExtSpec[spec.Example](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Examples, 1)
@@ -178,41 +189,44 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 			},
 		},
 		{
-			name: "request bodies spec",
+			name: "request body spec",
 			create: func() (string, any) {
-				o := spec.NewRequestBodySpec()
-				o.Spec.Spec.Description = "test"
-				return "testRequestBodies", o.Spec.Spec
-			},
-			check: func(tb testing.TB, c *spec.Components) {
-				require.Len(tb, c.RequestBodies, 1)
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"])
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec)
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec.Spec)
-				require.Equal(tb, "test", c.RequestBodies["testRequestBodies"].Spec.Spec.Description)
-			},
-		},
-		{
-			name: "request bodies ext spec",
-			create: func() (string, any) {
-				o := spec.NewRequestBodySpec()
-				o.Spec.Spec.Description = "test"
-				return "testRequestBodies", o.Spec
-			},
-			check: func(tb testing.TB, c *spec.Components) {
-				require.Len(tb, c.RequestBodies, 1)
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"])
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec)
-				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec.Spec)
-				require.Equal(tb, "test", c.RequestBodies["testRequestBodies"].Spec.Spec.Description)
-			},
-		},
-		{
-			name: "request bodies ref or spec",
-			create: func() (string, any) {
-				o := spec.NewRequestBodySpec()
-				o.Spec.Spec.Description = "test"
+				o := &spec.RequestBody{
+					Description: "test",
+				}
 				return "testRequestBodies", o
+			},
+			check: func(tb testing.TB, c *spec.Components) {
+				require.Len(tb, c.RequestBodies, 1)
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"])
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec)
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec.Spec)
+				require.Equal(tb, "test", c.RequestBodies["testRequestBodies"].Spec.Spec.Description)
+			},
+		},
+		{
+			name: "request body ext spec",
+			create: func() (string, any) {
+				o := &spec.RequestBody{
+					Description: "test",
+				}
+				return "testRequestBodies", spec.NewExtendable[spec.RequestBody](o)
+			},
+			check: func(tb testing.TB, c *spec.Components) {
+				require.Len(tb, c.RequestBodies, 1)
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"])
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec)
+				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec.Spec)
+				require.Equal(tb, "test", c.RequestBodies["testRequestBodies"].Spec.Spec.Description)
+			},
+		},
+		{
+			name: "request body ref or spec",
+			create: func() (string, any) {
+				o := &spec.RequestBody{
+					Description: "test",
+				}
+				return "testRequestBodies", spec.NewRefOrExtSpec[spec.RequestBody](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.RequestBodies, 1)
@@ -225,9 +239,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "headers spec",
 			create: func() (string, any) {
-				o := spec.NewHeaderSpec()
-				o.Spec.Spec.Description = "test"
-				return "testHeader", o.Spec.Spec
+				o := &spec.Header{
+					Description: "test",
+				}
+				return "testHeader", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Headers, 1)
@@ -240,9 +255,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "headers ext spec",
 			create: func() (string, any) {
-				o := spec.NewHeaderSpec()
-				o.Spec.Spec.Description = "test"
-				return "testHeader", o.Spec
+				o := &spec.Header{
+					Description: "test",
+				}
+				return "testHeader", spec.NewExtendable[spec.Header](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Headers, 1)
@@ -255,9 +271,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "headers ref or spec",
 			create: func() (string, any) {
-				o := spec.NewHeaderSpec()
-				o.Spec.Spec.Description = "test"
-				return "testHeader", o
+				o := &spec.Header{
+					Description: "test",
+				}
+				return "testHeader", spec.NewRefOrExtSpec[spec.Header](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Headers, 1)
@@ -270,9 +287,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "security schemes spec",
 			create: func() (string, any) {
-				o := spec.NewSecuritySchemeSpec()
-				o.Spec.Spec.Description = "test"
-				return "testSecurityScheme", o.Spec.Spec
+				o := &spec.SecurityScheme{
+					Description: "test",
+				}
+				return "testSecurityScheme", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.SecuritySchemes, 1)
@@ -285,9 +303,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "security schemes ext spec",
 			create: func() (string, any) {
-				o := spec.NewSecuritySchemeSpec()
-				o.Spec.Spec.Description = "test"
-				return "testSecurityScheme", o.Spec
+				o := &spec.SecurityScheme{
+					Description: "test",
+				}
+				return "testSecurityScheme", spec.NewExtendable[spec.SecurityScheme](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.SecuritySchemes, 1)
@@ -300,9 +319,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "security schemes ref or spec",
 			create: func() (string, any) {
-				o := spec.NewSecuritySchemeSpec()
-				o.Spec.Spec.Description = "test"
-				return "testSecurityScheme", o
+				o := &spec.SecurityScheme{
+					Description: "test",
+				}
+				return "testSecurityScheme", spec.NewRefOrExtSpec[spec.SecurityScheme](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.SecuritySchemes, 1)
@@ -315,9 +335,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "link spec",
 			create: func() (string, any) {
-				o := spec.NewLinkSpec()
-				o.Spec.Spec.Description = "test"
-				return "testLink", o.Spec.Spec
+				o := &spec.Link{
+					Description: "test",
+				}
+				return "testLink", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Links, 1)
@@ -330,9 +351,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "link ext spec",
 			create: func() (string, any) {
-				o := spec.NewLinkSpec()
-				o.Spec.Spec.Description = "test"
-				return "testLink", o.Spec
+				o := &spec.Link{
+					Description: "test",
+				}
+				return "testLink", spec.NewExtendable[spec.Link](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Links, 1)
@@ -345,9 +367,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "link ref or spec",
 			create: func() (string, any) {
-				o := spec.NewLinkSpec()
-				o.Spec.Spec.Description = "test"
-				return "testLink", o
+				o := &spec.Link{
+					Description: "test",
+				}
+				return "testLink", spec.NewRefOrExtSpec[spec.Link](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Links, 1)
@@ -360,33 +383,14 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "callback spec",
 			create: func() (string, any) {
-				p := spec.NewPathItemSpec()
-				p.Spec.Spec.Description = "test"
-				o := spec.NewCallbackSpec()
-				o.Spec.Spec.WithPathItem("testPath", p)
-				return "testCallback", o.Spec.Spec
-			},
-			check: func(tb testing.TB, c *spec.Components) {
-				require.Len(tb, c.Callbacks, 1)
-				require.NotNil(tb, c.Callbacks["testCallback"])
-				require.NotNil(tb, c.Callbacks["testCallback"].Spec)
-				require.NotNil(tb, c.Callbacks["testCallback"].Spec.Spec)
-				paths := c.Callbacks["testCallback"].Spec.Spec.Callback
-				require.Len(tb, paths, 1)
-				require.NotNil(tb, paths["testPath"])
-				require.NotNil(tb, paths["testPath"].Spec)
-				require.NotNil(tb, paths["testPath"].Spec.Spec)
-				require.Equal(tb, "test", paths["testPath"].Spec.Spec.Description)
-			},
-		},
-		{
-			name: "callback spec",
-			create: func() (string, any) {
-				p := spec.NewPathItemSpec()
-				p.Spec.Spec.Description = "test"
-				o := spec.NewCallbackSpec()
-				o.Spec.Spec.WithPathItem("testPath", p)
-				return "testCallback", o.Spec.Spec
+				o := &spec.Callback{
+					Callback: map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]{
+						"testPath": spec.NewRefOrExtSpec[spec.PathItem](&spec.PathItem{
+							Description: "test",
+						}),
+					},
+				}
+				return "testCallback", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Callbacks, 1)
@@ -404,11 +408,14 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "callback ext spec",
 			create: func() (string, any) {
-				p := spec.NewPathItemSpec()
-				p.Spec.Spec.Description = "test"
-				o := spec.NewCallbackSpec()
-				o.Spec.Spec.WithPathItem("testPath", p)
-				return "testCallback", o.Spec
+				o := &spec.Callback{
+					Callback: map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]{
+						"testPath": spec.NewRefOrExtSpec[spec.PathItem](&spec.PathItem{
+							Description: "test",
+						}),
+					},
+				}
+				return "testCallback", spec.NewExtendable[spec.Callback](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Callbacks, 1)
@@ -426,11 +433,14 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "callback ref or spec",
 			create: func() (string, any) {
-				p := spec.NewPathItemSpec()
-				p.Spec.Spec.Description = "test"
-				o := spec.NewCallbackSpec()
-				o.Spec.Spec.WithPathItem("testPath", p)
-				return "testCallback", o
+				o := &spec.Callback{
+					Callback: map[string]*spec.RefOrSpec[spec.Extendable[spec.PathItem]]{
+						"testPath": spec.NewRefOrExtSpec[spec.PathItem](&spec.PathItem{
+							Description: "test",
+						}),
+					},
+				}
+				return "testCallback", spec.NewRefOrExtSpec[spec.Callback](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Callbacks, 1)
@@ -448,9 +458,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "path item spec",
 			create: func() (string, any) {
-				o := spec.NewPathItemSpec()
-				o.Spec.Spec.Description = "test"
-				return "testPathItem", o.Spec.Spec
+				o := &spec.PathItem{
+					Description: "test",
+				}
+				return "testPathItem", o
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Paths, 1)
@@ -463,9 +474,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "path item ext spec",
 			create: func() (string, any) {
-				o := spec.NewPathItemSpec()
-				o.Spec.Spec.Description = "test"
-				return "testPathItem", o.Spec
+				o := &spec.PathItem{
+					Description: "test",
+				}
+				return "testPathItem", spec.NewExtendable[spec.PathItem](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Paths, 1)
@@ -478,9 +490,10 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		{
 			name: "path item ref or spec",
 			create: func() (string, any) {
-				o := spec.NewPathItemSpec()
-				o.Spec.Spec.Description = "test"
-				return "testPathItem", o
+				o := &spec.PathItem{
+					Description: "test",
+				}
+				return "testPathItem", spec.NewRefOrExtSpec[spec.PathItem](o)
 			},
 			check: func(tb testing.TB, c *spec.Components) {
 				require.Len(tb, c.Paths, 1)
@@ -492,17 +505,14 @@ func TestComponents_WithRefOrSpec(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			c := spec.NewComponents().Spec
 			name, obj := tt.create()
-			c.WithRefOrSpec(name, obj)
-			tt.check(t, c)
+			tt.check(t, (&spec.Components{}).WithRefOrSpec(name, obj))
 		})
 	}
 
 	t.Run("panic", func(t *testing.T) {
-		c := spec.NewComponents().Spec
 		require.Panics(t, func() {
-			c.WithRefOrSpec("panic", 42)
+			(&spec.Components{}).WithRefOrSpec("panic", 42)
 		})
 	})
 }

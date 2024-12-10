@@ -69,16 +69,6 @@ type PathItem struct {
 	Parameters []*RefOrSpec[Extendable[Parameter]] `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 }
 
-// NewPathItemSpec creates PathItem object.
-func NewPathItemSpec() *RefOrSpec[Extendable[PathItem]] {
-	return NewRefOrSpec[Extendable[PathItem]](nil, NewExtendable(&PathItem{}))
-}
-
-// NewPathItemRef creates Ref object.
-func NewPathItemRef(ref *Ref) *RefOrSpec[Extendable[PathItem]] {
-	return NewRefOrSpec[Extendable[PathItem]](ref, nil)
-}
-
 func (o *PathItem) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Parameters) > 0 {

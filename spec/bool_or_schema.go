@@ -15,14 +15,6 @@ type BoolOrSchema struct {
 	Allowed bool
 }
 
-// NewBoolOrSchema creates BoolOrSchema object.
-func NewBoolOrSchema(allowed bool, spec *RefOrSpec[Schema]) *BoolOrSchema {
-	return &BoolOrSchema{
-		Allowed: allowed,
-		Schema:  spec,
-	}
-}
-
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (o *BoolOrSchema) UnmarshalJSON(data []byte) error {
 	if json.Unmarshal(data, &o.Allowed) == nil {

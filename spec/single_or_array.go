@@ -10,9 +10,9 @@ import (
 type SingleOrArray[T any] []T
 
 // NewSingleOrArray creates SingleOrArray object.
-func NewSingleOrArray[T any](v ...T) SingleOrArray[T] {
+func NewSingleOrArray[T any](v ...T) *SingleOrArray[T] {
 	a := append(SingleOrArray[T]{}, v...)
-	return a
+	return &a
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.

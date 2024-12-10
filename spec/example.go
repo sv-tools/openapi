@@ -47,16 +47,6 @@ type Example struct {
 	ExternalValue string `json:"externalValue,omitempty" yaml:"externalValue,omitempty"`
 }
 
-// NewExampleSpec creates Example object.
-func NewExampleSpec() *RefOrSpec[Extendable[Example]] {
-	return NewRefOrSpec[Extendable[Example]](nil, NewExtendable(&Example{}))
-}
-
-// NewExampleRef creates Ref object.
-func NewExampleRef(ref *Ref) *RefOrSpec[Extendable[Example]] {
-	return NewRefOrSpec[Extendable[Example]](ref, nil)
-}
-
 func (o *Example) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Value != nil && o.ExternalValue != "" {

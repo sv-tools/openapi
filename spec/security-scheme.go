@@ -74,16 +74,6 @@ type SecurityScheme struct {
 	OpenIDConnectURL string `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
 }
 
-// NewSecuritySchemeSpec creates SecurityScheme object.
-func NewSecuritySchemeSpec() *RefOrSpec[Extendable[SecurityScheme]] {
-	return NewRefOrSpec[Extendable[SecurityScheme]](nil, NewExtendable(&SecurityScheme{}))
-}
-
-// NewSecuritySchemeRef creates a Ref object.
-func NewSecuritySchemeRef(ref *Ref) *RefOrSpec[Extendable[SecurityScheme]] {
-	return NewRefOrSpec[Extendable[SecurityScheme]](ref, nil)
-}
-
 func (o *SecurityScheme) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Type == "" {

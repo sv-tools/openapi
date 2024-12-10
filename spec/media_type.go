@@ -46,11 +46,6 @@ type MediaType struct {
 	Encoding map[string]*Extendable[Encoding] `json:"encoding,omitempty" yaml:"encoding,omitempty"`
 }
 
-// NewMediaType creates MediaType object.
-func NewMediaType() *Extendable[MediaType] {
-	return NewExtendable(&MediaType{})
-}
-
 func (o *MediaType) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil {

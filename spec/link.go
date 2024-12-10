@@ -79,16 +79,6 @@ type Link struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-// NewLinkSpec creates Link object.
-func NewLinkSpec() *RefOrSpec[Extendable[Link]] {
-	return NewRefOrSpec[Extendable[Link]](nil, NewExtendable(&Link{}))
-}
-
-// NewLinkRef creates Ref object.
-func NewLinkRef(ref *Ref) *RefOrSpec[Extendable[Link]] {
-	return NewRefOrSpec[Extendable[Link]](ref, nil)
-}
-
 func (o *Link) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.OperationRef != "" && o.OperationID != "" {

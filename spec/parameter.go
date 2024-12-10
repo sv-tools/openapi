@@ -177,16 +177,6 @@ type Parameter struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-// NewParameterSpec creates Parameter object.
-func NewParameterSpec() *RefOrSpec[Extendable[Parameter]] {
-	return NewRefOrSpec[Extendable[Parameter]](nil, NewExtendable(&Parameter{}))
-}
-
-// NewParameterRef creates Ref object.
-func NewParameterRef(ref *Ref) *RefOrSpec[Extendable[Parameter]] {
-	return NewRefOrSpec[Extendable[Parameter]](ref, nil)
-}
-
 func (o *Parameter) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {

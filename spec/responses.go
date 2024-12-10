@@ -47,11 +47,6 @@ type Responses struct {
 	Response map[string]*RefOrSpec[Extendable[Response]] `json:"-" yaml:"-"`
 }
 
-// NewResponses creates Paths object.
-func NewResponses() *Extendable[Responses] {
-	return NewExtendable(&Responses{})
-}
-
 // MarshalJSON implements json.Marshaler interface.
 func (o *Responses) MarshalJSON() ([]byte, error) {
 	var raw map[string]json.RawMessage

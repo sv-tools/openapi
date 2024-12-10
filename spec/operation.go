@@ -102,11 +102,6 @@ type Operation struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-// NewOperation creates Operation object.
-func NewOperation() *Extendable[Operation] {
-	return NewExtendable(&Operation{})
-}
-
 func (o *Operation) validateSpec(path string, opts *validationOptions) []*validationError {
 	var errs []*validationError
 	if o.OperationID != "" {
