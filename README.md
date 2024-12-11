@@ -17,13 +17,11 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 
 * v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See `v0` branch.
 * v1 - The current version with the in-place validation of the specification. 
-  The minimal version of Go is `v1.21` and the `github.com/santhosh-tekuri/jsonschema/v5` package is not used anymore. 
-  See `main` branch.
+     - The minimal version of Go is `v1.21`.
+     - Everything has been moved to root folder.
 
 ## Features
 
-* The `spec` folder contains full implementation of the v3.1 Specification using generics and `errors.Join` function, so the minimum supported version of Go is `v1.20`.
-* The `spec.ValidateSpec` function validates the specification without transforming it to `map[string]any`.
 * The official v3.0 and v3.1 [examples](https://github.com/OAI/OpenAPI-Specification/tree/main/examples) are tested.
   In most cases v3.0 specification can be converted to v3.1 by changing the version's parameter only.
   ```diff
