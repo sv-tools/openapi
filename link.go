@@ -79,7 +79,7 @@ type Link struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Link) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Link) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.OperationRef != "" && o.OperationID != "" {
 		errs = append(errs, newValidationError(joinDot(path, "operationRef&operationId"), ErrMutuallyExclusive))

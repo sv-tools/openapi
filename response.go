@@ -31,7 +31,7 @@ type Response struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Response) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Response) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	errs := make([]*validationError, 0)
 	if o.Description == "" {
 		errs = append(errs, newValidationError(joinDot(path, "description"), ErrRequired))

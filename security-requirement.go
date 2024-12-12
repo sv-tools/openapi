@@ -14,7 +14,7 @@ package openapi
 //	api_key: []
 type SecurityRequirement map[string][]string
 
-func (o *SecurityRequirement) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *SecurityRequirement) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	for k := range *o {
 		opts.visited["#/components/securitySchemes/"+k] = true
 	}

@@ -20,7 +20,7 @@ type Tag struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Tag) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Tag) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {
 		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))

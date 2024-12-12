@@ -30,7 +30,7 @@ type Server struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Server) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Server) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {
 		errs = append(errs, newValidationError(joinDot(path, "url"), ErrRequired))

@@ -60,7 +60,7 @@ func (o *Paths) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &o.Paths)
 }
 
-func (o *Paths) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Paths) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	for k, v := range o.Paths {
 		if !strings.HasPrefix(k, "/") {

@@ -32,7 +32,7 @@ type OAuthFlows struct {
 	AuthorizationCode *Extendable[OAuthFlow] `json:"authorizationCode,omitempty" yaml:"authorizationCode,omitempty"`
 }
 
-func (o *OAuthFlows) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *OAuthFlows) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Implicit != nil {
 		errs = append(errs, o.Implicit.validateSpec(joinDot(path, "implicit"), opts)...)
