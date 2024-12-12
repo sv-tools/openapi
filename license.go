@@ -21,7 +21,7 @@ type License struct {
 	URL string `json:"url,omitempty" yaml:"url,omitempty"`
 }
 
-func (o *License) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *License) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {
 		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))

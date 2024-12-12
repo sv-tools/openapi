@@ -59,7 +59,7 @@ type OpenAPI struct {
 	Servers []*Extendable[Server] `json:"servers,omitempty" yaml:"servers,omitempty"`
 }
 
-func checkUnusedComponent[T any](name string, m map[string]T, opts *validationOptions) []*validationError {
+func checkUnusedComponent[T any](name string, m map[string]T, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	for k := range m {
 		if !opts.visited[fmt.Sprintf("#/components/%s/%s", name, k)] {
@@ -69,7 +69,7 @@ func checkUnusedComponent[T any](name string, m map[string]T, opts *validationOp
 	return errs
 }
 
-func (o *OpenAPI) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *OpenAPI) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.OpenAPI == "" {
 		errs = append(errs, newValidationError(joinDot(path, "openapi"), ErrRequired))

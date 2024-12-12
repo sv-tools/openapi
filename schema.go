@@ -454,7 +454,7 @@ func (o *Schema) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *Schema) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 
 	if o.Discriminator != nil {

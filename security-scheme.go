@@ -74,7 +74,7 @@ type SecurityScheme struct {
 	OpenIDConnectURL string `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
 }
 
-func (o *SecurityScheme) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *SecurityScheme) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Type == "" {
 		errs = append(errs, newValidationError(joinDot(path, "type"), ErrRequired))

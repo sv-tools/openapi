@@ -190,7 +190,7 @@ func (o *RefOrSpec[T]) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *RefOrSpec[T]) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *RefOrSpec[T]) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Spec != nil {
 		if spec, ok := any(o.Spec).(validatable); ok {

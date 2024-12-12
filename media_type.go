@@ -46,7 +46,7 @@ type MediaType struct {
 	Encoding map[string]*Extendable[Encoding] `json:"encoding,omitempty" yaml:"encoding,omitempty"`
 }
 
-func (o *MediaType) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *MediaType) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil {
 		errs = append(errs, o.Schema.validateSpec(joinDot(path, "schema"), opts)...)

@@ -29,7 +29,7 @@ type Discriminator struct {
 	PropertyName string `json:"propertyName" yaml:"propertyName"`
 }
 
-func (o *Discriminator) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Discriminator) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.PropertyName == "" {
 		errs = append(errs, newValidationError(joinDot(path, "propertyName"), ErrRequired))

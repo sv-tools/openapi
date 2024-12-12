@@ -1,17 +1,21 @@
 package openapi
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/mail"
 	"net/url"
 	"strings"
+	"sync"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // Validatable is an interface for validating the specification.
 type validatable interface {
 	// an unexported method to be used by ValidateSpec function
-	validateSpec(path string, opts *validationOptions) []*validationError
+	validateSpec(path string, opts *specValidationOptions) []*validationError
 }
 
 type visitedObjects map[string]bool
@@ -24,7 +28,7 @@ func (o visitedObjects) String() string {
 	return strings.Join(keys, ", ")
 }
 
-type validationOptions struct {
+type specValidationOptions struct {
 	spec                            *Extendable[OpenAPI]
 	visited                         visitedObjects
 	linkToOperationID               map[string]string
@@ -37,8 +41,8 @@ type validationOptions struct {
 	doNotValidateDefaultValues      bool
 }
 
-func newValidationOptions(spec *Extendable[OpenAPI], opts ...ValidationOption) *validationOptions {
-	options := &validationOptions{
+func newSpecValidationOptions(spec *Extendable[OpenAPI], opts ...SpecValidationOption) *specValidationOptions {
+	options := &specValidationOptions{
 		spec:              spec,
 		visited:           make(visitedObjects),
 		linkToOperationID: make(map[string]string),
@@ -50,48 +54,48 @@ func newValidationOptions(spec *Extendable[OpenAPI], opts ...ValidationOption) *
 	return options
 }
 
-// ValidationOption is a type for validation options.
-type ValidationOption func(*validationOptions)
+// SpecValidationOption is a type for validation options.
+type SpecValidationOption func(*specValidationOptions)
 
 // AllowExtensionNameWithoutPrefix is a validation option to allow extension name without `x-` prefix.
-func AllowExtensionNameWithoutPrefix() ValidationOption {
-	return func(v *validationOptions) {
+func AllowExtensionNameWithoutPrefix() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.allowExtensionNameWithoutPrefix = true
 	}
 }
 
-func AllowRequestBodyForGet() ValidationOption {
-	return func(v *validationOptions) {
+func AllowRequestBodyForGet() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.allowRequestBodyForGet = true
 	}
 }
 
-func AllowRequestBodyForHead() ValidationOption {
-	return func(v *validationOptions) {
+func AllowRequestBodyForHead() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.allowRequestBodyForHead = true
 	}
 }
 
-func AllowRequestBodyForDelete() ValidationOption {
-	return func(v *validationOptions) {
+func AllowRequestBodyForDelete() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.allowRequestBodyForDelete = true
 	}
 }
 
-func AllowUndefinedTagsInOperation() ValidationOption {
-	return func(v *validationOptions) {
+func AllowUndefinedTagsInOperation() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.allowUndefinedTagsInOperation = true
 	}
 }
 
-func DoNotValidateExamples() ValidationOption {
-	return func(v *validationOptions) {
+func DoNotValidateExamples() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.doNotValidateExamples = true
 	}
 }
 
-func DoNotValidateDefaultValues() ValidationOption {
-	return func(v *validationOptions) {
+func DoNotValidateDefaultValues() SpecValidationOption {
+	return func(v *specValidationOptions) {
 		v.doNotValidateDefaultValues = true
 	}
 }
@@ -182,9 +186,8 @@ func ValidateData(value any, schema *Schema, spec *Extendable[OpenAPI]) error {
 	return errors.New("data validation not implemented")
 }
 
-// ValidateSpec validates only Extendable[OpenAPI] object.
-func ValidateSpec(spec *Extendable[OpenAPI], opts ...ValidationOption) error {
-	options := newValidationOptions(spec, opts...)
+func ValidateSpec(spec *Extendable[OpenAPI], opts ...SpecValidationOption) error {
+	options := newSpecValidationOptions(spec, opts...)
 
 	if errs := spec.validateSpec("", options); len(errs) > 0 {
 		joinErrors := make([]error, len(errs))
@@ -195,4 +198,65 @@ func ValidateSpec(spec *Extendable[OpenAPI], opts ...ValidationOption) error {
 	}
 
 	return nil
+}
+
+// CompilerOption is a type to modify the jsonschema.Compiler.
+type CompilerOption func(*jsonschema.Compiler)
+
+type DataValidator struct {
+	compiler *jsonschema.Compiler
+	schemas  sync.Map
+	mu       sync.Mutex
+}
+
+const specPrefix = "http://spec"
+
+func NewDataValidator(spec *Extendable[OpenAPI], opts ...CompilerOption) (*DataValidator, error) {
+	data, err := spec.MarshalJSON()
+	if err != nil {
+		return nil, fmt.Errorf("marshaling spec failed: %w", err)
+	}
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	c := jsonschema.NewCompiler()
+	c.DefaultDraft(jsonschema.Draft2020)
+	for _, opt := range opts {
+		opt(c)
+	}
+	if err := c.AddResource(specPrefix, doc); err != nil {
+		return nil, fmt.Errorf("adding spec to compiler failed: %w", err)
+	}
+	return &DataValidator{
+		compiler: c,
+		schemas:  sync.Map{},
+	}, nil
+}
+
+func (v *DataValidator) Validate(loc string, value any) error {
+	var schema *jsonschema.Schema
+	if s, ok := v.schemas.Load(loc); ok {
+		schema = s.(*jsonschema.Schema)
+	} else {
+		var err error
+		schema, err = func() (*jsonschema.Schema, error) {
+			v.mu.Lock()
+			defer v.mu.Unlock()
+			if s, ok := v.schemas.Load(loc); ok {
+				return s.(*jsonschema.Schema), nil
+			} else {
+				if !strings.HasPrefix(loc, "#") {
+					loc = "#" + loc
+				}
+				schema, err := v.compiler.Compile(specPrefix + loc)
+				if err != nil {
+					return nil, fmt.Errorf("compiling spec for given location %q failed: %w", loc, err)
+				}
+				v.schemas.Store(loc, schema)
+				return schema, nil
+			}
+		}()
+		if err != nil {
+			return err
+		}
+	}
+	return schema.Validate(value)
 }
