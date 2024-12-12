@@ -38,7 +38,7 @@ type Header struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-func (o *Header) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Header) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
 		errs = append(errs, newValidationError(joinDot(path, "schema&content"), ErrMutuallyExclusive))

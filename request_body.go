@@ -47,7 +47,7 @@ type RequestBody struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-func (o *RequestBody) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *RequestBody) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Content) == 0 {
 		errs = append(errs, newValidationError(joinDot(path, "content"), ErrRequired))

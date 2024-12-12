@@ -102,7 +102,7 @@ type Operation struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-func (o *Operation) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Operation) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.OperationID != "" {
 		id := joinDot("operations", o.OperationID)

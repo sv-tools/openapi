@@ -69,7 +69,7 @@ type PathItem struct {
 	Parameters []*RefOrSpec[Extendable[Parameter]] `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 }
 
-func (o *PathItem) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *PathItem) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Parameters) > 0 {
 		for i, v := range o.Parameters {

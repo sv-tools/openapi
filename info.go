@@ -40,7 +40,7 @@ type Info struct {
 	Version string `json:"version" yaml:"version"`
 }
 
-func (o *Info) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Info) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Title == "" {
 		errs = append(errs, newValidationError(joinDot(path, "title"), ErrRequired))

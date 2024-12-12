@@ -177,7 +177,7 @@ type Parameter struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-func (o *Parameter) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Parameter) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
 		errs = append(errs, newValidationError(joinDot(path, "schema&content"), ErrMutuallyExclusive))

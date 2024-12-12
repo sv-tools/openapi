@@ -74,7 +74,7 @@ type Encoding struct {
 	AllowReserved bool `json:"allowReserved,omitempty" yaml:"allowReserved,omitempty"`
 }
 
-func (o *Encoding) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Encoding) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Headers) > 0 {
 		for k, v := range o.Headers {

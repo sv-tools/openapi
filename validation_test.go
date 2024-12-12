@@ -48,7 +48,7 @@ func TestManuallyCreatedSpec(t *testing.T) {
 	for _, tt := range []struct {
 		name string
 		spec *openapi.Extendable[openapi.OpenAPI]
-		opts []openapi.ValidationOption
+		opts []openapi.SpecValidationOption
 		err  string
 	}{
 		{
@@ -148,6 +148,71 @@ func TestManuallyCreatedSpec(t *testing.T) {
 			} else {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tt.err)
+			}
+		})
+	}
+}
+
+func TestValidatePayload(t *testing.T) {
+	data, err := os.ReadFile(path.Join("testdata", "petstore.json"))
+	require.NoError(t, err)
+	var spec openapi.Extendable[openapi.OpenAPI]
+	require.NoError(t, json.Unmarshal(data, &spec))
+	validator, err := openapi.NewDataValidator(&spec)
+	require.NoError(t, err)
+
+	for _, tt := range []struct {
+		name          string
+		ref           string
+		data          string
+		compileError  string
+		validateError string
+	}{
+		{
+			name: "by component",
+			ref:  "#/components/schemas/Pet",
+			data: `{"id": 123, "name": "foo", "tag": "bar"}`,
+		},
+		{
+			name:          "by component failed",
+			ref:           "/components/schemas/Pet",
+			data:          `{"id": "123", "name": "foo", "tag": "bar"}`,
+			validateError: "got string, want integer",
+		},
+		{
+			name: "by rout",
+			ref:  "/paths/~1pets~1{petId}/get/responses/200/content/application~1json/schema",
+			data: `{"id": 123, "name": "foo", "tag": "bar"}`,
+		},
+		{
+			name:          "by route failed",
+			ref:           "/paths/~1pets~1{petId}/get/responses/200/content/application~1json/schema",
+			data:          `{"id": "123", "name": "foo", "tag": "bar"}`,
+			validateError: "got string, want integer",
+		},
+		{
+			name:         "component not found",
+			ref:          "/components/schemas/Fake",
+			data:         `{}`,
+			compileError: "not found",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var data any
+			require.NoError(t, json.Unmarshal([]byte(tt.data), &data))
+			err := validator.Validate(tt.ref, data)
+
+			if tt.compileError != "" {
+				require.ErrorContains(t, err, tt.compileError)
+				return
+			}
+
+			if tt.validateError != "" {
+				require.ErrorContains(t, err, tt.validateError)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}

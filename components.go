@@ -254,7 +254,7 @@ func (o *Components) WithRefOrSpec(name string, v any) *Components {
 	return o
 }
 
-func (o *Components) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Components) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schemas != nil {
 		for k, v := range o.Schemas {

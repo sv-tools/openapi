@@ -47,7 +47,7 @@ type Example struct {
 	ExternalValue string `json:"externalValue,omitempty" yaml:"externalValue,omitempty"`
 }
 
-func (o *Example) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Example) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Value != nil && o.ExternalValue != "" {
 		errs = append(errs, newValidationError(joinDot(path, "value&externalValue"), ErrMutuallyExclusive))

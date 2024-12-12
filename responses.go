@@ -127,7 +127,7 @@ func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
 	return yaml.Unmarshal(data, &o.Response)
 }
 
-func (o *Responses) validateSpec(path string, opts *validationOptions) []*validationError {
+func (o *Responses) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Default != nil {
 		errs = append(errs, o.Default.validateSpec(joinDot(path, "default"), opts)...)
