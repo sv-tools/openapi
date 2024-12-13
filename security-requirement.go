@@ -16,7 +16,7 @@ type SecurityRequirement map[string][]string
 
 func (o *SecurityRequirement) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	for k := range *o {
-		opts.visited["#/components/securitySchemes/"+k] = true
+		opts.visited[joinLoc("#", "components", "securitySchemes", k)] = true
 	}
 	return nil // nothing to validate
 }

@@ -52,10 +52,10 @@ func (o *Callback) UnmarshalYAML(node *yaml.Node) error {
 	return node.Decode(&o.Callback)
 }
 
-func (o *Callback) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Callback) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	for k, v := range o.Callback {
-		errs = append(errs, v.validateSpec(joinArrayItem(path, k), opts)...)
+		errs = append(errs, v.validateSpec(joinLoc(location, k), opts)...)
 	}
 	return nil
 }

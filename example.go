@@ -47,13 +47,13 @@ type Example struct {
 	ExternalValue string `json:"externalValue,omitempty" yaml:"externalValue,omitempty"`
 }
 
-func (o *Example) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Example) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Value != nil && o.ExternalValue != "" {
-		errs = append(errs, newValidationError(joinDot(path, "value&externalValue"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "value&externalValue"), ErrMutuallyExclusive))
 	}
 	if err := checkURL(o.ExternalValue); err != nil {
-		errs = append(errs, newValidationError(joinDot(path, "externalValue"), err))
+		errs = append(errs, newValidationError(joinLoc(location, "externalValue"), err))
 	}
 	// no validation of Value field, because it needs a schema and
 	// should be validated in the object that defines the example and a schema

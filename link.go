@@ -79,19 +79,19 @@ type Link struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Link) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Link) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.OperationRef != "" && o.OperationID != "" {
-		errs = append(errs, newValidationError(joinDot(path, "operationRef&operationId"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "operationRef&operationId"), ErrMutuallyExclusive))
 	}
 	if o.OperationID != "" {
-		id := joinDot("operations", o.OperationID)
+		id := joinLoc("operations", o.OperationID)
 		if !opts.visited[id] {
-			opts.linkToOperationID[joinDot(path, "operationId")] = o.OperationID
+			opts.linkToOperationID[joinLoc(location, "operationId")] = o.OperationID
 		}
 	}
 	if o.Server != nil {
-		errs = append(errs, o.Server.validateSpec(joinDot(path, "server"), opts)...)
+		errs = append(errs, o.Server.validateSpec(joinLoc(location, "server"), opts)...)
 	}
 	return errs
 }

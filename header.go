@@ -38,28 +38,28 @@ type Header struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-func (o *Header) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Header) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
-		errs = append(errs, newValidationError(joinDot(path, "schema&content"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "schema&content"), ErrMutuallyExclusive))
 	}
 
 	if l := len(o.Content); l > 0 {
 		if l != 1 {
-			errs = append(errs, newValidationError(joinDot(path, "content"), "must be only one item, but got '%d'", l))
+			errs = append(errs, newValidationError(joinLoc(location, "content"), "must be only one item, but got '%d'", l))
 		}
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "content"), k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
 		}
 	}
 	if o.Schema != nil {
-		errs = append(errs, o.Schema.validateSpec(joinDot(path, "schema"), opts)...)
+		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), opts)...)
 	}
 
 	switch o.Style {
 	case "", StyleSimple:
 	default:
-		errs = append(errs, newValidationError(joinDot(path, "style"), "must be one of [%s], but got '%s'", StyleSimple, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected one of [%s], but got '%s'", StyleSimple, o.Style))
 	}
 
 	return errs

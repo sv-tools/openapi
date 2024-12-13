@@ -190,13 +190,13 @@ func (o *RefOrSpec[T]) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *RefOrSpec[T]) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *RefOrSpec[T]) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Spec != nil {
 		if spec, ok := any(o.Spec).(validatable); ok {
-			errs = append(errs, spec.validateSpec(path, opts)...)
+			errs = append(errs, spec.validateSpec(location, opts)...)
 		} else {
-			errs = append(errs, newValidationError(path, fmt.Errorf("unsupported spec type: %T", o.Spec)))
+			errs = append(errs, newValidationError(location, fmt.Errorf("unsupported spec type: %T", o.Spec)))
 		}
 	} else {
 		// do not validate already visited refs
@@ -204,11 +204,11 @@ func (o *RefOrSpec[T]) validateSpec(path string, opts *specValidationOptions) []
 			return errs
 		}
 		opts.visited[o.Ref.Ref] = true
-		spec, err := o.GetSpec(opts.spec.Spec.Components)
+		spec, err := o.GetSpec(opts.validator.spec.Spec.Components)
 		if err != nil {
-			errs = append(errs, newValidationError(path, err))
+			errs = append(errs, newValidationError(location, err))
 		} else if spec != nil {
-			errs = append(errs, o.validateSpec(path, opts)...)
+			errs = append(errs, o.validateSpec(location, opts)...)
 		}
 	}
 	return errs

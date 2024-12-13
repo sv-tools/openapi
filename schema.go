@@ -454,53 +454,53 @@ func (o *Schema) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 
 	if o.Discriminator != nil {
-		errs = append(errs, o.Discriminator.validateSpec(joinDot(path, "discriminator"), opts)...)
+		errs = append(errs, o.Discriminator.validateSpec(joinLoc(location, "discriminator"), opts)...)
 	}
 	if o.XML != nil {
-		errs = append(errs, o.XML.validateSpec(joinDot(path, "xml"), opts)...)
+		errs = append(errs, o.XML.validateSpec(joinLoc(location, "xml"), opts)...)
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.ExternalDocs.validateSpec(joinDot(path, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), opts)...)
 	}
 	if o.Example != nil {
 		if !opts.doNotValidateExamples {
-			if err := ValidateData(o.Example, o, opts.spec); err != nil {
-				errs = append(errs, newValidationError(joinDot(path, "example"), err))
+			if e := opts.validator.ValidateDataAsJSON(location, o.Example); e != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "example"), e))
 			}
 		}
 	}
 
 	// JsonSchemaComposition
 	if o.Not != nil {
-		errs = append(errs, o.Not.validateSpec(joinDot(path, "not"), opts)...)
+		errs = append(errs, o.Not.validateSpec(joinLoc(location, "not"), opts)...)
 	}
 	if o.AllOf != nil {
 		for i, v := range o.AllOf {
-			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "allOf"), i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "allOf", i), opts)...)
 		}
 	}
 	if o.AnyOf != nil {
 		for i, v := range o.AnyOf {
-			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "anyOf"), i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "anyOf", i), opts)...)
 		}
 	}
 	if o.OneOf != nil {
 		for i, v := range o.OneOf {
-			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "oneOf"), i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "oneOf", i), opts)...)
 		}
 	}
 
 	// JsonSchemaCore
 	if o.Schema != "" && o.Schema != Draft202012 {
-		errs = append(errs, newValidationError(joinDot(path, "schema"), "must be '%s', but got '%s'", Draft202012, o.Schema))
+		errs = append(errs, newValidationError(joinLoc(location, "schema"), "must be '%s', but got '%s'", Draft202012, o.Schema))
 	}
 	if len(o.Defs) > 0 {
 		for k, v := range o.Defs {
-			errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "defs"), k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "defs", k), opts)...)
 		}
 	}
 	if o.Type != nil {
@@ -510,14 +510,14 @@ func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*valid
 			switch v := (*o.Type)[0]; v {
 			case StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType:
 			default:
-				errs = append(errs, newValidationError(joinDot(path, "type"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
+				errs = append(errs, newValidationError(joinLoc(location, "type"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
 			}
 		default:
 			for i, v := range *o.Type {
 				switch v {
 				case StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType:
 				default:
-					errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "type"), i), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
+					errs = append(errs, newValidationError(joinLoc(location, "type", i), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
 				}
 			}
 		}
@@ -525,21 +525,21 @@ func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*valid
 
 	// JsonSchemaMedia
 	if o.ContentSchema != nil {
-		errs = append(errs, o.ContentSchema.validateSpec(joinDot(path, "contentSchema"), opts)...)
+		errs = append(errs, o.ContentSchema.validateSpec(joinLoc(location, "contentSchema"), opts)...)
 	}
 	if o.ContentEncoding != "" {
 		switch o.ContentEncoding {
 		case SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding:
 		default:
-			errs = append(errs, newValidationError(joinDot(path, "contentEncoding"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding, o.ContentEncoding))
+			errs = append(errs, newValidationError(joinLoc(location, "contentEncoding"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding, o.ContentEncoding))
 		}
 	}
 
 	// JsonSchemaGeneric
 	if o.Default != nil {
 		if !opts.doNotValidateDefaultValues {
-			if err := ValidateData(o.Default, o, opts.spec); err != nil {
-				errs = append(errs, newValidationError(joinDot(path, "default"), err))
+			if e := opts.validator.ValidateDataAsJSON(location, o.Default); e != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "default"), e))
 			}
 		}
 		if len(o.Enum) > 0 {
@@ -551,15 +551,15 @@ func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*valid
 				}
 			}
 			if !found {
-				errs = append(errs, newValidationError(joinDot(path, "default"), "must be one of enum values: %v", o.Enum))
+				errs = append(errs, newValidationError(joinLoc(location, "default"), "invalid value, expected one of enum values: %v", o.Enum))
 			}
 		}
 	}
 
 	if len(o.Examples) > 0 && !opts.doNotValidateExamples {
 		for k, v := range o.Examples {
-			if err := ValidateData(v, o, opts.spec); err != nil {
-				errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "examples"), k), err))
+			if e := opts.validator.ValidateDataAsJSON(location, v); e != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
 			}
 		}
 	}
@@ -569,117 +569,117 @@ func (o *Schema) validateSpec(path string, opts *specValidationOptions) []*valid
 			switch t {
 			case ArrayType: // JsonSchemaTypeArray
 				if o.Items != nil {
-					errs = append(errs, o.Items.validateSpec(joinDot(path, "items"), opts)...)
+					errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), opts)...)
 				}
 				if o.MinItems != nil && *o.MinItems < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "minItems"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "minItems"), "must be greater than or equal to 0"))
 				}
 				if o.MaxItems != nil && *o.MaxItems < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "maxItems"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to 0"))
 					if o.MinItems != nil && *o.MaxItems < *o.MinItems {
-						errs = append(errs, newValidationError(joinDot(path, "maxItems"), "must be greater than or equal to minItems"))
+						errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to minItems"))
 					}
 				}
 				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinDot(path, "unevaluatedItems"), opts)...)
+					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), opts)...)
 				}
 				if o.Contains != nil {
-					errs = append(errs, o.Contains.validateSpec(joinDot(path, "contains"), opts)...)
+					errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), opts)...)
 				}
 				if o.MinContains != nil && *o.MinContains < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "minContains"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "minContains"), "must be greater than or equal to 0"))
 				}
 				if o.MaxContains != nil && *o.MaxContains < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "maxContains"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to 0"))
 					if o.MinContains != nil && *o.MaxContains < *o.MinContains {
-						errs = append(errs, newValidationError(joinDot(path, "maxContains"), "must be greater than or equal to minContains"))
+						errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to minContains"))
 					}
 				}
 				if len(o.PrefixItems) > 0 {
 					for i, v := range o.PrefixItems {
-						errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "prefixItems"), i), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), opts)...)
 					}
 				}
 			case ObjectType: // JsonSchemaTypeObject
 				if o.Properties != nil {
 					for k, v := range o.Properties {
-						errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "properties"), k), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), opts)...)
 					}
 				}
 				if o.PatternProperties != nil {
 					for k, v := range o.PatternProperties {
-						errs = append(errs, v.validateSpec(joinArrayItem(joinDot(path, "patternProperties"), k), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), opts)...)
 						if _, err := regexp.Compile(k); err != nil {
-							errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "patternProperties"), k), err))
+							errs = append(errs, newValidationError(joinLoc(location, "patternProperties", k), err))
 						}
 					}
 				}
 				if o.AdditionalProperties != nil {
-					errs = append(errs, o.AdditionalProperties.validateSpec(joinDot(path, "additionalProperties"), opts)...)
+					errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), opts)...)
 				}
 				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinDot(path, "unevaluatedItems"), opts)...)
+					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), opts)...)
 				}
 				if o.PropertyNames != nil {
-					errs = append(errs, o.PropertyNames.validateSpec(joinDot(path, "propertyNames"), opts)...)
+					errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), opts)...)
 				}
 				if o.MinProperties != nil && *o.MinProperties < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "minProperties"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "minProperties"), "must be greater than or equal to 0"))
 				}
 				if o.MaxProperties != nil && *o.MaxProperties < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "maxProperties"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to 0"))
 					if o.MinProperties != nil && *o.MaxProperties < *o.MinProperties {
-						errs = append(errs, newValidationError(joinDot(path, "maxProperties"), "must be greater than or equal to minProperties"))
+						errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to minProperties"))
 					}
 				}
 				if len(o.Required) > 0 {
 					for i, v := range o.Required {
 						if _, ok := o.Properties[v]; !ok {
-							errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "required"), i), "must be a property in properties"))
+							errs = append(errs, newValidationError(joinLoc(location, "required", i), "must be a property in properties"))
 						}
 					}
 				}
 			case NumberType, IntegerType: // JsonSchemaTypeNumber
 				if o.MultipleOf != nil && *o.MultipleOf <= 0 {
-					errs = append(errs, newValidationError(joinDot(path, "multipleOf"), "must be greater than 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "multipleOf"), "must be greater than 0"))
 				}
 				if o.Minimum != nil && *o.Minimum < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "minimum"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "minimum"), "must be greater than or equal to 0"))
 				}
 				if o.Maximum != nil && *o.Maximum < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "maximum"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to 0"))
 					if o.Minimum != nil && *o.Maximum < *o.Minimum {
-						errs = append(errs, newValidationError(joinDot(path, "maximum"), "must be greater than or equal to minimum"))
+						errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
 					}
 				}
 				if o.ExclusiveMinimum != nil && *o.ExclusiveMinimum < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "exclusiveMinimum"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMinimum"), "must be greater than or equal to 0"))
 				}
 				if o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "exclusiveMaximum"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to 0"))
 					if o.ExclusiveMinimum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
-						errs = append(errs, newValidationError(joinDot(path, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
+						errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
 					}
 				}
 				if o.Minimum != nil && o.ExclusiveMinimum != nil {
-					errs = append(errs, newValidationError(joinDot(path, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
+					errs = append(errs, newValidationError(joinLoc(location, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
 				}
 				if o.Maximum != nil && o.ExclusiveMaximum != nil {
-					errs = append(errs, newValidationError(joinDot(path, "maximum&exclusiveMaximum"), ErrMutuallyExclusive))
+					errs = append(errs, newValidationError(joinLoc(location, "maximum&exclusiveMaximum"), ErrMutuallyExclusive))
 				}
 			case StringType: // JsonSchemaTypeString
 				if o.MinLength != nil && *o.MinLength < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "minLength"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "minLength"), "must be greater than or equal to 0"))
 				}
 				if o.MaxLength != nil && *o.MaxLength < 0 {
-					errs = append(errs, newValidationError(joinDot(path, "maxLength"), "must be greater than or equal to 0"))
+					errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to 0"))
 					if o.MinLength != nil && *o.MaxLength < *o.MinLength {
-						errs = append(errs, newValidationError(joinDot(path, "maxLength"), "must be greater than or equal to minLength"))
+						errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to minLength"))
 					}
 				}
 				if o.Pattern != "" {
 					if _, err := regexp.Compile(o.Pattern); err != nil {
-						errs = append(errs, newValidationError(joinDot(path, "pattern"), err))
+						errs = append(errs, newValidationError(joinLoc(location, "pattern"), err))
 					}
 				}
 			}
