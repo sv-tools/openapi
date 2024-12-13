@@ -18,13 +18,13 @@ type ExternalDocs struct {
 	URL string `json:"url" yaml:"url"`
 }
 
-func (o *ExternalDocs) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *ExternalDocs) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {
-		errs = append(errs, newValidationError(joinDot(path, "url"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "url"), ErrRequired))
 	}
 	if err := checkURL(o.URL); err != nil {
-		errs = append(errs, newValidationError(joinDot(path, "url"), err))
+		errs = append(errs, newValidationError(joinLoc(loc, "url"), err))
 	}
 	return errs
 }

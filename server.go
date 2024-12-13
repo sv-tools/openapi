@@ -30,24 +30,24 @@ type Server struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Server) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Server) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {
-		errs = append(errs, newValidationError(joinDot(path, "url"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "url"), ErrRequired))
 	}
 	if l := len(o.Variables); l == 0 {
 		if err := checkURL(o.URL); err != nil {
-			errs = append(errs, newValidationError(joinDot(path, "url"), err))
+			errs = append(errs, newValidationError(joinLoc(loc, "url"), err))
 		}
 	} else {
 		oldnew := make([]string, 0, l*2)
 		for k, v := range o.Variables {
-			errs = append(errs, v.validateSpec(joinDot(path, "variables", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(loc, "variables", k), opts)...)
 			oldnew = append(oldnew, "{"+k+"}", v.Spec.Default)
 		}
 		u := strings.NewReplacer(oldnew...).Replace(o.URL)
 		if err := checkURL(u); err != nil {
-			errs = append(errs, newValidationError(joinDot(path, "url"), err))
+			errs = append(errs, newValidationError(joinLoc(loc, "url"), err))
 		}
 	}
 	return errs

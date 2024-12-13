@@ -153,13 +153,13 @@ func (o *Extendable[T]) UnmarshalYAML(node *yaml.Node) error {
 
 var ErrExtensionNameMustStartWithPrefix = errors.New("extension name must start with `" + ExtensionPrefix + "`")
 
-func (o *Extendable[T]) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Extendable[T]) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Spec != nil {
 		if spec, ok := any(o.Spec).(validatable); ok {
-			errs = append(errs, spec.validateSpec(path, opts)...)
+			errs = append(errs, spec.validateSpec(loc, opts)...)
 		} else {
-			errs = append(errs, newValidationError(path, fmt.Errorf("unsupported spec type: %T", o.Spec)))
+			errs = append(errs, newValidationError(loc, fmt.Errorf("unsupported spec type: %T", o.Spec)))
 		}
 	}
 	if opts.allowExtensionNameWithoutPrefix {
@@ -168,7 +168,7 @@ func (o *Extendable[T]) validateSpec(path string, opts *specValidationOptions) [
 
 	for name, _ := range o.Extensions {
 		if !strings.HasPrefix(name, ExtensionPrefix) {
-			errs = append(errs, newValidationError(joinDot(path, name), ErrExtensionNameMustStartWithPrefix))
+			errs = append(errs, newValidationError(joinLoc(loc, name), ErrExtensionNameMustStartWithPrefix))
 		}
 	}
 	return errs

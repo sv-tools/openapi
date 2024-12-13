@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/mail"
@@ -15,7 +16,7 @@ import (
 // Validatable is an interface for validating the specification.
 type validatable interface {
 	// an unexported method to be used by ValidateSpec function
-	validateSpec(path string, opts *specValidationOptions) []*validationError
+	validateSpec(loc string, opts *specValidationOptions) []*validationError
 }
 
 type visitedObjects map[string]bool
@@ -29,7 +30,7 @@ func (o visitedObjects) String() string {
 }
 
 type specValidationOptions struct {
-	spec                            *Extendable[OpenAPI]
+	validator                       *Validator
 	visited                         visitedObjects
 	linkToOperationID               map[string]string
 	allowExtensionNameWithoutPrefix bool
@@ -37,13 +38,14 @@ type specValidationOptions struct {
 	allowRequestBodyForHead         bool
 	allowRequestBodyForDelete       bool
 	allowUndefinedTagsInOperation   bool
+	allowUnusedComponents           bool
 	doNotValidateExamples           bool
 	doNotValidateDefaultValues      bool
 }
 
-func newSpecValidationOptions(spec *Extendable[OpenAPI], opts ...SpecValidationOption) *specValidationOptions {
+func newSpecValidationOptions(validator *Validator, opts ...SpecValidationOption) *specValidationOptions {
 	options := &specValidationOptions{
-		spec:              spec,
+		validator:         validator,
 		visited:           make(visitedObjects),
 		linkToOperationID: make(map[string]string),
 	}
@@ -64,36 +66,49 @@ func AllowExtensionNameWithoutPrefix() SpecValidationOption {
 	}
 }
 
+// AllowRequestBodyForGet is a validation option to allow request body for GET operation.
 func AllowRequestBodyForGet() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.allowRequestBodyForGet = true
 	}
 }
 
+// AllowRequestBodyForHead is a validation option to allow request body for HEAD operation.
 func AllowRequestBodyForHead() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.allowRequestBodyForHead = true
 	}
 }
 
+// AllowRequestBodyForDelete is a validation option to allow request body for DELETE operation.
 func AllowRequestBodyForDelete() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.allowRequestBodyForDelete = true
 	}
 }
 
+// AllowUndefinedTagsInOperation is a validation option to allow undefined tags in operation.
 func AllowUndefinedTagsInOperation() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.allowUndefinedTagsInOperation = true
 	}
 }
 
+// AllowUnusedComponents is a validation option to allow unused components.
+func AllowUnusedComponents() SpecValidationOption {
+	return func(v *specValidationOptions) {
+		v.allowUnusedComponents = true
+	}
+}
+
+// DoNotValidateExamples is a validation option to skip examples validation.
 func DoNotValidateExamples() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.doNotValidateExamples = true
 	}
 }
 
+// DoNotValidateDefaultValues is a validation option to skip default values validation.
 func DoNotValidateDefaultValues() SpecValidationOption {
 	return func(v *specValidationOptions) {
 		v.doNotValidateDefaultValues = true
@@ -101,49 +116,39 @@ func DoNotValidateDefaultValues() SpecValidationOption {
 }
 
 type validationError struct {
-	path string
-	err  error
+	loc string
+	err error
 }
 
-func newValidationError(path string, err any, args ...any) *validationError {
+func newValidationError(loc string, err any, args ...any) *validationError {
 	switch e := err.(type) {
 	case error:
-		return &validationError{path: path, err: e}
+		return &validationError{loc: loc, err: e}
 	case string:
-		return &validationError{path: path, err: fmt.Errorf(e, args...)}
+		return &validationError{loc: loc, err: fmt.Errorf(e, args...)}
 	default:
 		// unreachable
 		panic(fmt.Sprintf("unsupported error type: %T", e))
 	}
 }
 
-func joinDot(path ...string) string {
-	switch len(path) {
-	case 0:
-		return ""
-	case 1:
-		return path[0]
-	default:
-	}
-	if path[0] == "" {
-		path = path[1:]
-	}
-	return strings.Join(path, ".")
-}
+var jsonPointerEscaper = strings.NewReplacer("~", "~0", "/", "~1")
 
-func joinArrayItem(path string, v any) string {
-	switch t := v.(type) {
-	case int:
-		return fmt.Sprintf("%s[%d]", path, t)
-	case string:
-		return fmt.Sprintf("%s['%s']", path, t)
-	default:
-		return fmt.Sprintf("%s[%v]", path, t)
+func joinLoc(base string, parts ...any) string {
+	if len(parts) == 0 {
+		return base
 	}
+
+	elems := append(make([]string, 0, len(parts)+1), base)
+	for _, v := range parts {
+		elems = append(elems, jsonPointerEscaper.Replace(fmt.Sprintf("%v", v)))
+	}
+
+	return strings.Join(elems, "/")
 }
 
 func (e *validationError) Error() string {
-	return fmt.Sprintf("%s: %s", e.path, e.err)
+	return fmt.Sprintf("%s: %s", e.loc, e.err)
 }
 
 func (e *validationError) Unwrap() error {
@@ -176,20 +181,46 @@ func checkEmail(value string) error {
 	return nil
 }
 
-// ValidateData validates given object against the given schema.
-// Warning: this function is not implemented yet.
-func ValidateData(value any, schema *Schema, spec *Extendable[OpenAPI]) error {
-	if spec == nil {
-		return errors.New("given Schema cannot be nil")
-	}
+// CompilerOption is a type to modify the jsonschema.Compiler.
+type CompilerOption func(*jsonschema.Compiler)
 
-	return errors.New("data validation not implemented")
+// Validator is a struct for validating the OpenAPI specification and a data.
+type Validator struct {
+	spec     *Extendable[OpenAPI]
+	compiler *jsonschema.Compiler
+	schemas  sync.Map
+	mu       sync.Mutex
 }
 
-func ValidateSpec(spec *Extendable[OpenAPI], opts ...SpecValidationOption) error {
-	options := newSpecValidationOptions(spec, opts...)
+const specPrefix = "http://spec"
 
-	if errs := spec.validateSpec("", options); len(errs) > 0 {
+// NewValidator creates an instance of Validator struct.
+//
+// The function creates new jsonschema comppiler and adds the given spec to the compiler.
+func NewValidator(spec *Extendable[OpenAPI], opts ...CompilerOption) (*Validator, error) {
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling spec failed: %w", err)
+	}
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	c := jsonschema.NewCompiler()
+	c.DefaultDraft(jsonschema.Draft2020)
+	if err := c.AddResource(specPrefix, doc); err != nil {
+		return nil, fmt.Errorf("adding spec to compiler failed: %w", err)
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return &Validator{
+		spec:     spec,
+		compiler: c,
+		schemas:  sync.Map{},
+	}, nil
+}
+
+// ValidateSpec validates the specification.
+func (v *Validator) ValidateSpec(opts ...SpecValidationOption) error {
+	if errs := v.spec.validateSpec("", newSpecValidationOptions(v, opts...)); len(errs) > 0 {
 		joinErrors := make([]error, len(errs))
 		for i := range errs {
 			joinErrors[i] = errs[i]
@@ -200,38 +231,9 @@ func ValidateSpec(spec *Extendable[OpenAPI], opts ...SpecValidationOption) error
 	return nil
 }
 
-// CompilerOption is a type to modify the jsonschema.Compiler.
-type CompilerOption func(*jsonschema.Compiler)
-
-type DataValidator struct {
-	compiler *jsonschema.Compiler
-	schemas  sync.Map
-	mu       sync.Mutex
-}
-
-const specPrefix = "http://spec"
-
-func NewDataValidator(spec *Extendable[OpenAPI], opts ...CompilerOption) (*DataValidator, error) {
-	data, err := spec.MarshalJSON()
-	if err != nil {
-		return nil, fmt.Errorf("marshaling spec failed: %w", err)
-	}
-	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
-	c := jsonschema.NewCompiler()
-	c.DefaultDraft(jsonschema.Draft2020)
-	for _, opt := range opts {
-		opt(c)
-	}
-	if err := c.AddResource(specPrefix, doc); err != nil {
-		return nil, fmt.Errorf("adding spec to compiler failed: %w", err)
-	}
-	return &DataValidator{
-		compiler: c,
-		schemas:  sync.Map{},
-	}, nil
-}
-
-func (v *DataValidator) Validate(loc string, value any) error {
+// ValidateData validates the given value against the schema located at the given location.
+// The location should be in form of JSON Pointer.
+func (v *Validator) ValidateData(loc string, value any) error {
 	var schema *jsonschema.Schema
 	if s, ok := v.schemas.Load(loc); ok {
 		schema = s.(*jsonschema.Schema)
@@ -259,4 +261,18 @@ func (v *DataValidator) Validate(loc string, value any) error {
 		}
 	}
 	return schema.Validate(value)
+}
+
+// ValidateDataAsJSON marshal and unmarshals the given value to JSON and
+// validates it against the schema located at the given location.
+func (v *Validator) ValidateDataAsJSON(loc string, value any) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("marshaling value failed: %w", err)
+	}
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	if err != nil {
+		return fmt.Errorf("unmarshaling value failed: %w", err)
+	}
+	return v.ValidateData(loc, doc)
 }

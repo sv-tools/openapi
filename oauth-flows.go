@@ -32,33 +32,33 @@ type OAuthFlows struct {
 	AuthorizationCode *Extendable[OAuthFlow] `json:"authorizationCode,omitempty" yaml:"authorizationCode,omitempty"`
 }
 
-func (o *OAuthFlows) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *OAuthFlows) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Implicit != nil {
-		errs = append(errs, o.Implicit.validateSpec(joinDot(path, "implicit"), opts)...)
+		errs = append(errs, o.Implicit.validateSpec(joinLoc(loc, "implicit"), opts)...)
 		if o.Implicit.Spec.AuthorizationURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "implicit", "authorizationUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinLoc(loc, "implicit", "authorizationUrl"), ErrRequired))
 		}
 	}
 	if o.Password != nil {
-		errs = append(errs, o.Password.validateSpec(joinDot(path, "password"), opts)...)
+		errs = append(errs, o.Password.validateSpec(joinLoc(loc, "password"), opts)...)
 		if o.Password.Spec.TokenURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "password", "tokenUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinLoc(loc, "password", "tokenUrl"), ErrRequired))
 		}
 	}
 	if o.ClientCredentials != nil {
-		errs = append(errs, o.ClientCredentials.validateSpec(joinDot(path, "clientCredentials"), opts)...)
+		errs = append(errs, o.ClientCredentials.validateSpec(joinLoc(loc, "clientCredentials"), opts)...)
 		if o.ClientCredentials.Spec.TokenURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "clientCredentials", "tokenUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinLoc(loc, "clientCredentials", "tokenUrl"), ErrRequired))
 		}
 	}
 	if o.AuthorizationCode != nil {
-		errs = append(errs, o.AuthorizationCode.validateSpec(joinDot(path, "authorizationCode"), opts)...)
+		errs = append(errs, o.AuthorizationCode.validateSpec(joinLoc(loc, "authorizationCode"), opts)...)
 		if o.AuthorizationCode.Spec.AuthorizationURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "authorizationCode", "authorizationUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinLoc(loc, "authorizationCode", "authorizationUrl"), ErrRequired))
 		}
 		if o.AuthorizationCode.Spec.TokenURL == "" {
-			errs = append(errs, newValidationError(joinDot(path, "authorizationCode", "tokenUrl"), ErrRequired))
+			errs = append(errs, newValidationError(joinLoc(loc, "authorizationCode", "tokenUrl"), ErrRequired))
 		}
 	}
 

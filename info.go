@@ -40,22 +40,22 @@ type Info struct {
 	Version string `json:"version" yaml:"version"`
 }
 
-func (o *Info) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Info) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Title == "" {
-		errs = append(errs, newValidationError(joinDot(path, "title"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "title"), ErrRequired))
 	}
 	if o.Version == "" {
-		errs = append(errs, newValidationError(joinDot(path, "version"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "version"), ErrRequired))
 	}
 	if o.Contact != nil {
-		errs = append(errs, o.Contact.validateSpec(joinDot(path, "contact"), opts)...)
+		errs = append(errs, o.Contact.validateSpec(joinLoc(loc, "contact"), opts)...)
 	}
 	if o.License != nil {
-		errs = append(errs, o.License.validateSpec(joinDot(path, "license"), opts)...)
+		errs = append(errs, o.License.validateSpec(joinLoc(loc, "license"), opts)...)
 	}
 	if err := checkURL(o.TermsOfService); err != nil {
-		errs = append(errs, newValidationError(joinDot(path, "termsOfService"), err))
+		errs = append(errs, newValidationError(joinLoc(loc, "termsOfService"), err))
 	}
 	return errs
 }

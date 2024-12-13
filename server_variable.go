@@ -18,10 +18,10 @@ type ServerVariable struct {
 	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 }
 
-func (o *ServerVariable) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *ServerVariable) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Default == "" {
-		errs = append(errs, newValidationError(joinDot(path, "default"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "default"), ErrRequired))
 	}
 	return errs
 }

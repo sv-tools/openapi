@@ -19,7 +19,10 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 * v1 - The current version with the in-place validation of the specification. 
   * The minimal version of Go is `v1.21`.
   * Everything have been moved to root folder. So, the import path is `github.com/sv-tools/openapi`.
-  * Added DataValidator struct for validation of the data against the specification.
+  * Added `Validator` struct for validation of the specification and the data.
+    * `Validator.ValidateSpec()` method validates the specification.
+    * `Validator.ValidateData()` method validates the data.
+    * `Validator.ValidateDataAsJSON()` method validates the data by marshalling and unmarshalling it. **SLOW**
 
 ## Features
 

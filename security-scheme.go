@@ -74,42 +74,42 @@ type SecurityScheme struct {
 	OpenIDConnectURL string `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
 }
 
-func (o *SecurityScheme) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *SecurityScheme) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Type == "" {
-		errs = append(errs, newValidationError(joinDot(path, "type"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "type"), ErrRequired))
 	} else {
 		switch o.Type {
 		case TypeApiKey:
 			if o.Name == "" {
-				errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+				errs = append(errs, newValidationError(joinLoc(loc, "name"), ErrRequired))
 			}
 			if o.In == "" {
-				errs = append(errs, newValidationError(joinDot(path, "in"), ErrRequired))
+				errs = append(errs, newValidationError(joinLoc(loc, "in"), ErrRequired))
 			} else {
 				switch o.In {
 				case InQuery, InHeader, InCookie:
 				default:
-					errs = append(errs, newValidationError(joinDot(path, "in"), "must be one of [%s, %s, %s], but got '%s'", InQuery, InHeader, InCookie, o.In))
+					errs = append(errs, newValidationError(joinLoc(loc, "in"), "must be one of [%s, %s, %s], but got '%s'", InQuery, InHeader, InCookie, o.In))
 				}
 			}
 		case TypeHTTP:
 			if o.Scheme == "" {
-				errs = append(errs, newValidationError(joinDot(path, "scheme"), ErrRequired))
+				errs = append(errs, newValidationError(joinLoc(loc, "scheme"), ErrRequired))
 			}
 		case TypeOAuth2:
 			if o.Flows == nil {
-				errs = append(errs, newValidationError(joinDot(path, "flows"), ErrRequired))
+				errs = append(errs, newValidationError(joinLoc(loc, "flows"), ErrRequired))
 			} else {
-				errs = o.Flows.validateSpec(joinDot(path, "flows"), opts)
+				errs = o.Flows.validateSpec(joinLoc(loc, "flows"), opts)
 			}
 		case TypeOpenIDConnect:
 			if o.OpenIDConnectURL == "" {
-				errs = append(errs, newValidationError(joinDot(path, "openIdConnectUrl"), ErrRequired))
+				errs = append(errs, newValidationError(joinLoc(loc, "openIdConnectUrl"), ErrRequired))
 			}
 		case TypeMutualTLS:
 		default:
-			errs = append(errs, newValidationError(joinDot(path, "type"), "must be one of [%s, %s, %s, %s, %s], but got '%s'", TypeApiKey, TypeHTTP, TypeMutualTLS, TypeOAuth2, TypeOpenIDConnect, o.Type))
+			errs = append(errs, newValidationError(joinLoc(loc, "type"), "must be one of [%s, %s, %s, %s, %s], but got '%s'", TypeApiKey, TypeHTTP, TypeMutualTLS, TypeOAuth2, TypeOpenIDConnect, o.Type))
 		}
 	}
 	return errs

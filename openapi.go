@@ -62,73 +62,74 @@ type OpenAPI struct {
 func checkUnusedComponent[T any](name string, m map[string]T, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	for k := range m {
-		if !opts.visited[fmt.Sprintf("#/components/%s/%s", name, k)] {
-			errs = append(errs, newValidationError(joinArrayItem(joinDot("components", name), k), ErrUnused))
+		id := joinLoc("#", "components", name, k)
+		if !opts.visited[id] {
+			errs = append(errs, newValidationError(id, ErrUnused))
 		}
 	}
 	return errs
 }
 
-func (o *OpenAPI) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *OpenAPI) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.OpenAPI == "" {
-		errs = append(errs, newValidationError(joinDot(path, "openapi"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "openapi"), ErrRequired))
 	} else {
 		if !strings.HasPrefix(o.OpenAPI, "3.1.") {
-			errs = append(errs, newValidationError(joinDot(path, "openapi"), fmt.Errorf("unsupported version: %s", o.OpenAPI)))
+			errs = append(errs, newValidationError(joinLoc(loc, "openapi"), fmt.Errorf("unsupported version: %s", o.OpenAPI)))
 		}
 	}
 	if o.Info == nil {
-		errs = append(errs, newValidationError(joinDot(path, "info"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "info"), ErrRequired))
 	} else {
-		errs = append(errs, o.Info.validateSpec(joinDot(path, "info"), opts)...)
+		errs = append(errs, o.Info.validateSpec(joinLoc(loc, "info"), opts)...)
 	}
 
 	// validate tags first to memorize them for later checking
 	if o.Tags != nil {
 		for i, tag := range o.Tags {
-			errs = append(errs, tag.validateSpec(joinArrayItem(joinDot(path, "tag"), i), opts)...)
+			errs = append(errs, tag.validateSpec(joinLoc(loc, "tag", i), opts)...)
 		}
 	}
 
 	if err := checkURL(o.JsonSchemaDialect); err != nil {
-		errs = append(errs, newValidationError(joinDot(path, "jsonSchemaDialect"), err))
+		errs = append(errs, newValidationError(joinLoc(loc, "jsonSchemaDialect"), err))
 	}
 	if o.Servers != nil {
 		for i, server := range o.Servers {
-			errs = append(errs, server.validateSpec(joinArrayItem(joinDot(path, "servers"), i), opts)...)
+			errs = append(errs, server.validateSpec(joinLoc(loc, "servers", i), opts)...)
 		}
 	}
 	if o.Paths != nil {
-		errs = append(errs, o.Paths.validateSpec(joinDot(path, "paths"), opts)...)
+		errs = append(errs, o.Paths.validateSpec(joinLoc(loc, "paths"), opts)...)
 	}
 	if o.WebHooks != nil {
 		for name, webhook := range o.WebHooks {
-			errs = append(errs, webhook.validateSpec(joinDot(path, "webhooks", name), opts)...)
+			errs = append(errs, webhook.validateSpec(joinLoc(loc, "webhooks", name), opts)...)
 		}
 	}
 	if o.Components != nil {
-		errs = append(errs, o.Components.validateSpec(joinDot(path, "components"), opts)...)
+		errs = append(errs, o.Components.validateSpec(joinLoc(loc, "components"), opts)...)
 	}
 	if o.Security != nil {
 		for i, security := range o.Security {
-			errs = append(errs, security.validateSpec(joinArrayItem(joinDot(path, "security"), i), opts)...)
+			errs = append(errs, security.validateSpec(joinLoc(loc, "security", i), opts)...)
 		}
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.Components.validateSpec(joinDot(path, "externalDocs"), opts)...)
+		errs = append(errs, o.Components.validateSpec(joinLoc(loc, "externalDocs"), opts)...)
 	}
 	if o.Paths == nil && o.WebHooks == nil && o.Components == nil {
-		errs = append(errs, newValidationError(joinDot(path, "paths||webhooks||components"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "paths||webhooks||components"), ErrRequired))
 	}
 
 	// check for unused
 	for i, t := range o.Tags {
-		if !opts.visited[joinDot("tags", t.Spec.Name, "used")] {
-			errs = append(errs, newValidationError(joinArrayItem(joinDot(path, "tags"), i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
+		if !opts.visited[joinLoc("tags", t.Spec.Name, "used")] {
+			errs = append(errs, newValidationError(joinLoc(loc, "tags", i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
 		}
 	}
-	if o.Components != nil {
+	if o.Components != nil && !opts.allowUnusedComponents {
 		errs = append(errs, checkUnusedComponent("schemas", o.Components.Spec.Schemas, opts)...)
 		errs = append(errs, checkUnusedComponent("responses", o.Components.Spec.Responses, opts)...)
 		errs = append(errs, checkUnusedComponent("parameters", o.Components.Spec.Parameters, opts)...)
@@ -142,7 +143,7 @@ func (o *OpenAPI) validateSpec(path string, opts *specValidationOptions) []*vali
 	}
 
 	for k, v := range opts.linkToOperationID {
-		if !opts.visited[joinDot("operations", v)] {
+		if !opts.visited[joinLoc("operations", v)] {
 			errs = append(errs, newValidationError(k, "'%s' not found", v))
 		}
 	}

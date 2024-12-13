@@ -20,14 +20,14 @@ type Tag struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Tag) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Tag) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {
-		errs = append(errs, newValidationError(joinDot(path, "name"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(loc, "name"), ErrRequired))
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.ExternalDocs.validateSpec(joinDot(path, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(loc, "externalDocs"), opts)...)
 	}
-	opts.visited[joinDot("tags", o.Name)] = true
+	opts.visited[joinLoc("tags", o.Name)] = true
 	return errs
 }

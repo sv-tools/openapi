@@ -63,6 +63,9 @@ func (o *Responses) MarshalJSON() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+		if raw == nil {
+			raw = make(map[string]json.RawMessage, 1)
+		}
 		raw["default"] = data
 	}
 	return json.Marshal(&raw)
@@ -99,6 +102,9 @@ func (o *Responses) MarshalYAML() (any, error) {
 	}
 
 	if o.Default != nil {
+		if raw == nil {
+			raw = make(map[string]any, 1)
+		}
 		raw["default"] = o.Default
 	}
 	return raw, nil
@@ -127,16 +133,16 @@ func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
 	return yaml.Unmarshal(data, &o.Response)
 }
 
-func (o *Responses) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *Responses) validateSpec(loc string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Default != nil {
-		errs = append(errs, o.Default.validateSpec(joinDot(path, "default"), opts)...)
+		errs = append(errs, o.Default.validateSpec(joinLoc(loc, "default"), opts)...)
 	}
 	for k, v := range o.Response {
 		if !ResponseCodePattern.MatchString(k) {
-			errs = append(errs, newValidationError(joinArrayItem(path, k), "must match pattern '%s', but got '%s'", ResponseCodePattern, k))
+			errs = append(errs, newValidationError(joinLoc(loc, k), "must match pattern '%s', but got '%s'", ResponseCodePattern, k))
 		}
-		errs = append(errs, v.validateSpec(joinArrayItem(path, k), opts)...)
+		errs = append(errs, v.validateSpec(joinLoc(loc, k), opts)...)
 	}
 	return errs
 }
