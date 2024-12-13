@@ -3,7 +3,7 @@ package openapi
 const (
 	// ******* Built-in OpenAPI formats *******
 	//
-	// https://spec.openapis.org/oas/v3.1.0#data-types
+	// https://spec.openapis.org/oas/v3.1.1#data-types
 
 	Int32Format    = "int32"
 	Int64Format    = "int64"

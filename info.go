@@ -3,7 +3,7 @@ package openapi
 // Info provides metadata about the API.
 // The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation tools for convenience.
 //
-// https://spec.openapis.org/oas/v3.1.0#info-object
+// https://spec.openapis.org/oas/v3.1.1#info-object
 //
 // Example:
 //

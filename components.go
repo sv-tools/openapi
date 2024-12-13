@@ -6,7 +6,7 @@ import "fmt"
 // All objects defined within the components object will have no effect on the API unless they are explicitly referenced
 // from properties outside the components object.
 //
-// https://spec.openapis.org/oas/v3.1.0#components-object
+// https://spec.openapis.org/oas/v3.1.1#components-object
 //
 // Example:
 //

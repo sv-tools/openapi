@@ -2,7 +2,7 @@ package openapi
 
 // Encoding is definition that applied to a single schema property.
 //
-// https://spec.openapis.org/oas/v3.1.0#encoding-object
+// https://spec.openapis.org/oas/v3.1.1#encoding-object
 //
 // Example:
 //

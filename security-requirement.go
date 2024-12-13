@@ -7,7 +7,7 @@ package openapi
 // When a list of Security Requirement Objects is defined on the OpenAPI Object or Operation Object,
 // only one of the Security Requirement Objects in the list needs to be satisfied to authorize the request.
 //
-// https://spec.openapis.org/oas/v3.1.0#security-requirement-object
+// https://spec.openapis.org/oas/v3.1.1#security-requirement-object
 //
 // Example:
 //

@@ -17,7 +17,7 @@ var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:[0-9]{2}|XX)$`)
 // The Responses Object MUST contain at least one response code, and if only one response code is provided
 // it SHOULD be the response for a successful operation call.
 //
-// https://spec.openapis.org/oas/v3.1.0#responses-object
+// https://spec.openapis.org/oas/v3.1.1#responses-object
 //
 // Example:
 //

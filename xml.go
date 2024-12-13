@@ -5,7 +5,7 @@ package openapi
 // be used to add that information.
 // See examples for expected behavior.
 //
-// https://spec.openapis.org/oas/v3.1.0#xml-object
+// https://spec.openapis.org/oas/v3.1.1#xml-object
 //
 // Example:
 //

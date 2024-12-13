@@ -12,7 +12,7 @@ import (
 // The $ref string value contains a URI [RFC3986], which identifies the location of the value being referenced.
 // See the rules for resolving Relative References.
 //
-// https://spec.openapis.org/oas/v3.1.0#reference-object
+// https://spec.openapis.org/oas/v3.1.1#reference-object
 //
 // Example:
 //

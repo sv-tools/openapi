@@ -64,7 +64,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "minimal valid with empty paths",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -75,7 +75,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "minimal valid with empty components",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -86,7 +86,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "minimal valid with empty webhooks",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -97,7 +97,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "xml component",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -130,7 +130,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "properties examples",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -169,7 +169,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "properties default",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",
@@ -197,7 +197,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		{
 			name: "properties example",
 			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.0",
+				OpenAPI: "3.1.1",
 				Info: openapi.NewExtendable(&openapi.Info{
 					Title:   "Minimal Valid Spec",
 					Version: "1.0.0",

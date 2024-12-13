@@ -3,7 +3,7 @@ package openapi
 // Example is expected to be compatible with the type schema of its associated value.
 // Tooling implementations MAY choose to validate compatibility automatically, and reject the example value(s) if incompatible.
 //
-// https://spec.openapis.org/oas/v3.1.0#example-object
+// https://spec.openapis.org/oas/v3.1.1#example-object
 //
 // Example:
 //

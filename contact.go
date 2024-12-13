@@ -2,7 +2,7 @@ package openapi
 
 // Contact information for the exposed API.
 //
-// https://spec.openapis.org/oas/v3.1.0#contact-object
+// https://spec.openapis.org/oas/v3.1.1#contact-object
 //
 // Example:
 //

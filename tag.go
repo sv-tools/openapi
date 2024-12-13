@@ -3,7 +3,7 @@ package openapi
 // Tag adds metadata to a single tag that is used by the Operation Object.
 // It is not mandatory to have a Tag Object per tag defined in the Operation Object instances.
 //
-// https://spec.openapis.org/oas/v3.1.0#tag-object
+// https://spec.openapis.org/oas/v3.1.1#tag-object
 //
 // Example:
 //

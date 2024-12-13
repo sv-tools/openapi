@@ -2,7 +2,7 @@ package openapi
 
 // ExternalDocs allows referencing an external resource for extended documentation.
 //
-// https://spec.openapis.org/oas/v3.1.0#external-documentation-object
+// https://spec.openapis.org/oas/v3.1.1#external-documentation-object
 //
 // Example:
 //

@@ -2,7 +2,7 @@ package openapi
 
 // Response describes a single response from an API Operation, including design-time, static links to operations based on the response.
 //
-// https://spec.openapis.org/oas/v3.1.0#response-object
+// https://spec.openapis.org/oas/v3.1.1#response-object
 //
 // Example:
 //
