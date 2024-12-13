@@ -22,7 +22,9 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
   * Added `Validator` struct for validation of the specification and the data.
     * `Validator.ValidateSpec()` method validates the specification.
     * `Validator.ValidateData()` method validates the data.
-    * `Validator.ValidateDataAsJSON()` method validates the data by marshalling and unmarshalling it. **SLOW**
+    * `Validator.ValidateDataAsJSON()` method validates the data by converting it into `map[string]any` type first using `json.Marshal` and `json.Unmarshal`. 
+      **WARNING**: the function is slow due to double conversion.
+  * Use OpenAPI `v3.1.1` by default.
 
 ## Features
 

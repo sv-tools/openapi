@@ -10,21 +10,21 @@ const (
 	// This does not include the host or base path of the API.
 	// For example, in /items/{itemId}, the path parameter is itemId.
 	//
-	// https://spec.openapis.org/oas/v3.1.0#parameter-locations
+	// https://spec.openapis.org/oas/v3.1.1#parameter-locations
 	InPath = "path"
 	// InQuery used for parameters that are appended to the URL.
 	// For example, in /items?id=###, the query parameter is id.
 	//
-	// https://spec.openapis.org/oas/v3.1.0#parameter-locations
+	// https://spec.openapis.org/oas/v3.1.1#parameter-locations
 	InQuery = "query"
 	// InHeader used as custom headers that are expected as part of the request.
 	// Note that [RFC7230] states header names are case insensitive.
 	//
-	// https://spec.openapis.org/oas/v3.1.0#parameter-locations
+	// https://spec.openapis.org/oas/v3.1.1#parameter-locations
 	InHeader = "header"
 	// InCookie used to pass a specific cookie value to the API.
 	//
-	// https://spec.openapis.org/oas/v3.1.0#parameter-locations
+	// https://spec.openapis.org/oas/v3.1.1#parameter-locations
 	InCookie = "cookie"
 
 	// StyleMatrix is the parameters defined by [RFC6570](https://www.rfc-editor.org/rfc/rfc6570#section-3.2.7)
@@ -102,7 +102,7 @@ var PathNamePattern = regexp.MustCompile(`[^/#?]+$`)
 // Parameter describes a single operation parameter.
 // A unique parameter is defined by a combination of a name and location.
 //
-// https://spec.openapis.org/oas/v3.1.0#parameter-object
+// https://spec.openapis.org/oas/v3.1.1#parameter-object
 //
 // Example:
 //

@@ -2,7 +2,7 @@ package openapi
 
 // OAuthFlow configuration details for a supported OAuth Flow
 //
-// https://spec.openapis.org/oas/v3.1.0#oauth-flow-object
+// https://spec.openapis.org/oas/v3.1.1#oauth-flow-object
 //
 // Example:
 //

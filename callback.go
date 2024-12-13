@@ -12,7 +12,7 @@ import (
 // that identifies a URL to use for the callback operation.
 // To describe incoming requests from the API provider independent from another API call, use the webhooks field.
 //
-// https://spec.openapis.org/oas/v3.1.0#callback-object
+// https://spec.openapis.org/oas/v3.1.1#callback-object
 //
 // Example:
 //

@@ -2,7 +2,7 @@ package openapi
 
 // RequestBody describes a single request body.
 //
-// https://spec.openapis.org/oas/v3.1.0#request-body-object
+// https://spec.openapis.org/oas/v3.1.1#request-body-object
 //
 // Example:
 //

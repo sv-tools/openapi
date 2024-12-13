@@ -6,7 +6,7 @@ package openapi
 // an alternative schema based on the value associated with it.
 // When using the discriminator, inline schemas will not be considered.
 //
-// https://spec.openapis.org/oas/v3.1.0#discriminator-object
+// https://spec.openapis.org/oas/v3.1.1#discriminator-object
 //
 // Example:
 //

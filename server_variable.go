@@ -2,7 +2,7 @@ package openapi
 
 // ServerVariable is an object representing a Server Variable for server URL template substitution.
 //
-// https://spec.openapis.org/oas/v3.1.0#server-variable-object
+// https://spec.openapis.org/oas/v3.1.1#server-variable-object
 type ServerVariable struct {
 	// REQUIRED.
 	// The default value to use for substitution, which SHALL be sent if an alternate value is not supplied.

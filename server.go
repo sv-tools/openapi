@@ -4,7 +4,7 @@ import "strings"
 
 // Server is an object representing a Server.
 //
-// https://spec.openapis.org/oas/v3.1.0#server-object
+// https://spec.openapis.org/oas/v3.1.1#server-object
 //
 // Example:
 //

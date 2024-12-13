@@ -6,7 +6,7 @@ import (
 
 // Operation Describes a single API operation on a path.
 //
-// https://spec.openapis.org/oas/v3.1.0#operation-object
+// https://spec.openapis.org/oas/v3.1.1#operation-object
 //
 // Example:
 //

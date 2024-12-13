@@ -7,11 +7,11 @@ import (
 
 // OpenAPI is the root object of the OpenAPI document.
 //
-// https://spec.openapis.org/oas/v3.1.0#openapi-object
+// https://spec.openapis.org/oas/v3.1.1#openapi-object
 //
 // Example:
 //
-//	openapi: 3.1.0
+//	openapi: 3.1.1
 //	info:
 //	  title: Minimal OpenAPI example
 //	  version: 1.0.0

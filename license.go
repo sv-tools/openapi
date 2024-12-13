@@ -2,7 +2,7 @@ package openapi
 
 // License information for the exposed API.
 //
-// https://spec.openapis.org/oas/v3.1.0#license-object
+// https://spec.openapis.org/oas/v3.1.1#license-object
 //
 // Example:
 //

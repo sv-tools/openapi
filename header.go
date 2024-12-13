@@ -2,7 +2,7 @@ package openapi
 
 // Header Object follows the structure of the Parameter Object with the some changes.
 //
-// https://spec.openapis.org/oas/v3.1.0#header-object
+// https://spec.openapis.org/oas/v3.1.1#header-object
 //
 // Example:
 //

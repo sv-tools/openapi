@@ -11,7 +11,7 @@ import (
 // The path is appended to the URL from the Server Object in order to construct the full URL.
 // The Paths MAY be empty, due to Access Control List (ACL) constraints.
 //
-// https://spec.openapis.org/oas/v3.1.0#paths-object
+// https://spec.openapis.org/oas/v3.1.1#paths-object
 //
 // Example:
 //

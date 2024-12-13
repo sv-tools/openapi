@@ -23,7 +23,7 @@ const (
 // Where JSON Schema indicates that behavior is defined by the application (e.g. for annotations),
 // OAS also defers the definition of semantics to the application consuming the OpenAPI document.
 //
-// https://spec.openapis.org/oas/v3.1.0#schema-object
+// https://spec.openapis.org/oas/v3.1.1#schema-object
 // https://json-schema.org/understanding-json-schema/index.html
 type Schema struct {
 	// *** Core Fields ***

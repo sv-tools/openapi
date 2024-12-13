@@ -2,7 +2,7 @@ package openapi
 
 // OAuthFlows allows configuration of the supported OAuth Flows.
 //
-// https://spec.openapis.org/oas/v3.1.0#oauth-flows-object
+// https://spec.openapis.org/oas/v3.1.1#oauth-flows-object
 //
 // Example:
 //

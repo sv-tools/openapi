@@ -4,7 +4,7 @@ package openapi
 // A Path Item MAY be empty, due to ACL constraints.
 // The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.
 //
-// https://spec.openapis.org/oas/v3.1.0#path-item-object
+// https://spec.openapis.org/oas/v3.1.1#path-item-object
 //
 // Example:
 //

@@ -16,11 +16,11 @@ const ExtensionPrefix = "x-"
 // Field names beginning `x-oai-` and `x-oas-` are reserved for uses defined by the OpenAPI Initiative.
 // The value can be null, a primitive, an array or an object.
 //
-// https://spec.openapis.org/oas/v3.1.0#specification-extensions
+// https://spec.openapis.org/oas/v3.1.1#specification-extensions
 //
 // Example:
 //
-//	  openapi: 3.1.0
+//	  openapi: 3.1.1
 //	  info:
 //	    title: Sample Pet Store App
 //	    summary: A pet store manager.

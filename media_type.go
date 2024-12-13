@@ -2,7 +2,7 @@ package openapi
 
 // MediaType provides schema and examples for the media type identified by its key.
 //
-// https://spec.openapis.org/oas/v3.1.0#media-type-object
+// https://spec.openapis.org/oas/v3.1.1#media-type-object
 //
 // Example:
 //
