@@ -188,7 +188,7 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 
 	if l := len(o.Content); l > 0 {
 		if l != 1 {
-			errs = append(errs, newValidationError(joinLoc(location, "content"), "must be only one item, but got '%d'", l))
+			errs = append(errs, newValidationError(joinLoc(location, "content"), "invalid number of items, expected only one, but got '%d'", l))
 		}
 		for k, v := range o.Content {
 			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
