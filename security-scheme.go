@@ -90,7 +90,7 @@ func (o *SecurityScheme) validateSpec(location string, opts *specValidationOptio
 				switch o.In {
 				case InQuery, InHeader, InCookie:
 				default:
-					errs = append(errs, newValidationError(joinLoc(location, "in"), "must be one of [%s, %s, %s], but got '%s'", InQuery, InHeader, InCookie, o.In))
+					errs = append(errs, newValidationError(joinLoc(location, "in"), "invalid value, expected one of [%s, %s, %s], but got '%s'", InQuery, InHeader, InCookie, o.In))
 				}
 			}
 		case TypeHTTP:
@@ -109,7 +109,7 @@ func (o *SecurityScheme) validateSpec(location string, opts *specValidationOptio
 			}
 		case TypeMutualTLS:
 		default:
-			errs = append(errs, newValidationError(joinLoc(location, "type"), "must be one of [%s, %s, %s, %s, %s], but got '%s'", TypeApiKey, TypeHTTP, TypeMutualTLS, TypeOAuth2, TypeOpenIDConnect, o.Type))
+			errs = append(errs, newValidationError(joinLoc(location, "type"), "invalid value, expected one of [%s, %s, %s, %s, %s], but got '%s'", TypeApiKey, TypeHTTP, TypeMutualTLS, TypeOAuth2, TypeOpenIDConnect, o.Type))
 		}
 	}
 	return errs

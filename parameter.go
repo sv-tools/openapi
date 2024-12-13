@@ -203,7 +203,7 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 	case "":
 		errs = append(errs, newValidationError(joinLoc(location, "in"), ErrRequired))
 	default:
-		errs = append(errs, newValidationError(joinLoc(location, "in"), "must be one of [%s, %s, %s, %s], but got '%s'", InQuery, InHeader, InPath, InCookie, o.In))
+		errs = append(errs, newValidationError(joinLoc(location, "in"), "invalid value, expected one of [%s, %s, %s, %s], but got '%s'", InQuery, InHeader, InPath, InCookie, o.In))
 	}
 
 	switch o.Style {
@@ -225,7 +225,7 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 			errs = append(errs, newValidationError(joinLoc(location, "style"), "only allowed when `in` is '%s'", InQuery))
 		}
 	default:
-		errs = append(errs, newValidationError(joinLoc(location, "style"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 
 	if o.Name == "" {

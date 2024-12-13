@@ -510,14 +510,14 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 			switch v := (*o.Type)[0]; v {
 			case StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType:
 			default:
-				errs = append(errs, newValidationError(joinLoc(location, "type"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
+				errs = append(errs, newValidationError(joinLoc(location, "type"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
 			}
 		default:
 			for i, v := range *o.Type {
 				switch v {
 				case StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType:
 				default:
-					errs = append(errs, newValidationError(joinLoc(location, "type", i), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
+					errs = append(errs, newValidationError(joinLoc(location, "type", i), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StringType, NumberType, IntegerType, BooleanType, ObjectType, ArrayType, NullType, v))
 				}
 			}
 		}
@@ -531,7 +531,7 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 		switch o.ContentEncoding {
 		case SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding:
 		default:
-			errs = append(errs, newValidationError(joinLoc(location, "contentEncoding"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding, o.ContentEncoding))
+			errs = append(errs, newValidationError(joinLoc(location, "contentEncoding"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", SevenBitEncoding, EightBitEncoding, BinaryEncoding, QuotedPrintableEncoding, Base16Encoding, Base32Encoding, Base64Encoding, o.ContentEncoding))
 		}
 	}
 
@@ -551,7 +551,7 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 				}
 			}
 			if !found {
-				errs = append(errs, newValidationError(joinLoc(location, "default"), "must be one of enum values: %v", o.Enum))
+				errs = append(errs, newValidationError(joinLoc(location, "default"), "invalid value, expected one of enum values: %v", o.Enum))
 			}
 		}
 	}

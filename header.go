@@ -59,7 +59,7 @@ func (o *Header) validateSpec(location string, opts *specValidationOptions) []*v
 	switch o.Style {
 	case "", StyleSimple:
 	default:
-		errs = append(errs, newValidationError(joinLoc(location, "style"), "must be one of [%s], but got '%s'", StyleSimple, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected one of [%s], but got '%s'", StyleSimple, o.Style))
 	}
 
 	return errs

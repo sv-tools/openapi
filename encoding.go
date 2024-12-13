@@ -85,7 +85,7 @@ func (o *Encoding) validateSpec(location string, opts *specValidationOptions) []
 	switch o.Style {
 	case "", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
 	default:
-		errs = append(errs, newValidationError(joinLoc(location, "style"), "must be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 	return errs
 }
