@@ -74,18 +74,18 @@ type Encoding struct {
 	AllowReserved bool `json:"allowReserved,omitempty" yaml:"allowReserved,omitempty"`
 }
 
-func (o *Encoding) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *Encoding) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Headers) > 0 {
 		for k, v := range o.Headers {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "headers", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), opts)...)
 		}
 	}
 
 	switch o.Style {
 	case "", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
 	default:
-		errs = append(errs, newValidationError(joinLoc(loc, "style"), "must be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "must be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 	return errs
 }

@@ -21,16 +21,16 @@ type License struct {
 	URL string `json:"url,omitempty" yaml:"url,omitempty"`
 }
 
-func (o *License) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *License) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {
-		errs = append(errs, newValidationError(joinLoc(loc, "name"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(location, "name"), ErrRequired))
 	}
 	if o.Identifier != "" && o.URL != "" {
-		errs = append(errs, newValidationError(joinLoc(loc, "identifier&url"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "identifier&url"), ErrMutuallyExclusive))
 	}
 	if err := checkURL(o.URL); err != nil {
-		errs = append(errs, newValidationError(joinLoc(loc, "url"), err))
+		errs = append(errs, newValidationError(joinLoc(location, "url"), err))
 	}
 	return errs
 }

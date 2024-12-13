@@ -177,75 +177,75 @@ type Parameter struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-func (o *Parameter) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *Parameter) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
-		errs = append(errs, newValidationError(joinLoc(loc, "schema&content"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "schema&content"), ErrMutuallyExclusive))
 	}
 	if o.Example != nil && len(o.Examples) > 0 {
-		errs = append(errs, newValidationError(joinLoc(loc, "example&examples"), ErrMutuallyExclusive))
+		errs = append(errs, newValidationError(joinLoc(location, "example&examples"), ErrMutuallyExclusive))
 	}
 
 	if l := len(o.Content); l > 0 {
 		if l != 1 {
-			errs = append(errs, newValidationError(joinLoc(loc, "content"), "must be only one item, but got '%d'", l))
+			errs = append(errs, newValidationError(joinLoc(location, "content"), "must be only one item, but got '%d'", l))
 		}
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "content", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
 		}
 	}
 	if o.Schema != nil {
-		errs = append(errs, o.Schema.validateSpec(joinLoc(loc, "schema"), opts)...)
+		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), opts)...)
 	}
 
 	switch o.In {
 	case InQuery, InHeader, InPath, InCookie:
 	case "":
-		errs = append(errs, newValidationError(joinLoc(loc, "in"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(location, "in"), ErrRequired))
 	default:
-		errs = append(errs, newValidationError(joinLoc(loc, "in"), "must be one of [%s, %s, %s, %s], but got '%s'", InQuery, InHeader, InPath, InCookie, o.In))
+		errs = append(errs, newValidationError(joinLoc(location, "in"), "must be one of [%s, %s, %s, %s], but got '%s'", InQuery, InHeader, InPath, InCookie, o.In))
 	}
 
 	switch o.Style {
 	case "":
 	case StyleMatrix, StyleLabel:
 		if o.In != InPath {
-			errs = append(errs, newValidationError(joinLoc(loc, "style"), "only allowed when `in` is '%s'", InPath))
+			errs = append(errs, newValidationError(joinLoc(location, "style"), "only allowed when `in` is '%s'", InPath))
 		}
 	case StyleForm:
 		if o.In != InQuery && o.In != InCookie {
-			errs = append(errs, newValidationError(joinLoc(loc, "style"), "only allowed when `in` is '%s' or '%s' ", InQuery, InCookie))
+			errs = append(errs, newValidationError(joinLoc(location, "style"), "only allowed when `in` is '%s' or '%s' ", InQuery, InCookie))
 		}
 	case StyleSimple:
 		if o.In != InPath && o.In != InHeader {
-			errs = append(errs, newValidationError(joinLoc(loc, "style"), "only allowed when `in` is '%s' or '%s' ", InPath, InHeader))
+			errs = append(errs, newValidationError(joinLoc(location, "style"), "only allowed when `in` is '%s' or '%s' ", InPath, InHeader))
 		}
 	case StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
 		if o.In != InQuery {
-			errs = append(errs, newValidationError(joinLoc(loc, "style"), "only allowed when `in` is '%s'", InQuery))
+			errs = append(errs, newValidationError(joinLoc(location, "style"), "only allowed when `in` is '%s'", InQuery))
 		}
 	default:
-		errs = append(errs, newValidationError(joinLoc(loc, "style"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "must be one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 
 	if o.Name == "" {
-		errs = append(errs, newValidationError(joinLoc(loc, "name"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(location, "name"), ErrRequired))
 	} else if o.In == InPath && !PathNamePattern.MatchString(o.Name) {
-		errs = append(errs, newValidationError(joinLoc(loc, "name"), "must match pattern '%s', but got '%s'", PathNamePattern, o.Name))
+		errs = append(errs, newValidationError(joinLoc(location, "name"), "must match pattern '%s', but got '%s'", PathNamePattern, o.Name))
 	} else if !o.AllowReserved && o.In == InQuery && strings.ContainsAny(o.Name, ReservedCharacters) {
-		errs = append(errs, newValidationError(joinLoc(loc, "name"), "'%s' contains reserved characters: '%s'", o.Name, ReservedCharacters))
+		errs = append(errs, newValidationError(joinLoc(location, "name"), "'%s' contains reserved characters: '%s'", o.Name, ReservedCharacters))
 	}
 
 	if o.AllowReserved && o.In != InQuery {
-		errs = append(errs, newValidationError(joinLoc(loc, "allowReserved"), "only allowed when `in` is '%s'", InQuery))
+		errs = append(errs, newValidationError(joinLoc(location, "allowReserved"), "only allowed when `in` is '%s'", InQuery))
 	}
 
 	if o.AllowEmptyValue && o.In != InQuery {
-		errs = append(errs, newValidationError(joinLoc(loc, "allowEmptyValue"), "only allowed when `in` is '%s'", InQuery))
+		errs = append(errs, newValidationError(joinLoc(location, "allowEmptyValue"), "only allowed when `in` is '%s'", InQuery))
 	}
 
 	if !o.Required && o.In == InPath {
-		errs = append(errs, newValidationError(joinLoc(loc, "required"), "must be `true` when `in` is '%s'", InPath))
+		errs = append(errs, newValidationError(joinLoc(location, "required"), "must be `true` when `in` is '%s'", InPath))
 	}
 
 	if opts.doNotValidateExamples {
@@ -274,8 +274,8 @@ func (o *Parameter) validateSpec(loc string, opts *specValidationOptions) []*val
 	}
 	if spec != nil {
 		if o.Example != nil {
-			if e := opts.validator.ValidateDataAsJSON(loc, o.Example); e != nil {
-				errs = append(errs, newValidationError(joinLoc(loc, "example"), e))
+			if e := opts.validator.ValidateDataAsJSON(location, o.Example); e != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "example"), e))
 			}
 		}
 		if len(o.Examples) > 0 {
@@ -286,8 +286,8 @@ func (o *Parameter) validateSpec(loc string, opts *specValidationOptions) []*val
 					continue
 				}
 				if value := example.Spec.Value; value != nil {
-					if e := opts.validator.ValidateDataAsJSON(loc, value); e != nil {
-						errs = append(errs, newValidationError(joinLoc(loc, "examples", k), e))
+					if e := opts.validator.ValidateDataAsJSON(location, value); e != nil {
+						errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
 					}
 				}
 			}

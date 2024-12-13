@@ -16,7 +16,7 @@ import (
 // Validatable is an interface for validating the specification.
 type validatable interface {
 	// an unexported method to be used by ValidateSpec function
-	validateSpec(loc string, opts *specValidationOptions) []*validationError
+	validateSpec(location string, opts *specValidationOptions) []*validationError
 }
 
 type visitedObjects map[string]bool
@@ -116,16 +116,16 @@ func DoNotValidateDefaultValues() SpecValidationOption {
 }
 
 type validationError struct {
-	loc string
-	err error
+	location string
+	err      error
 }
 
-func newValidationError(loc string, err any, args ...any) *validationError {
+func newValidationError(location string, err any, args ...any) *validationError {
 	switch e := err.(type) {
 	case error:
-		return &validationError{loc: loc, err: e}
+		return &validationError{location: location, err: e}
 	case string:
-		return &validationError{loc: loc, err: fmt.Errorf(e, args...)}
+		return &validationError{location: location, err: fmt.Errorf(e, args...)}
 	default:
 		// unreachable
 		panic(fmt.Sprintf("unsupported error type: %T", e))
@@ -148,7 +148,7 @@ func joinLoc(base string, parts ...any) string {
 }
 
 func (e *validationError) Error() string {
-	return fmt.Sprintf("%s: %s", e.loc, e.err)
+	return fmt.Sprintf("%s: %s", e.location, e.err)
 }
 
 func (e *validationError) Unwrap() error {
@@ -233,26 +233,26 @@ func (v *Validator) ValidateSpec(opts ...SpecValidationOption) error {
 
 // ValidateData validates the given value against the schema located at the given location.
 // The location should be in form of JSON Pointer.
-func (v *Validator) ValidateData(loc string, value any) error {
+func (v *Validator) ValidateData(location string, value any) error {
 	var schema *jsonschema.Schema
-	if s, ok := v.schemas.Load(loc); ok {
+	if s, ok := v.schemas.Load(location); ok {
 		schema = s.(*jsonschema.Schema)
 	} else {
 		var err error
 		schema, err = func() (*jsonschema.Schema, error) {
 			v.mu.Lock()
 			defer v.mu.Unlock()
-			if s, ok := v.schemas.Load(loc); ok {
+			if s, ok := v.schemas.Load(location); ok {
 				return s.(*jsonschema.Schema), nil
 			} else {
-				if !strings.HasPrefix(loc, "#") {
-					loc = "#" + loc
+				if !strings.HasPrefix(location, "#") {
+					location = "#" + location
 				}
-				schema, err := v.compiler.Compile(specPrefix + loc)
+				schema, err := v.compiler.Compile(specPrefix + location)
 				if err != nil {
-					return nil, fmt.Errorf("compiling spec for given location %q failed: %w", loc, err)
+					return nil, fmt.Errorf("compiling spec for given location %q failed: %w", location, err)
 				}
-				v.schemas.Store(loc, schema)
+				v.schemas.Store(location, schema)
 				return schema, nil
 			}
 		}()
@@ -265,7 +265,7 @@ func (v *Validator) ValidateData(loc string, value any) error {
 
 // ValidateDataAsJSON marshal and unmarshals the given value to JSON and
 // validates it against the schema located at the given location.
-func (v *Validator) ValidateDataAsJSON(loc string, value any) error {
+func (v *Validator) ValidateDataAsJSON(location string, value any) error {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("marshaling value failed: %w", err)
@@ -274,5 +274,5 @@ func (v *Validator) ValidateDataAsJSON(loc string, value any) error {
 	if err != nil {
 		return fmt.Errorf("unmarshaling value failed: %w", err)
 	}
-	return v.ValidateData(loc, doc)
+	return v.ValidateData(location, doc)
 }

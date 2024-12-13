@@ -69,41 +69,41 @@ type PathItem struct {
 	Parameters []*RefOrSpec[Extendable[Parameter]] `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 }
 
-func (o *PathItem) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *PathItem) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	if len(o.Parameters) > 0 {
 		for i, v := range o.Parameters {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "parameters", i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "parameters", i), opts)...)
 		}
 	}
 	if len(o.Servers) > 0 {
 		for i, v := range o.Servers {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "servers", i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "servers", i), opts)...)
 		}
 	}
 	if o.Get != nil {
-		errs = append(errs, o.Get.validateSpec(joinLoc(loc, "get"), opts)...)
+		errs = append(errs, o.Get.validateSpec(joinLoc(location, "get"), opts)...)
 	}
 	if o.Put != nil {
-		errs = append(errs, o.Put.validateSpec(joinLoc(loc, "put"), opts)...)
+		errs = append(errs, o.Put.validateSpec(joinLoc(location, "put"), opts)...)
 	}
 	if o.Post != nil {
-		errs = append(errs, o.Post.validateSpec(joinLoc(loc, "post"), opts)...)
+		errs = append(errs, o.Post.validateSpec(joinLoc(location, "post"), opts)...)
 	}
 	if o.Delete != nil {
-		errs = append(errs, o.Delete.validateSpec(joinLoc(loc, "delete"), opts)...)
+		errs = append(errs, o.Delete.validateSpec(joinLoc(location, "delete"), opts)...)
 	}
 	if o.Options != nil {
-		errs = append(errs, o.Options.validateSpec(joinLoc(loc, "options"), opts)...)
+		errs = append(errs, o.Options.validateSpec(joinLoc(location, "options"), opts)...)
 	}
 	if o.Head != nil {
-		errs = append(errs, o.Head.validateSpec(joinLoc(loc, "head"), opts)...)
+		errs = append(errs, o.Head.validateSpec(joinLoc(location, "head"), opts)...)
 	}
 	if o.Patch != nil {
-		errs = append(errs, o.Patch.validateSpec(joinLoc(loc, "patch"), opts)...)
+		errs = append(errs, o.Patch.validateSpec(joinLoc(location, "patch"), opts)...)
 	}
 	if o.Trace != nil {
-		errs = append(errs, o.Trace.validateSpec(joinLoc(loc, "trace"), opts)...)
+		errs = append(errs, o.Trace.validateSpec(joinLoc(location, "trace"), opts)...)
 	}
 	return errs
 }

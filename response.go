@@ -31,24 +31,24 @@ type Response struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Response) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *Response) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	errs := make([]*validationError, 0)
 	if o.Description == "" {
-		errs = append(errs, newValidationError(joinLoc(loc, "description"), ErrRequired))
+		errs = append(errs, newValidationError(joinLoc(location, "description"), ErrRequired))
 	}
 	if o.Content != nil {
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "content", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
 		}
 	}
 	if o.Links != nil {
 		for k, v := range o.Links {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "links", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "links", k), opts)...)
 		}
 	}
 	if o.Headers != nil {
 		for k, v := range o.Headers {
-			errs = append(errs, v.validateSpec(joinLoc(loc, "headers", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), opts)...)
 		}
 	}
 	return errs

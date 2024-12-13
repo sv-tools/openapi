@@ -59,16 +59,16 @@ func (o *Paths) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &o.Paths)
 }
 
-func (o *Paths) validateSpec(loc string, opts *specValidationOptions) []*validationError {
+func (o *Paths) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
 	for k, v := range o.Paths {
 		if !strings.HasPrefix(k, "/") {
-			errs = append(errs, newValidationError(joinLoc(loc, k), "path must start with a forward slash (`/`)"))
+			errs = append(errs, newValidationError(joinLoc(location, k), "path must start with a forward slash (`/`)"))
 		}
 		if v == nil {
-			errs = append(errs, newValidationError(joinLoc(loc, k), "path item cannot be empty"))
+			errs = append(errs, newValidationError(joinLoc(location, k), "path item cannot be empty"))
 		} else {
-			errs = append(errs, v.validateSpec(joinLoc(loc, k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, k), opts)...)
 		}
 	}
 	return errs
