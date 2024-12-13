@@ -58,3 +58,50 @@ func (o *RequestBody) validateSpec(location string, opts *specValidationOptions)
 	}
 	return errs
 }
+
+type RequestBodyBuilder struct {
+	spec *RefOrSpec[Extendable[RequestBody]]
+}
+
+func NewRequestBodyBuilder() *RequestBodyBuilder {
+	return &RequestBodyBuilder{
+		spec: NewRefOrExtSpec[RequestBody](&RequestBody{}),
+	}
+}
+
+func (b *RequestBodyBuilder) Build() *RefOrSpec[Extendable[RequestBody]] {
+	return b.spec
+}
+
+func (b *RequestBodyBuilder) Extensions(v map[string]any) *RequestBodyBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *RequestBodyBuilder) AddExt(name string, value any) *RequestBodyBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *RequestBodyBuilder) Content(v map[string]*Extendable[MediaType]) *RequestBodyBuilder {
+	b.spec.Spec.Spec.Content = v
+	return b
+}
+
+func (b *RequestBodyBuilder) AddContent(key string, value *Extendable[MediaType]) *RequestBodyBuilder {
+	if b.spec.Spec.Spec.Content == nil {
+		b.spec.Spec.Spec.Content = make(map[string]*Extendable[MediaType], 1)
+	}
+	b.spec.Spec.Spec.Content[key] = value
+	return b
+}
+
+func (b *RequestBodyBuilder) Description(v string) *RequestBodyBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}
+
+func (b *RequestBodyBuilder) Required(v bool) *RequestBodyBuilder {
+	b.spec.Spec.Spec.Required = v
+	return b
+}

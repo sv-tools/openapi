@@ -20,3 +20,22 @@ func (o *SecurityRequirement) validateSpec(path string, opts *specValidationOpti
 	}
 	return nil // nothing to validate
 }
+
+type SecurityRequirementBuilder struct {
+	spec SecurityRequirement
+}
+
+func NewSecurityRequirementBuilder() *SecurityRequirementBuilder {
+	return &SecurityRequirementBuilder{
+		spec: make(SecurityRequirement),
+	}
+}
+
+func (b *SecurityRequirementBuilder) Build() *SecurityRequirement {
+	return &b.spec
+}
+
+func (b *SecurityRequirementBuilder) Add(name string, scopes ...string) *SecurityRequirementBuilder {
+	b.spec[name] = append(b.spec[name], scopes...)
+	return b
+}

@@ -64,3 +64,70 @@ func (o *Header) validateSpec(location string, opts *specValidationOptions) []*v
 
 	return errs
 }
+
+type HeaderBuilder struct {
+	spec *RefOrSpec[Extendable[Header]]
+}
+
+func NewHeaderBuilder() *HeaderBuilder {
+	return &HeaderBuilder{
+		spec: NewRefOrExtSpec[Header](&Header{}),
+	}
+}
+
+func (b *HeaderBuilder) Build() *RefOrSpec[Extendable[Header]] {
+	return b.spec
+}
+
+func (b *HeaderBuilder) Extensions(v map[string]any) *HeaderBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *HeaderBuilder) AddExt(name string, value any) *HeaderBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *HeaderBuilder) Schema(v *RefOrSpec[Schema]) *HeaderBuilder {
+	b.spec.Spec.Spec.Schema = v
+	return b
+}
+
+func (b *HeaderBuilder) Content(v map[string]*Extendable[MediaType]) *HeaderBuilder {
+	b.spec.Spec.Spec.Content = v
+	return b
+}
+
+func (b *HeaderBuilder) AddContent(name string, value *Extendable[MediaType]) *HeaderBuilder {
+	if b.spec.Spec.Spec.Content == nil {
+		b.spec.Spec.Spec.Content = make(map[string]*Extendable[MediaType], 1)
+	}
+	b.spec.Spec.Spec.Content[name] = value
+	return b
+}
+
+func (b *HeaderBuilder) Description(v string) *HeaderBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}
+
+func (b *HeaderBuilder) Style(v string) *HeaderBuilder {
+	b.spec.Spec.Spec.Style = v
+	return b
+}
+
+func (b *HeaderBuilder) Explode(v bool) *HeaderBuilder {
+	b.spec.Spec.Spec.Explode = v
+	return b
+}
+
+func (b *HeaderBuilder) Required(v bool) *HeaderBuilder {
+	b.spec.Spec.Spec.Required = v
+	return b
+}
+
+func (b *HeaderBuilder) Deprecated(v bool) *HeaderBuilder {
+	b.spec.Spec.Spec.Deprecated = v
+	return b
+}

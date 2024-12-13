@@ -59,3 +59,47 @@ func (o *Example) validateSpec(location string, opts *specValidationOptions) []*
 	// should be validated in the object that defines the example and a schema
 	return errs
 }
+
+type ExampleBuilder struct {
+	spec *RefOrSpec[Extendable[Example]]
+}
+
+func NewExampleBuilder() *ExampleBuilder {
+	return &ExampleBuilder{
+		spec: NewRefOrExtSpec[Example](&Example{}),
+	}
+}
+
+func (b *ExampleBuilder) Build() *RefOrSpec[Extendable[Example]] {
+	return b.spec
+}
+
+func (b *ExampleBuilder) Extensions(v map[string]any) *ExampleBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *ExampleBuilder) AddExt(name string, value any) *ExampleBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *ExampleBuilder) Summary(v string) *ExampleBuilder {
+	b.spec.Spec.Spec.Summary = v
+	return b
+}
+
+func (b *ExampleBuilder) Description(v string) *ExampleBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}
+
+func (b *ExampleBuilder) Value(v any) *ExampleBuilder {
+	b.spec.Spec.Spec.Value = v
+	return b
+}
+
+func (b *ExampleBuilder) ExternalValue(v string) *ExampleBuilder {
+	b.spec.Spec.Spec.ExternalValue = v
+	return b
+}

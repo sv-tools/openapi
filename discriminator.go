@@ -34,5 +34,41 @@ func (o *Discriminator) validateSpec(location string, opts *specValidationOption
 	if o.PropertyName == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "propertyName"), ErrRequired))
 	}
+	for k, v := range o.Mapping {
+		ref := NewRefOrSpec[Schema](v)
+		errs = append(errs, ref.validateSpec(joinLoc(location, "mapping", k), opts)...)
+	}
 	return errs
+}
+
+type DiscriminatorBuilder struct {
+	spec *Discriminator
+}
+
+func NewDiscriminatorBuilder() *DiscriminatorBuilder {
+	return &DiscriminatorBuilder{
+		spec: &Discriminator{},
+	}
+}
+
+func (b *DiscriminatorBuilder) Build() *Discriminator {
+	return b.spec
+}
+
+func (b *DiscriminatorBuilder) Mapping(v map[string]string) *DiscriminatorBuilder {
+	b.spec.Mapping = v
+	return b
+}
+
+func (b *DiscriminatorBuilder) AddMapping(name, value string) *DiscriminatorBuilder {
+	if b.spec.Mapping == nil {
+		b.spec.Mapping = make(map[string]string, 1)
+	}
+	b.spec.Mapping[name] = value
+	return b
+}
+
+func (b *DiscriminatorBuilder) PropertyName(v string) *DiscriminatorBuilder {
+	b.spec.PropertyName = v
+	return b
 }

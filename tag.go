@@ -31,3 +31,42 @@ func (o *Tag) validateSpec(location string, opts *specValidationOptions) []*vali
 	opts.visited[joinLoc("tags", o.Name)] = true
 	return errs
 }
+
+type TagBuilder struct {
+	spec *Extendable[Tag]
+}
+
+func NewTagBuilder() *TagBuilder {
+	return &TagBuilder{
+		spec: NewExtendable[Tag](&Tag{}),
+	}
+}
+
+func (b *TagBuilder) Build() *Extendable[Tag] {
+	return b.spec
+}
+
+func (b *TagBuilder) Extensions(v map[string]any) *TagBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *TagBuilder) AddExt(name string, value any) *TagBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *TagBuilder) ExternalDocs(v *Extendable[ExternalDocs]) *TagBuilder {
+	b.spec.Spec.ExternalDocs = v
+	return b
+}
+
+func (b *TagBuilder) Name(v string) *TagBuilder {
+	b.spec.Spec.Name = v
+	return b
+}
+
+func (b *TagBuilder) Description(v string) *TagBuilder {
+	b.spec.Spec.Description = v
+	return b
+}

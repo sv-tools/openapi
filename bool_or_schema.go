@@ -71,3 +71,14 @@ func (o *BoolOrSchema) validateSpec(path string, opts *specValidationOptions) []
 	}
 	return errs
 }
+
+func NewBoolOrSchema(v any) *BoolOrSchema {
+	switch v := v.(type) {
+	case bool:
+		return &BoolOrSchema{Allowed: v}
+	case *RefOrSpec[Schema]:
+		return &BoolOrSchema{Schema: v}
+	default:
+		return nil
+	}
+}

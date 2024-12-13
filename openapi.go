@@ -33,7 +33,7 @@ type OpenAPI struct {
 	// for example by an out of band registration.
 	// The key name is a unique string to refer to each webhook, while the (optionally referenced) PathItem Object describes
 	// a request that may be initiated by the API provider and the expected responses.
-	WebHooks map[string]*RefOrSpec[Extendable[PathItem]] `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
+	WebHooks Webhooks `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	// The default value for the $schema keyword within Schema Objects contained within this OAS document.
 	// This MUST be in the form of a URI.
 	JsonSchemaDialect string `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
@@ -148,4 +148,118 @@ func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*
 		}
 	}
 	return errs
+}
+
+type OpenAPIBuilder struct {
+	spec *Extendable[OpenAPI]
+}
+
+func NewOpenAPIBuilder() *OpenAPIBuilder {
+	return &OpenAPIBuilder{spec: NewExtendable(&OpenAPI{
+		OpenAPI:           "3.1.1",
+		JsonSchemaDialect: "https://spec.openapis.org/oas/3.1/dialect/base",
+	})}
+}
+
+func (b *OpenAPIBuilder) Build() *Extendable[OpenAPI] {
+	return b.spec
+}
+
+func (b *OpenAPIBuilder) Extensions(v map[string]any) *OpenAPIBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *OpenAPIBuilder) AddExt(name string, value any) *OpenAPIBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *OpenAPIBuilder) OpenAPI(openAPI string) *OpenAPIBuilder {
+	b.spec.Spec.OpenAPI = openAPI
+	return b
+}
+
+func (b *OpenAPIBuilder) Info(info *Extendable[Info]) *OpenAPIBuilder {
+	b.spec.Spec.Info = info
+	return b
+}
+
+func (b *OpenAPIBuilder) Components(components *Extendable[Components]) *OpenAPIBuilder {
+	b.spec.Spec.Components = components
+	return b
+}
+
+func (b *OpenAPIBuilder) AddComponent(name string, component any) *OpenAPIBuilder {
+	if b.spec.Spec.Components == nil {
+		b.spec.Spec.Components = NewComponents()
+	}
+	b.spec.Spec.Components.Spec.Add(name, component)
+	return b
+}
+
+func (b *OpenAPIBuilder) ExternalDocs(externalDocs *Extendable[ExternalDocs]) *OpenAPIBuilder {
+	b.spec.Spec.ExternalDocs = externalDocs
+	return b
+}
+
+func (b *OpenAPIBuilder) Paths(paths *Extendable[Paths]) *OpenAPIBuilder {
+	b.spec.Spec.Paths = paths
+	return b
+}
+
+func (b *OpenAPIBuilder) AddPath(path string, item *RefOrSpec[Extendable[PathItem]]) *OpenAPIBuilder {
+	if b.spec.Spec.Paths == nil {
+		b.spec.Spec.Paths = NewPaths()
+	}
+	b.spec.Spec.Paths.Spec.Add(path, item)
+	return b
+}
+
+func (b *OpenAPIBuilder) WebHooks(webHooks Webhooks) *OpenAPIBuilder {
+	b.spec.Spec.WebHooks = webHooks
+	return b
+}
+
+func (b *OpenAPIBuilder) AddWebHook(name string, path *RefOrSpec[Extendable[PathItem]]) *OpenAPIBuilder {
+	if b.spec.Spec.WebHooks == nil {
+		b.spec.Spec.WebHooks = NewWebhooks()
+	}
+	b.spec.Spec.WebHooks[name] = path
+	return b
+}
+
+func (b *OpenAPIBuilder) JsonSchemaDialect(jsonSchemaDialect string) *OpenAPIBuilder {
+	b.spec.Spec.JsonSchemaDialect = jsonSchemaDialect
+	return b
+}
+
+func (b *OpenAPIBuilder) Security(security ...SecurityRequirement) *OpenAPIBuilder {
+	b.spec.Spec.Security = security
+	return b
+}
+
+func (b *OpenAPIBuilder) AddSecurity(v ...SecurityRequirement) *OpenAPIBuilder {
+	b.spec.Spec.Security = append(b.spec.Spec.Security, v...)
+	return b
+}
+
+func (b *OpenAPIBuilder) Tags(tags ...*Extendable[Tag]) *OpenAPIBuilder {
+	b.spec.Spec.Tags = tags
+	return b
+}
+
+func (b *OpenAPIBuilder) AddTags(tags ...*Extendable[Tag]) *OpenAPIBuilder {
+	b.spec.Spec.Tags = append(b.spec.Spec.Tags, tags...)
+	return b
+}
+
+func (b *OpenAPIBuilder) Servers(servers ...*Extendable[Server]) *OpenAPIBuilder {
+	b.spec.Spec.Servers = servers
+	return b
+}
+
+func (b *OpenAPIBuilder) AddServers(servers ...*Extendable[Server]) *OpenAPIBuilder {
+	b.spec.Spec.Servers = append(b.spec.Spec.Servers, servers...)
+	return b
 }

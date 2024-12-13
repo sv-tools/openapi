@@ -29,33 +29,77 @@ import (
 //	        '200':
 //	          description: callback successfully processed
 type Callback struct {
-	Callback map[string]*RefOrSpec[Extendable[PathItem]]
+	Paths map[string]*RefOrSpec[Extendable[PathItem]]
 }
 
 // MarshalJSON implements json.Marshaler interface.
 func (o *Callback) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&o.Callback)
+	return json.Marshal(&o.Paths)
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (o *Callback) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &o.Callback)
+	return json.Unmarshal(data, &o.Paths)
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
 func (o *Callback) MarshalYAML() (any, error) {
-	return o.Callback, nil
+	return o.Paths, nil
 }
 
 // UnmarshalYAML implements yaml.Unmarshaler interface.
 func (o *Callback) UnmarshalYAML(node *yaml.Node) error {
-	return node.Decode(&o.Callback)
+	return node.Decode(&o.Paths)
 }
 
 func (o *Callback) validateSpec(location string, opts *specValidationOptions) []*validationError {
 	var errs []*validationError
-	for k, v := range o.Callback {
+	for k, v := range o.Paths {
 		errs = append(errs, v.validateSpec(joinLoc(location, k), opts)...)
 	}
 	return nil
+}
+
+func (o *Callback) Add(expression string, item *RefOrSpec[Extendable[PathItem]]) *Callback {
+	if o.Paths == nil {
+		o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]], 1)
+	}
+	o.Paths[expression] = item
+	return o
+}
+
+type CallbackBuilder struct {
+	spec *RefOrSpec[Extendable[Callback]]
+}
+
+func NewCallbackBuilder() *CallbackBuilder {
+	return &CallbackBuilder{
+		spec: NewRefOrExtSpec[Callback](&Callback{
+			Paths: make(map[string]*RefOrSpec[Extendable[PathItem]]),
+		}),
+	}
+}
+
+func (b *CallbackBuilder) Build() *RefOrSpec[Extendable[Callback]] {
+	return b.spec
+}
+
+func (b *CallbackBuilder) Extensions(v map[string]any) *CallbackBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *CallbackBuilder) AddExt(name string, value any) *CallbackBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *CallbackBuilder) Paths(paths map[string]*RefOrSpec[Extendable[PathItem]]) *CallbackBuilder {
+	b.spec.Spec.Spec.Paths = paths
+	return b
+}
+
+func (b *CallbackBuilder) AddPathItem(expression string, item *RefOrSpec[Extendable[PathItem]]) *CallbackBuilder {
+	b.spec.Spec.Spec.Add(expression, item)
+	return b
 }

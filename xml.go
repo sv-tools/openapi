@@ -49,3 +49,52 @@ type XML struct {
 func (o *XML) validateSpec(path string, opts *specValidationOptions) []*validationError {
 	return nil // nothing to validate
 }
+
+type XMLBuilder struct {
+	spec *Extendable[XML]
+}
+
+func NewXMLBuilder() *XMLBuilder {
+	return &XMLBuilder{
+		spec: NewExtendable[XML](&XML{}),
+	}
+}
+
+func (b *XMLBuilder) Build() *Extendable[XML] {
+	return b.spec
+}
+
+func (b *XMLBuilder) Extensions(v map[string]any) *XMLBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *XMLBuilder) AddExt(name string, value any) *XMLBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *XMLBuilder) Name(v string) *XMLBuilder {
+	b.spec.Spec.Name = v
+	return b
+}
+
+func (b *XMLBuilder) Namespace(v string) *XMLBuilder {
+	b.spec.Spec.Namespace = v
+	return b
+}
+
+func (b *XMLBuilder) Prefix(v string) *XMLBuilder {
+	b.spec.Spec.Prefix = v
+	return b
+}
+
+func (b *XMLBuilder) Attribute(v bool) *XMLBuilder {
+	b.spec.Spec.Attribute = v
+	return b
+}
+
+func (b *XMLBuilder) Wrapped(v bool) *XMLBuilder {
+	b.spec.Spec.Wrapped = v
+	return b
+}

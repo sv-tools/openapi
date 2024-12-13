@@ -114,3 +114,67 @@ func (o *SecurityScheme) validateSpec(location string, opts *specValidationOptio
 	}
 	return errs
 }
+
+type SecuritySchemeBuilder struct {
+	spec *RefOrSpec[Extendable[SecurityScheme]]
+}
+
+func NewSecuritySchemeBuilder() *SecuritySchemeBuilder {
+	return &SecuritySchemeBuilder{
+		spec: NewRefOrExtSpec[SecurityScheme](&SecurityScheme{}),
+	}
+}
+
+func (b *SecuritySchemeBuilder) Build() *RefOrSpec[Extendable[SecurityScheme]] {
+	return b.spec
+}
+
+func (b *SecuritySchemeBuilder) Extensions(v map[string]any) *SecuritySchemeBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) AddExt(name string, value any) *SecuritySchemeBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *SecuritySchemeBuilder) Type(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.Type = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) Description(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) Name(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.Name = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) In(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.In = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) Scheme(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.Scheme = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) BearerFormat(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.BearerFormat = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) Flows(v *Extendable[OAuthFlows]) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.Flows = v
+	return b
+}
+
+func (b *SecuritySchemeBuilder) OpenIDConnectURL(v string) *SecuritySchemeBuilder {
+	b.spec.Spec.Spec.OpenIDConnectURL = v
+	return b
+}

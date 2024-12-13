@@ -146,3 +146,45 @@ func (o *Responses) validateSpec(location string, opts *specValidationOptions) [
 	}
 	return errs
 }
+
+type ResponsesBuilder struct {
+	spec *RefOrSpec[Extendable[Responses]]
+}
+
+func NewResponsesBuilder() *ResponsesBuilder {
+	return &ResponsesBuilder{
+		spec: NewRefOrExtSpec[Responses](&Responses{}),
+	}
+}
+
+func (b *ResponsesBuilder) Build() *RefOrSpec[Extendable[Responses]] {
+	return b.spec
+}
+
+func (b *ResponsesBuilder) Extensions(v map[string]any) *ResponsesBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *ResponsesBuilder) AddExt(name string, value any) *ResponsesBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *ResponsesBuilder) Default(v *RefOrSpec[Extendable[Response]]) *ResponsesBuilder {
+	b.spec.Spec.Spec.Default = v
+	return b
+}
+
+func (b *ResponsesBuilder) Response(v map[string]*RefOrSpec[Extendable[Response]]) *ResponsesBuilder {
+	b.spec.Spec.Spec.Response = v
+	return b
+}
+
+func (b *ResponsesBuilder) AddResponse(key string, value *RefOrSpec[Extendable[Response]]) *ResponsesBuilder {
+	if b.spec.Spec.Spec.Response == nil {
+		b.spec.Spec.Spec.Response = make(map[string]*RefOrSpec[Extendable[Response]], 1)
+	}
+	b.spec.Spec.Spec.Response[key] = value
+	return b
+}

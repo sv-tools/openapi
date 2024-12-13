@@ -295,3 +295,108 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 	}
 	return errs
 }
+
+type ParameterBuilder struct {
+	spec *RefOrSpec[Extendable[Parameter]]
+}
+
+func NewParameterBuilder() *ParameterBuilder {
+	return &ParameterBuilder{
+		spec: NewRefOrExtSpec[Parameter](&Parameter{}),
+	}
+}
+
+func (b *ParameterBuilder) Build() *RefOrSpec[Extendable[Parameter]] {
+	return b.spec
+}
+
+func (b *ParameterBuilder) Extensions(v map[string]any) *ParameterBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *ParameterBuilder) AddExt(name string, value any) *ParameterBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *ParameterBuilder) Example(v any) *ParameterBuilder {
+	b.spec.Spec.Spec.Example = v
+	return b
+}
+
+func (b *ParameterBuilder) Content(v map[string]*Extendable[MediaType]) *ParameterBuilder {
+	b.spec.Spec.Spec.Content = v
+	return b
+}
+
+func (b *ParameterBuilder) AddContent(name string, value *Extendable[MediaType]) *ParameterBuilder {
+	if b.spec.Spec.Spec.Content == nil {
+		b.spec.Spec.Spec.Content = make(map[string]*Extendable[MediaType], 1)
+	}
+	b.spec.Spec.Spec.Content[name] = value
+	return b
+}
+
+func (b *ParameterBuilder) Examples(v map[string]*RefOrSpec[Extendable[Example]]) *ParameterBuilder {
+	b.spec.Spec.Spec.Examples = v
+	return b
+}
+
+func (b *ParameterBuilder) AddExample(name string, value *RefOrSpec[Extendable[Example]]) *ParameterBuilder {
+	if b.spec.Spec.Spec.Examples == nil {
+		b.spec.Spec.Spec.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
+	}
+	b.spec.Spec.Spec.Examples[name] = value
+	return b
+}
+
+func (b *ParameterBuilder) Schema(v *RefOrSpec[Schema]) *ParameterBuilder {
+	b.spec.Spec.Spec.Schema = v
+	return b
+}
+
+func (b *ParameterBuilder) In(v string) *ParameterBuilder {
+	b.spec.Spec.Spec.In = v
+	return b
+}
+
+func (b *ParameterBuilder) Description(v string) *ParameterBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}
+
+func (b *ParameterBuilder) Style(v string) *ParameterBuilder {
+	b.spec.Spec.Spec.Style = v
+	return b
+}
+
+func (b *ParameterBuilder) Name(v string) *ParameterBuilder {
+	b.spec.Spec.Spec.Name = v
+	return b
+}
+
+func (b *ParameterBuilder) Explode(v bool) *ParameterBuilder {
+	b.spec.Spec.Spec.Explode = v
+	return b
+}
+
+func (b *ParameterBuilder) AllowReserved(v bool) *ParameterBuilder {
+	b.spec.Spec.Spec.AllowReserved = v
+	return b
+}
+
+func (b *ParameterBuilder) AllowEmptyValue(v bool) *ParameterBuilder {
+	b.spec.Spec.Spec.AllowEmptyValue = v
+	return b
+}
+
+func (b *ParameterBuilder) Deprecated(v bool) *ParameterBuilder {
+	b.spec.Spec.Spec.Deprecated = v
+	return b
+}
+
+func (b *ParameterBuilder) Required(v bool) *ParameterBuilder {
+	b.spec.Spec.Spec.Required = v
+	return b
+}

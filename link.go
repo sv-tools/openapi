@@ -6,7 +6,8 @@ package openapi
 // Unlike dynamic links (i.e. links provided in the response payload),
 // the OAS linking mechanism does not require link information in the runtime response.
 // For computing links, and providing instructions to execute them,
-// a runtime expression is used for accessing values in an operation and using them as parameters while invoking the linked operation.
+// a runtime expression is used for accessing values in an operation
+// and using them as parameters while invoking the linked operation.
 //
 // https://spec.openapis.org/oas/v3.1.1#link-object
 //
@@ -90,8 +91,75 @@ func (o *Link) validateSpec(location string, opts *specValidationOptions) []*val
 			opts.linkToOperationID[joinLoc(location, "operationId")] = o.OperationID
 		}
 	}
+	// uncomment when JSONLookup is implemented
+	//if o.OperationRef != "" {
+	//	ref := NewRefOrExtSpec[Operation](o.OperationRef)
+	//	errs = append(errs, ref.validateSpec(joinLoc(location, "operationRef"), opts)...)
+	//}
 	if o.Server != nil {
 		errs = append(errs, o.Server.validateSpec(joinLoc(location, "server"), opts)...)
 	}
 	return errs
+}
+
+type LinkBuilder struct {
+	spec *RefOrSpec[Extendable[Link]]
+}
+
+func NewLinkBuilder() *LinkBuilder {
+	return &LinkBuilder{
+		spec: NewRefOrExtSpec[Link](&Link{}),
+	}
+}
+
+func (b *LinkBuilder) Build() *RefOrSpec[Extendable[Link]] {
+	return b.spec
+}
+
+func (b *LinkBuilder) Extensions(v map[string]any) *LinkBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *LinkBuilder) AddExt(name string, value any) *LinkBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *LinkBuilder) RequestBody(v any) *LinkBuilder {
+	b.spec.Spec.Spec.RequestBody = v
+	return b
+}
+
+func (b *LinkBuilder) Parameters(v map[string]any) *LinkBuilder {
+	b.spec.Spec.Spec.Parameters = v
+	return b
+}
+
+func (b *LinkBuilder) AddParameter(name string, value any) *LinkBuilder {
+	if b.spec.Spec.Spec.Parameters == nil {
+		b.spec.Spec.Spec.Parameters = make(map[string]any, 1)
+	}
+	b.spec.Spec.Spec.Parameters[name] = value
+	return b
+}
+
+func (b *LinkBuilder) Server(v *Extendable[Server]) *LinkBuilder {
+	b.spec.Spec.Spec.Server = v
+	return b
+}
+
+func (b *LinkBuilder) OperationRef(v string) *LinkBuilder {
+	b.spec.Spec.Spec.OperationRef = v
+	return b
+}
+
+func (b *LinkBuilder) OperationID(v string) *LinkBuilder {
+	b.spec.Spec.Spec.OperationID = v
+	return b
+}
+
+func (b *LinkBuilder) Description(v string) *LinkBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
 }

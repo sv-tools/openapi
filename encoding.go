@@ -85,7 +85,64 @@ func (o *Encoding) validateSpec(location string, opts *specValidationOptions) []
 	switch o.Style {
 	case "", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject:
 	default:
-		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected be one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
+		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected one of [%s, %s, %s, %s], but got '%s'", StyleForm, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 	return errs
+}
+
+type EncodingBuilder struct {
+	spec *Extendable[Encoding]
+}
+
+func NewEncodingBuilder() *EncodingBuilder {
+	return &EncodingBuilder{
+		spec: NewExtendable[Encoding](&Encoding{}),
+	}
+}
+
+func (b *EncodingBuilder) Build() *Extendable[Encoding] {
+	return b.spec
+}
+
+func (b *EncodingBuilder) Extensions(v map[string]any) *EncodingBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *EncodingBuilder) AddExt(name string, value any) *EncodingBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *EncodingBuilder) ContentType(v string) *EncodingBuilder {
+	b.spec.Spec.ContentType = v
+	return b
+}
+
+func (b *EncodingBuilder) Headers(v map[string]*RefOrSpec[Extendable[Header]]) *EncodingBuilder {
+	b.spec.Spec.Headers = v
+	return b
+}
+
+func (b *EncodingBuilder) Header(name string, value *RefOrSpec[Extendable[Header]]) *EncodingBuilder {
+	if b.spec.Spec.Headers == nil {
+		b.spec.Spec.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
+	}
+	b.spec.Spec.Headers[name] = value
+	return b
+}
+
+func (b *EncodingBuilder) Style(v string) *EncodingBuilder {
+	b.spec.Spec.Style = v
+	return b
+}
+
+func (b *EncodingBuilder) Explode(v bool) *EncodingBuilder {
+	b.spec.Spec.Explode = v
+	return b
+}
+
+func (b *EncodingBuilder) AllowReserved(v bool) *EncodingBuilder {
+	b.spec.Spec.AllowReserved = v
+	return b
 }

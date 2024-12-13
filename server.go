@@ -52,3 +52,50 @@ func (o *Server) validateSpec(location string, opts *specValidationOptions) []*v
 	}
 	return errs
 }
+
+type ServerBuilder struct {
+	spec *Extendable[Server]
+}
+
+func NewServerBuilder() *ServerBuilder {
+	return &ServerBuilder{
+		spec: NewExtendable[Server](&Server{}),
+	}
+}
+
+func (b *ServerBuilder) Build() *Extendable[Server] {
+	return b.spec
+}
+
+func (b *ServerBuilder) Extensions(v map[string]any) *ServerBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *ServerBuilder) AddExt(name string, value any) *ServerBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *ServerBuilder) Variables(v map[string]*Extendable[ServerVariable]) *ServerBuilder {
+	b.spec.Spec.Variables = v
+	return b
+}
+
+func (b *ServerBuilder) AddVariable(name string, value *Extendable[ServerVariable]) *ServerBuilder {
+	if b.spec.Spec.Variables == nil {
+		b.spec.Spec.Variables = make(map[string]*Extendable[ServerVariable], 1)
+	}
+	b.spec.Spec.Variables[name] = value
+	return b
+}
+
+func (b *ServerBuilder) URL(v string) *ServerBuilder {
+	b.spec.Spec.URL = v
+	return b
+}
+
+func (b *ServerBuilder) Description(v string) *ServerBuilder {
+	b.spec.Spec.Description = v
+	return b
+}

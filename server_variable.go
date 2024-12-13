@@ -25,3 +25,47 @@ func (o *ServerVariable) validateSpec(location string, opts *specValidationOptio
 	}
 	return errs
 }
+
+type ServerVariableBuilder struct {
+	spec *Extendable[ServerVariable]
+}
+
+func NewServerVariableBuilder() *ServerVariableBuilder {
+	return &ServerVariableBuilder{
+		spec: NewExtendable[ServerVariable](&ServerVariable{}),
+	}
+}
+
+func (b *ServerVariableBuilder) Build() *Extendable[ServerVariable] {
+	return b.spec
+}
+
+func (b *ServerVariableBuilder) Extensions(v map[string]any) *ServerVariableBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *ServerVariableBuilder) AddExt(name string, value any) *ServerVariableBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *ServerVariableBuilder) Default(v string) *ServerVariableBuilder {
+	b.spec.Spec.Default = v
+	return b
+}
+
+func (b *ServerVariableBuilder) Description(v string) *ServerVariableBuilder {
+	b.spec.Spec.Description = v
+	return b
+}
+
+func (b *ServerVariableBuilder) Enum(v ...string) *ServerVariableBuilder {
+	b.spec.Spec.Enum = v
+	return b
+}
+
+func (b *ServerVariableBuilder) AddEnum(v ...string) *ServerVariableBuilder {
+	b.spec.Spec.Enum = append(b.spec.Spec.Enum, v...)
+	return b
+}

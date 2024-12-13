@@ -59,3 +59,62 @@ func (o *Info) validateSpec(location string, opts *specValidationOptions) []*val
 	}
 	return errs
 }
+
+type InfoBuilder struct {
+	spec *Extendable[Info]
+}
+
+func NewInfoBuilder() *InfoBuilder {
+	return &InfoBuilder{
+		spec: NewExtendable[Info](&Info{}),
+	}
+}
+
+func (b *InfoBuilder) Build() *Extendable[Info] {
+	return b.spec
+}
+
+func (b *InfoBuilder) Extensions(v map[string]any) *InfoBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *InfoBuilder) AddExt(name string, value any) *InfoBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *InfoBuilder) Title(v string) *InfoBuilder {
+	b.spec.Spec.Title = v
+	return b
+}
+
+func (b *InfoBuilder) Summary(v string) *InfoBuilder {
+	b.spec.Spec.Summary = v
+	return b
+}
+
+func (b *InfoBuilder) Description(v string) *InfoBuilder {
+	b.spec.Spec.Description = v
+	return b
+}
+
+func (b *InfoBuilder) TermsOfService(v string) *InfoBuilder {
+	b.spec.Spec.TermsOfService = v
+	return b
+}
+
+func (b *InfoBuilder) Contact(v *Extendable[Contact]) *InfoBuilder {
+	b.spec.Spec.Contact = v
+	return b
+}
+
+func (b *InfoBuilder) License(v *Extendable[License]) *InfoBuilder {
+	b.spec.Spec.License = v
+	return b
+}
+
+func (b *InfoBuilder) Version(v string) *InfoBuilder {
+	b.spec.Spec.Version = v
+	return b
+}

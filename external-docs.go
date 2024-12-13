@@ -28,3 +28,37 @@ func (o *ExternalDocs) validateSpec(location string, opts *specValidationOptions
 	}
 	return errs
 }
+
+type ExternalDocsBuilder struct {
+	spec *Extendable[ExternalDocs]
+}
+
+func NewExternalDocsBuilder() *ExternalDocsBuilder {
+	return &ExternalDocsBuilder{
+		spec: NewExtendable[ExternalDocs](&ExternalDocs{}),
+	}
+}
+
+func (b *ExternalDocsBuilder) Build() *Extendable[ExternalDocs] {
+	return b.spec
+}
+
+func (b *ExternalDocsBuilder) Extensions(v map[string]any) *ExternalDocsBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *ExternalDocsBuilder) AddExt(name string, value any) *ExternalDocsBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *ExternalDocsBuilder) Description(v string) *ExternalDocsBuilder {
+	b.spec.Spec.Description = v
+	return b
+}
+
+func (b *ExternalDocsBuilder) URL(v string) *ExternalDocsBuilder {
+	b.spec.Spec.URL = v
+	return b
+}
