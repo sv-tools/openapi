@@ -117,7 +117,7 @@ func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*
 		}
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.Components.validateSpec(joinLoc(location, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), opts)...)
 	}
 	if o.Paths == nil && o.WebHooks == nil && o.Components == nil {
 		errs = append(errs, newValidationError(joinLoc(location, "paths||webhooks||components"), ErrRequired))
