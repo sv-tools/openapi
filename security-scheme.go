@@ -74,7 +74,7 @@ type SecurityScheme struct {
 	OpenIDConnectURL string `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
 }
 
-func (o *SecurityScheme) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *SecurityScheme) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Type == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "type"), ErrRequired))
@@ -101,7 +101,7 @@ func (o *SecurityScheme) validateSpec(location string, opts *specValidationOptio
 			if o.Flows == nil {
 				errs = append(errs, newValidationError(joinLoc(location, "flows"), ErrRequired))
 			} else {
-				errs = o.Flows.validateSpec(joinLoc(location, "flows"), opts)
+				errs = o.Flows.validateSpec(joinLoc(location, "flows"), validator)
 			}
 		case TypeOpenIDConnect:
 			if o.OpenIDConnectURL == "" {

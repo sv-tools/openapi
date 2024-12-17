@@ -13,6 +13,8 @@ paths:
             200 response
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Versions'
               examples:
                 foo:
                   value: |
@@ -47,34 +49,36 @@ paths:
             300 response
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Versions'
               examples:
                 foo:
                   value: |
                     {
-                     "versions": [
-                           {
-                             "status": "CURRENT",
-                             "updated": "2011-01-21T11:33:21Z",
-                             "id": "v2.0",
-                             "links": [
-                                 {
-                                     "href": "http://127.0.0.1:8774/v2/",
-                                     "rel": "self"
-                                 }
-                             ]
-                         },
-                         {
-                             "status": "EXPERIMENTAL",
-                             "updated": "2013-07-23T11:33:21Z",
-                             "id": "v3.0",
-                             "links": [
-                                 {
-                                     "href": "http://127.0.0.1:8774/v3/",
-                                     "rel": "self"
-                                 }
-                             ]
-                         }
-                     ]
+                      "versions": [
+                        {
+                          "status": "CURRENT",
+                          "updated": "2011-01-21T11:33:21Z",
+                          "id": "v2.0",
+                          "links": [
+                            {
+                              "href": "http://127.0.0.1:8774/v2/",
+                              "rel": "self"
+                            }
+                          ]
+                        },
+                        {
+                          "status": "EXPERIMENTAL",
+                          "updated": "2013-07-23T11:33:21Z",
+                          "id": "v3.0",
+                          "links": [
+                            {
+                              "href": "http://127.0.0.1:8774/v3/",
+                              "rel": "self"
+                            }
+                          ]
+                        }
+                      ]
                     }
   /v2:
     get:
@@ -86,6 +90,8 @@ paths:
             200 response
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/VersionDetails'
               examples:
                 foo:
                   value: |
@@ -132,6 +138,8 @@ paths:
             203 response
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/VersionDetails'
               examples:
                 foo:
                   value: |
@@ -168,3 +176,61 @@ paths:
                         ]
                       }
                     }
+components:
+  schemas:
+    Version:
+      type: object
+      properties:
+        status:
+          type: string
+        updated:
+          type: string
+        media-types:
+          type: array
+          items:
+            type: object
+            properties:
+              base:
+                type: string
+              type:
+                type: string
+            required:
+              - base
+              - type
+        id:
+          type: string
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                type: string
+              rel:
+                type: string
+              type:
+                type: string
+            required:
+              - href
+              - rel
+      required:
+        - status
+        - updated
+        - id
+        - links
+    Versions:
+      type: object
+      properties:
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Version'
+      required:
+        - versions
+    VersionDetails:
+      type: object
+      properties:
+        version:
+          $ref: '#/components/schemas/Version'
+      required:
+        - version

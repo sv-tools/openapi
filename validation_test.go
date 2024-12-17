@@ -39,12 +39,13 @@ func TestValidator_ValidateSpec(t *testing.T) {
 			default:
 				t.Fatal("wrong file")
 			}
-			v, err := openapi.NewValidator(o)
-			require.NoError(t, err)
-			require.NoError(t, v.ValidateSpec(
-				openapi.DoNotValidateExamples(),
+			v, err := openapi.NewValidator(
+				o,
 				openapi.AllowUndefinedTagsInOperation(),
-			))
+				openapi.ValidateStringDataAsJSON(),
+			)
+			require.NoError(t, err)
+			require.NoError(t, v.ValidateSpec())
 		})
 	}
 }
@@ -53,7 +54,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 	for _, tt := range []struct {
 		name string
 		spec *openapi.Extendable[openapi.OpenAPI]
-		opts []openapi.SpecValidationOption
+		opts []openapi.ValidationOption
 		err  string
 	}{
 		{
@@ -119,7 +120,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 				).
 				Build(),
 			).Build(),
-			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			opts: []openapi.ValidationOption{openapi.AllowUnusedComponents()},
 		},
 		{
 			name: "properties examples",
@@ -153,7 +154,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 					},
 				).Build(),
 			).Build(),
-			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			opts: []openapi.ValidationOption{openapi.AllowUnusedComponents()},
 		},
 		{
 			name: "properties examples error",
@@ -180,7 +181,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 					},
 				).Build(),
 			).Build(),
-			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			opts: []openapi.ValidationOption{openapi.AllowUnusedComponents()},
 			err:  "at '/id': got string, want integer",
 		},
 		{
@@ -204,7 +205,7 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 					Build(),
 				).Build(),
 			).Build(),
-			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			opts: []openapi.ValidationOption{openapi.AllowUnusedComponents()},
 		},
 		{
 			name: "properties default error",
@@ -227,15 +228,15 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 					Build(),
 				).Build(),
 			).Build(),
-			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			opts: []openapi.ValidationOption{openapi.AllowUnusedComponents()},
 			err:  "at '': got string, want integer",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			v, err := openapi.NewValidator(tt.spec)
+			v, err := openapi.NewValidator(tt.spec, tt.opts...)
 			require.NoError(t, err)
 
-			err = v.ValidateSpec(tt.opts...)
+			err = v.ValidateSpec()
 			t.Log("error: ", err)
 
 			if tt.err == "" {

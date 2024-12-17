@@ -59,18 +59,18 @@ type OpenAPI struct {
 	Servers []*Extendable[Server] `json:"servers,omitempty" yaml:"servers,omitempty"`
 }
 
-func checkUnusedComponent[T any](name string, m map[string]T, opts *specValidationOptions) []*validationError {
+func checkUnusedComponent[T any](name string, m map[string]T, validator *Validator) []*validationError {
 	var errs []*validationError
 	for k := range m {
 		id := joinLoc("#", "components", name, k)
-		if !opts.visited[id] {
+		if !validator.visited[id] {
 			errs = append(errs, newValidationError(id, ErrUnused))
 		}
 	}
 	return errs
 }
 
-func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *OpenAPI) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.OpenAPI == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "openapi"), ErrRequired))
@@ -82,13 +82,13 @@ func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*
 	if o.Info == nil {
 		errs = append(errs, newValidationError(joinLoc(location, "info"), ErrRequired))
 	} else {
-		errs = append(errs, o.Info.validateSpec(joinLoc(location, "info"), opts)...)
+		errs = append(errs, o.Info.validateSpec(joinLoc(location, "info"), validator)...)
 	}
 
 	// validate tags first to memorize them for later checking
 	if o.Tags != nil {
 		for i, tag := range o.Tags {
-			errs = append(errs, tag.validateSpec(joinLoc(location, "tag", i), opts)...)
+			errs = append(errs, tag.validateSpec(joinLoc(location, "tag", i), validator)...)
 		}
 	}
 
@@ -97,27 +97,27 @@ func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*
 	}
 	if o.Servers != nil {
 		for i, server := range o.Servers {
-			errs = append(errs, server.validateSpec(joinLoc(location, "servers", i), opts)...)
+			errs = append(errs, server.validateSpec(joinLoc(location, "servers", i), validator)...)
 		}
 	}
 	if o.Paths != nil {
-		errs = append(errs, o.Paths.validateSpec(joinLoc(location, "paths"), opts)...)
+		errs = append(errs, o.Paths.validateSpec(joinLoc(location, "paths"), validator)...)
 	}
 	if o.WebHooks != nil {
 		for name, webhook := range o.WebHooks {
-			errs = append(errs, webhook.validateSpec(joinLoc(location, "webhooks", name), opts)...)
+			errs = append(errs, webhook.validateSpec(joinLoc(location, "webhooks", name), validator)...)
 		}
 	}
 	if o.Components != nil {
-		errs = append(errs, o.Components.validateSpec(joinLoc(location, "components"), opts)...)
+		errs = append(errs, o.Components.validateSpec(joinLoc(location, "components"), validator)...)
 	}
 	if o.Security != nil {
 		for i, security := range o.Security {
-			errs = append(errs, security.validateSpec(joinLoc(location, "security", i), opts)...)
+			errs = append(errs, security.validateSpec(joinLoc(location, "security", i), validator)...)
 		}
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), validator)...)
 	}
 	if o.Paths == nil && o.WebHooks == nil && o.Components == nil {
 		errs = append(errs, newValidationError(joinLoc(location, "paths||webhooks||components"), ErrRequired))
@@ -125,25 +125,25 @@ func (o *OpenAPI) validateSpec(location string, opts *specValidationOptions) []*
 
 	// check for unused
 	for i, t := range o.Tags {
-		if !opts.visited[joinLoc("tags", t.Spec.Name, "used")] {
+		if !validator.visited[joinLoc("tags", t.Spec.Name, "used")] {
 			errs = append(errs, newValidationError(joinLoc(location, "tags", i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
 		}
 	}
-	if o.Components != nil && !opts.allowUnusedComponents {
-		errs = append(errs, checkUnusedComponent("schemas", o.Components.Spec.Schemas, opts)...)
-		errs = append(errs, checkUnusedComponent("responses", o.Components.Spec.Responses, opts)...)
-		errs = append(errs, checkUnusedComponent("parameters", o.Components.Spec.Parameters, opts)...)
-		errs = append(errs, checkUnusedComponent("examples", o.Components.Spec.Examples, opts)...)
-		errs = append(errs, checkUnusedComponent("requestBodies", o.Components.Spec.RequestBodies, opts)...)
-		errs = append(errs, checkUnusedComponent("headers", o.Components.Spec.Headers, opts)...)
-		errs = append(errs, checkUnusedComponent("securitySchemes", o.Components.Spec.SecuritySchemes, opts)...)
-		errs = append(errs, checkUnusedComponent("links", o.Components.Spec.Links, opts)...)
-		errs = append(errs, checkUnusedComponent("callbacks", o.Components.Spec.Callbacks, opts)...)
-		errs = append(errs, checkUnusedComponent("paths", o.Components.Spec.Paths, opts)...)
+	if o.Components != nil && !validator.opts.allowUnusedComponents {
+		errs = append(errs, checkUnusedComponent("schemas", o.Components.Spec.Schemas, validator)...)
+		errs = append(errs, checkUnusedComponent("responses", o.Components.Spec.Responses, validator)...)
+		errs = append(errs, checkUnusedComponent("parameters", o.Components.Spec.Parameters, validator)...)
+		errs = append(errs, checkUnusedComponent("examples", o.Components.Spec.Examples, validator)...)
+		errs = append(errs, checkUnusedComponent("requestBodies", o.Components.Spec.RequestBodies, validator)...)
+		errs = append(errs, checkUnusedComponent("headers", o.Components.Spec.Headers, validator)...)
+		errs = append(errs, checkUnusedComponent("securitySchemes", o.Components.Spec.SecuritySchemes, validator)...)
+		errs = append(errs, checkUnusedComponent("links", o.Components.Spec.Links, validator)...)
+		errs = append(errs, checkUnusedComponent("callbacks", o.Components.Spec.Callbacks, validator)...)
+		errs = append(errs, checkUnusedComponent("paths", o.Components.Spec.Paths, validator)...)
 	}
 
-	for k, v := range opts.linkToOperationID {
-		if !opts.visited[joinLoc("operations", v)] {
+	for k, v := range validator.linkToOperationID {
+		if !validator.visited[joinLoc("operations", v)] {
 			errs = append(errs, newValidationError(k, "'%s' not found", v))
 		}
 	}

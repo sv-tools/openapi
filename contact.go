@@ -20,7 +20,7 @@ type Contact struct {
 	Email string `json:"email,omitempty" yaml:"email,omitempty"`
 }
 
-func (o *Contact) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Contact) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if err := checkURL(o.URL); err != nil {
 		errs = append(errs, newValidationError(joinLoc(location, "url"), err))

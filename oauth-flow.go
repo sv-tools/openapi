@@ -46,7 +46,7 @@ type OAuthFlow struct {
 	RefreshURL string `json:"refreshUrl,omitempty" yaml:"refreshUrl,omitempty"`
 }
 
-func (o *OAuthFlow) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *OAuthFlow) validateSpec(path string, validator *Validator) []*validationError {
 	// all the validations are done in the parent object
 	return nil
 }

@@ -18,7 +18,7 @@ type ServerVariable struct {
 	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 }
 
-func (o *ServerVariable) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *ServerVariable) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Default == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "default"), ErrRequired))

@@ -77,6 +77,13 @@ func NewRefOrExtSpec[T any](v any) *RefOrSpec[Extendable[T]] {
 	return &o
 }
 
+func (o *RefOrSpec[T]) getLocationOrRef(location string) string {
+	if o.Ref != nil {
+		return o.Ref.Ref
+	}
+	return location
+}
+
 // GetSpec return a Spec if it is set or loads it from Components in case of Ref or an error
 func (o *RefOrSpec[T]) GetSpec(c *Extendable[Components]) (*T, error) {
 	return o.getSpec(c, make(visitedObjects))
@@ -190,25 +197,25 @@ func (o *RefOrSpec[T]) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *RefOrSpec[T]) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *RefOrSpec[T]) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Spec != nil {
 		if spec, ok := any(o.Spec).(validatable); ok {
-			errs = append(errs, spec.validateSpec(location, opts)...)
+			errs = append(errs, spec.validateSpec(location, validator)...)
 		} else {
 			errs = append(errs, newValidationError(location, fmt.Errorf("unsupported spec type: %T", o.Spec)))
 		}
 	} else {
 		// do not validate already visited refs
-		if opts.visited[o.Ref.Ref] {
+		if validator.visited[o.Ref.Ref] {
 			return errs
 		}
-		opts.visited[o.Ref.Ref] = true
-		spec, err := o.GetSpec(opts.validator.spec.Spec.Components)
+		validator.visited[o.Ref.Ref] = true
+		spec, err := o.GetSpec(validator.spec.Spec.Components)
 		if err != nil {
 			errs = append(errs, newValidationError(location, err))
 		} else if spec != nil {
-			errs = append(errs, o.validateSpec(location, opts)...)
+			errs = append(errs, o.validateSpec(location, validator)...)
 		}
 	}
 	return errs

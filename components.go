@@ -160,56 +160,56 @@ func (o *Components) Add(name string, v any) *Components {
 	return o
 }
 
-func (o *Components) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Components) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Schemas != nil {
 		for k, v := range o.Schemas {
-			errs = append(errs, v.validateSpec(joinLoc(location, "schemas", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "schemas", k), validator)...)
 		}
 	}
 	if o.Responses != nil {
 		for k, v := range o.Responses {
-			errs = append(errs, v.validateSpec(joinLoc(location, "responses", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "responses", k), validator)...)
 		}
 	}
 	if o.Parameters != nil {
 		for k, v := range o.Parameters {
-			errs = append(errs, v.validateSpec(joinLoc(location, "parameters", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "parameters", k), validator)...)
 		}
 	}
 	if o.Examples != nil {
 		for k, v := range o.Examples {
-			errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), validator)...)
 		}
 	}
 	if o.RequestBodies != nil {
 		for k, v := range o.RequestBodies {
-			errs = append(errs, v.validateSpec(joinLoc(location, "requestBodies", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "requestBodies", k), validator)...)
 		}
 	}
 	if o.Headers != nil {
 		for k, v := range o.Headers {
-			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), validator)...)
 		}
 	}
 	if o.SecuritySchemes != nil {
 		for k, v := range o.SecuritySchemes {
-			errs = append(errs, v.validateSpec(joinLoc(location, "securitySchemes", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "securitySchemes", k), validator)...)
 		}
 	}
 	if o.Links != nil {
 		for k, v := range o.Links {
-			errs = append(errs, v.validateSpec(joinLoc(location, "links", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "links", k), validator)...)
 		}
 	}
 	if o.Callbacks != nil {
 		for k, v := range o.Callbacks {
-			errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), validator)...)
 		}
 	}
 	if o.Paths != nil {
 		for k, v := range o.Paths {
-			errs = append(errs, v.validateSpec(joinLoc(location, "paths", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "paths", k), validator)...)
 		}
 	}
 

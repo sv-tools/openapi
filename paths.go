@@ -59,7 +59,7 @@ func (o *Paths) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &o.Paths)
 }
 
-func (o *Paths) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Paths) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	for k, v := range o.Paths {
 		if !strings.HasPrefix(k, "/") {
@@ -68,7 +68,7 @@ func (o *Paths) validateSpec(location string, opts *specValidationOptions) []*va
 		if v == nil {
 			errs = append(errs, newValidationError(joinLoc(location, k), "path item cannot be empty"))
 		} else {
-			errs = append(errs, v.validateSpec(joinLoc(location, k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, k), validator)...)
 		}
 	}
 	return errs
