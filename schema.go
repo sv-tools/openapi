@@ -479,21 +479,21 @@ func (o *Schema) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Schema) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 
 	if o.Discriminator != nil {
-		errs = append(errs, o.Discriminator.validateSpec(joinLoc(location, "discriminator"), opts)...)
+		errs = append(errs, o.Discriminator.validateSpec(joinLoc(location, "discriminator"), validator)...)
 	}
 	if o.XML != nil {
-		errs = append(errs, o.XML.validateSpec(joinLoc(location, "xml"), opts)...)
+		errs = append(errs, o.XML.validateSpec(joinLoc(location, "xml"), validator)...)
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), validator)...)
 	}
 	if o.Example != nil {
-		if !opts.doNotValidateExamples {
-			if e := opts.validator.ValidateDataAsJSON(location, o.Example); e != nil {
+		if !validator.opts.doNotValidateExamples {
+			if e := validator.ValidateData(location, o.Example); e != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "example"), e))
 			}
 		}
@@ -501,21 +501,21 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 
 	// JsonSchemaComposition
 	if o.Not != nil {
-		errs = append(errs, o.Not.validateSpec(joinLoc(location, "not"), opts)...)
+		errs = append(errs, o.Not.validateSpec(joinLoc(location, "not"), validator)...)
 	}
 	if o.AllOf != nil {
 		for i, v := range o.AllOf {
-			errs = append(errs, v.validateSpec(joinLoc(location, "allOf", i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "allOf", i), validator)...)
 		}
 	}
 	if o.AnyOf != nil {
 		for i, v := range o.AnyOf {
-			errs = append(errs, v.validateSpec(joinLoc(location, "anyOf", i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "anyOf", i), validator)...)
 		}
 	}
 	if o.OneOf != nil {
 		for i, v := range o.OneOf {
-			errs = append(errs, v.validateSpec(joinLoc(location, "oneOf", i), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "oneOf", i), validator)...)
 		}
 	}
 
@@ -525,7 +525,7 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 	}
 	if len(o.Defs) > 0 {
 		for k, v := range o.Defs {
-			errs = append(errs, v.validateSpec(joinLoc(location, "defs", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "defs", k), validator)...)
 		}
 	}
 	if o.Type != nil {
@@ -550,7 +550,7 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 
 	// JsonSchemaMedia
 	if o.ContentSchema != nil {
-		errs = append(errs, o.ContentSchema.validateSpec(joinLoc(location, "contentSchema"), opts)...)
+		errs = append(errs, o.ContentSchema.validateSpec(joinLoc(location, "contentSchema"), validator)...)
 	}
 	if o.ContentEncoding != "" {
 		switch o.ContentEncoding {
@@ -562,8 +562,8 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 
 	// JsonSchemaGeneric
 	if o.Default != nil {
-		if !opts.doNotValidateDefaultValues {
-			if e := opts.validator.ValidateDataAsJSON(location, o.Default); e != nil {
+		if !validator.opts.doNotValidateDefaultValues {
+			if e := validator.ValidateData(location, o.Default); e != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "default"), e))
 			}
 		}
@@ -581,9 +581,9 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 		}
 	}
 
-	if len(o.Examples) > 0 && !opts.doNotValidateExamples {
+	if len(o.Examples) > 0 && !validator.opts.doNotValidateExamples {
 		for k, v := range o.Examples {
-			if e := opts.validator.ValidateDataAsJSON(location, v); e != nil {
+			if e := validator.ValidateData(location, v); e != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
 			}
 		}
@@ -594,7 +594,7 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 			switch t {
 			case ArrayType: // JsonSchemaTypeArray
 				if o.Items != nil {
-					errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), opts)...)
+					errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), validator)...)
 				}
 				if o.MinItems != nil && *o.MinItems < 0 {
 					errs = append(errs, newValidationError(joinLoc(location, "minItems"), "must be greater than or equal to 0"))
@@ -606,10 +606,10 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 					}
 				}
 				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), opts)...)
+					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
 				}
 				if o.Contains != nil {
-					errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), opts)...)
+					errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), validator)...)
 				}
 				if o.MinContains != nil && *o.MinContains < 0 {
 					errs = append(errs, newValidationError(joinLoc(location, "minContains"), "must be greater than or equal to 0"))
@@ -622,31 +622,31 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 				}
 				if len(o.PrefixItems) > 0 {
 					for i, v := range o.PrefixItems {
-						errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), validator)...)
 					}
 				}
 			case ObjectType: // JsonSchemaTypeObject
 				if o.Properties != nil {
 					for k, v := range o.Properties {
-						errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), validator)...)
 					}
 				}
 				if o.PatternProperties != nil {
 					for k, v := range o.PatternProperties {
-						errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), opts)...)
+						errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), validator)...)
 						if _, err := regexp.Compile(k); err != nil {
 							errs = append(errs, newValidationError(joinLoc(location, "patternProperties", k), err))
 						}
 					}
 				}
 				if o.AdditionalProperties != nil {
-					errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), opts)...)
+					errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), validator)...)
 				}
 				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), opts)...)
+					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
 				}
 				if o.PropertyNames != nil {
-					errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), opts)...)
+					errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), validator)...)
 				}
 				if o.MinProperties != nil && *o.MinProperties < 0 {
 					errs = append(errs, newValidationError(joinLoc(location, "minProperties"), "must be greater than or equal to 0"))

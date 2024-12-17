@@ -177,7 +177,7 @@ type Parameter struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-func (o *Parameter) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Parameter) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
 		errs = append(errs, newValidationError(joinLoc(location, "schema&content"), ErrMutuallyExclusive))
@@ -191,11 +191,11 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 			errs = append(errs, newValidationError(joinLoc(location, "content"), "invalid number of items, expected only one, but got '%d'", l))
 		}
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), validator)...)
 		}
 	}
 	if o.Schema != nil {
-		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), opts)...)
+		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), validator)...)
 	}
 
 	switch o.In {
@@ -248,50 +248,40 @@ func (o *Parameter) validateSpec(location string, opts *specValidationOptions) [
 		errs = append(errs, newValidationError(joinLoc(location, "required"), "must be `true` when `in` is '%s'", InPath))
 	}
 
-	if opts.doNotValidateExamples {
+	if validator.opts.doNotValidateExamples {
 		return errs
 	}
-	var spec *Schema
+	var schemaRef string
 	if o.Schema != nil {
-		var err error
-		spec, err = o.Schema.GetSpec(opts.validator.spec.Spec.Components)
-		if err != nil {
-			// do not add the error, because it is already validated earlier
-			return errs
-		}
-	} else if o.Content != nil {
-		for _, v := range o.Content {
-			if v != nil {
-				var err error
-				spec, err = v.Spec.Schema.GetSpec(opts.validator.spec.Spec.Components)
-				if err != nil {
-					// do not add the error, because it is already validated earlier
-					return errs
-				}
-				break
-			}
+		schemaRef = o.Schema.getLocationOrRef(joinLoc(location, "schema"))
+	} else if len(o.Content) > 0 {
+		for k, v := range o.Content {
+			schemaRef = v.Spec.Schema.getLocationOrRef(joinLoc(location, "content", k, "schema"))
+			break
 		}
 	}
-	if spec != nil {
+	if schemaRef != "'" {
 		if o.Example != nil {
-			if e := opts.validator.ValidateDataAsJSON(location, o.Example); e != nil {
+			if e := validator.ValidateData(joinLoc(location, "schema"), o.Example); e != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "example"), e))
 			}
 		}
 		if len(o.Examples) > 0 {
 			for k, v := range o.Examples {
-				example, err := v.GetSpec(opts.validator.spec.Spec.Components)
+				example, err := v.GetSpec(validator.spec.Spec.Components)
 				if err != nil {
 					// do not add the error, because it is already validated earlier
 					continue
 				}
 				if value := example.Spec.Value; value != nil {
-					if e := opts.validator.ValidateDataAsJSON(location, value); e != nil {
+					if e := validator.ValidateData(joinLoc(location, "schema"), value); e != nil {
 						errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
 					}
 				}
 			}
 		}
+	} else {
+		errs = append(errs, newValidationError(location, "unable to validate examples without schema or content"))
 	}
 	return errs
 }

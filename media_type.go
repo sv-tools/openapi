@@ -46,14 +46,14 @@ type MediaType struct {
 	Encoding map[string]*Extendable[Encoding] `json:"encoding,omitempty" yaml:"encoding,omitempty"`
 }
 
-func (o *MediaType) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *MediaType) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil {
-		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), opts)...)
+		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), validator)...)
 	}
 	if len(o.Encoding) > 0 {
 		for k, v := range o.Encoding {
-			errs = append(errs, v.validateSpec(joinLoc(location, "encoding", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "encoding", k), validator)...)
 		}
 	}
 	if o.Example != nil && len(o.Examples) > 0 {
@@ -61,30 +61,31 @@ func (o *MediaType) validateSpec(location string, opts *specValidationOptions) [
 	}
 	if len(o.Examples) > 0 {
 		for k, v := range o.Examples {
-			errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), validator)...)
 		}
 	}
 
-	if opts.doNotValidateExamples {
+	if validator.opts.doNotValidateExamples {
 		return errs
 	}
 	if o.Schema == nil {
 		return append(errs, newValidationError(location, "unable to validate examples without schema"))
 	}
+	schemaRef := o.Schema.getLocationOrRef(joinLoc(location, "schema"))
 	if o.Example != nil {
-		if e := opts.validator.ValidateDataAsJSON(location, o.Example); e != nil {
+		if e := validator.ValidateData(schemaRef, o.Example); e != nil {
 			errs = append(errs, newValidationError(joinLoc(location, "example"), e))
 		}
 	}
 	if len(o.Examples) > 0 {
 		for k, v := range o.Examples {
-			example, err := v.GetSpec(opts.validator.spec.Spec.Components)
+			example, err := v.GetSpec(validator.spec.Spec.Components)
 			if err != nil {
 				// do not add the error, because it is already validated earlier
 				continue
 			}
 			if value := example.Spec.Value; value != nil {
-				if e := opts.validator.ValidateDataAsJSON(location, value); e != nil {
+				if e := validator.ValidateData(schemaRef, value); e != nil {
 					errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
 				}
 			}

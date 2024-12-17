@@ -30,7 +30,7 @@ type Server struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Server) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Server) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "url"), ErrRequired))
@@ -42,7 +42,7 @@ func (o *Server) validateSpec(location string, opts *specValidationOptions) []*v
 	} else {
 		oldnew := make([]string, 0, l*2)
 		for k, v := range o.Variables {
-			errs = append(errs, v.validateSpec(joinLoc(location, "variables", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "variables", k), validator)...)
 			oldnew = append(oldnew, "{"+k+"}", v.Spec.Default)
 		}
 		u := strings.NewReplacer(oldnew...).Replace(o.URL)

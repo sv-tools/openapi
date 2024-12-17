@@ -32,28 +32,28 @@ type OAuthFlows struct {
 	AuthorizationCode *Extendable[OAuthFlow] `json:"authorizationCode,omitempty" yaml:"authorizationCode,omitempty"`
 }
 
-func (o *OAuthFlows) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *OAuthFlows) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Implicit != nil {
-		errs = append(errs, o.Implicit.validateSpec(joinLoc(location, "implicit"), opts)...)
+		errs = append(errs, o.Implicit.validateSpec(joinLoc(location, "implicit"), validator)...)
 		if o.Implicit.Spec.AuthorizationURL == "" {
 			errs = append(errs, newValidationError(joinLoc(location, "implicit", "authorizationUrl"), ErrRequired))
 		}
 	}
 	if o.Password != nil {
-		errs = append(errs, o.Password.validateSpec(joinLoc(location, "password"), opts)...)
+		errs = append(errs, o.Password.validateSpec(joinLoc(location, "password"), validator)...)
 		if o.Password.Spec.TokenURL == "" {
 			errs = append(errs, newValidationError(joinLoc(location, "password", "tokenUrl"), ErrRequired))
 		}
 	}
 	if o.ClientCredentials != nil {
-		errs = append(errs, o.ClientCredentials.validateSpec(joinLoc(location, "clientCredentials"), opts)...)
+		errs = append(errs, o.ClientCredentials.validateSpec(joinLoc(location, "clientCredentials"), validator)...)
 		if o.ClientCredentials.Spec.TokenURL == "" {
 			errs = append(errs, newValidationError(joinLoc(location, "clientCredentials", "tokenUrl"), ErrRequired))
 		}
 	}
 	if o.AuthorizationCode != nil {
-		errs = append(errs, o.AuthorizationCode.validateSpec(joinLoc(location, "authorizationCode"), opts)...)
+		errs = append(errs, o.AuthorizationCode.validateSpec(joinLoc(location, "authorizationCode"), validator)...)
 		if o.AuthorizationCode.Spec.AuthorizationURL == "" {
 			errs = append(errs, newValidationError(joinLoc(location, "authorizationCode", "authorizationUrl"), ErrRequired))
 		}

@@ -40,7 +40,7 @@ type Info struct {
 	Version string `json:"version" yaml:"version"`
 }
 
-func (o *Info) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Info) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Title == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "title"), ErrRequired))
@@ -49,10 +49,10 @@ func (o *Info) validateSpec(location string, opts *specValidationOptions) []*val
 		errs = append(errs, newValidationError(joinLoc(location, "version"), ErrRequired))
 	}
 	if o.Contact != nil {
-		errs = append(errs, o.Contact.validateSpec(joinLoc(location, "contact"), opts)...)
+		errs = append(errs, o.Contact.validateSpec(joinLoc(location, "contact"), validator)...)
 	}
 	if o.License != nil {
-		errs = append(errs, o.License.validateSpec(joinLoc(location, "license"), opts)...)
+		errs = append(errs, o.License.validateSpec(joinLoc(location, "license"), validator)...)
 	}
 	if err := checkURL(o.TermsOfService); err != nil {
 		errs = append(errs, newValidationError(joinLoc(location, "termsOfService"), err))

@@ -38,7 +38,7 @@ type Header struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-func (o *Header) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Header) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Schema != nil && o.Content != nil {
 		errs = append(errs, newValidationError(joinLoc(location, "schema&content"), ErrMutuallyExclusive))
@@ -49,11 +49,11 @@ func (o *Header) validateSpec(location string, opts *specValidationOptions) []*v
 			errs = append(errs, newValidationError(joinLoc(location, "content"), "must be only one item, but got '%d'", l))
 		}
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), validator)...)
 		}
 	}
 	if o.Schema != nil {
-		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), opts)...)
+		errs = append(errs, o.Schema.validateSpec(joinLoc(location, "schema"), validator)...)
 	}
 
 	switch o.Style {

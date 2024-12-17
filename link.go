@@ -80,24 +80,24 @@ type Link struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (o *Link) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Link) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.OperationRef != "" && o.OperationID != "" {
 		errs = append(errs, newValidationError(joinLoc(location, "operationRef&operationId"), ErrMutuallyExclusive))
 	}
 	if o.OperationID != "" {
 		id := joinLoc("operations", o.OperationID)
-		if !opts.visited[id] {
-			opts.linkToOperationID[joinLoc(location, "operationId")] = o.OperationID
+		if !validator.visited[id] {
+			validator.linkToOperationID[joinLoc(location, "operationId")] = o.OperationID
 		}
 	}
 	// uncomment when JSONLookup is implemented
 	//if o.OperationRef != "" {
 	//	ref := NewRefOrExtSpec[Operation](o.OperationRef)
-	//	errs = append(errs, ref.validateSpec(joinLoc(location, "operationRef"), opts)...)
+	//	errs = append(errs, ref.validateSpec(joinLoc(location, "operationRef"), validator)...)
 	//}
 	if o.Server != nil {
-		errs = append(errs, o.Server.validateSpec(joinLoc(location, "server"), opts)...)
+		errs = append(errs, o.Server.validateSpec(joinLoc(location, "server"), validator)...)
 	}
 	return errs
 }

@@ -18,7 +18,7 @@ type ExternalDocs struct {
 	URL string `json:"url" yaml:"url"`
 }
 
-func (o *ExternalDocs) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *ExternalDocs) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.URL == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "url"), ErrRequired))

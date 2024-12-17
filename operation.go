@@ -101,62 +101,62 @@ type Operation struct {
 	Deprecated bool `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 
-func (o *Operation) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Operation) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.OperationID != "" {
 		id := joinLoc("operations", o.OperationID)
-		if opts.visited[id] {
+		if validator.visited[id] {
 			errs = append(errs, newValidationError(joinLoc(location, "operationId"), "'%s' is not unique", o.OperationID))
 		} else {
-			opts.visited[id] = true
+			validator.visited[id] = true
 		}
 	}
 
 	if o.RequestBody != nil {
 		nextLoc := joinLoc(location, "requestBody")
-		errs = append(errs, o.RequestBody.validateSpec(nextLoc, opts)...)
+		errs = append(errs, o.RequestBody.validateSpec(nextLoc, validator)...)
 		switch {
-		case !opts.allowRequestBodyForGet && strings.HasSuffix(location, "get"):
+		case !validator.opts.allowRequestBodyForGet && strings.HasSuffix(location, "get"):
 			errs = append(errs, newValidationError(location, "not allowed for get"))
-		case !opts.allowRequestBodyForDelete && strings.HasSuffix(location, "delete"):
+		case !validator.opts.allowRequestBodyForDelete && strings.HasSuffix(location, "delete"):
 			errs = append(errs, newValidationError(nextLoc, "not allowed for delete"))
-		case !opts.allowRequestBodyForHead && strings.HasSuffix(location, "head"):
+		case !validator.opts.allowRequestBodyForHead && strings.HasSuffix(location, "head"):
 			errs = append(errs, newValidationError(nextLoc, "not allowed for head"))
 		}
 	}
 	if o.Responses != nil {
-		errs = append(errs, o.Responses.validateSpec(joinLoc(location, "responses"), opts)...)
+		errs = append(errs, o.Responses.validateSpec(joinLoc(location, "responses"), validator)...)
 	}
 	if o.Callbacks != nil {
 		for k, v := range o.Callbacks {
-			errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), validator)...)
 		}
 	}
 	if o.ExternalDocs != nil {
-		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), opts)...)
+		errs = append(errs, o.ExternalDocs.validateSpec(joinLoc(location, "externalDocs"), validator)...)
 	}
 	if o.Parameters != nil {
 		for i, p := range o.Parameters {
-			errs = append(errs, p.validateSpec(joinLoc(location, "parameters", i), opts)...)
+			errs = append(errs, p.validateSpec(joinLoc(location, "parameters", i), validator)...)
 		}
 	}
 	if o.Tags != nil {
 		for i, t := range o.Tags {
-			if !opts.allowUndefinedTagsInOperation && !opts.visited[joinLoc("tags", t)] {
+			if !validator.opts.allowUndefinedTagsInOperation && !validator.visited[joinLoc("tags", t)] {
 				errs = append(errs, newValidationError(joinLoc(location, "tags", i), "'%s' not found", t))
 
 			}
-			opts.visited[joinLoc("tags", t, "used")] = true
+			validator.visited[joinLoc("tags", t, "used")] = true
 		}
 	}
 	if o.Security != nil {
 		for i, s := range o.Security {
-			errs = append(errs, s.validateSpec(joinLoc(location, "security", i), opts)...)
+			errs = append(errs, s.validateSpec(joinLoc(location, "security", i), validator)...)
 		}
 	}
 	if o.Servers != nil {
 		for i, s := range o.Servers {
-			errs = append(errs, s.validateSpec(joinLoc(location, "servers", i), opts)...)
+			errs = append(errs, s.validateSpec(joinLoc(location, "servers", i), validator)...)
 		}
 	}
 

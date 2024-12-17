@@ -74,11 +74,11 @@ type Encoding struct {
 	AllowReserved bool `json:"allowReserved,omitempty" yaml:"allowReserved,omitempty"`
 }
 
-func (o *Encoding) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Encoding) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if len(o.Headers) > 0 {
 		for k, v := range o.Headers {
-			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), validator)...)
 		}
 	}
 

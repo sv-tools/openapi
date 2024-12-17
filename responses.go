@@ -133,16 +133,16 @@ func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
 	return yaml.Unmarshal(data, &o.Response)
 }
 
-func (o *Responses) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Responses) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.Default != nil {
-		errs = append(errs, o.Default.validateSpec(joinLoc(location, "default"), opts)...)
+		errs = append(errs, o.Default.validateSpec(joinLoc(location, "default"), validator)...)
 	}
 	for k, v := range o.Response {
 		if !ResponseCodePattern.MatchString(k) {
 			errs = append(errs, newValidationError(joinLoc(location, k), "must match pattern '%s', but got '%s'", ResponseCodePattern, k))
 		}
-		errs = append(errs, v.validateSpec(joinLoc(location, k), opts)...)
+		errs = append(errs, v.validateSpec(joinLoc(location, k), validator)...)
 	}
 	return errs
 }

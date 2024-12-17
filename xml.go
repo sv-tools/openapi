@@ -46,7 +46,7 @@ type XML struct {
 	Wrapped bool `json:"wrapped,omitempty" yaml:"wrapped,omitempty"`
 }
 
-func (o *XML) validateSpec(path string, opts *specValidationOptions) []*validationError {
+func (o *XML) validateSpec(path string, validator *Validator) []*validationError {
 	return nil // nothing to validate
 }
 

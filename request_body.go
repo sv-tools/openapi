@@ -47,13 +47,13 @@ type RequestBody struct {
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
 }
 
-func (o *RequestBody) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *RequestBody) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if len(o.Content) == 0 {
 		errs = append(errs, newValidationError(joinLoc(location, "content"), ErrRequired))
 	} else {
 		for k, v := range o.Content {
-			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), opts)...)
+			errs = append(errs, v.validateSpec(joinLoc(location, "content", k), validator)...)
 		}
 	}
 	return errs

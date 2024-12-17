@@ -29,14 +29,14 @@ type Discriminator struct {
 	PropertyName string `json:"propertyName" yaml:"propertyName"`
 }
 
-func (o *Discriminator) validateSpec(location string, opts *specValidationOptions) []*validationError {
+func (o *Discriminator) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.PropertyName == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "propertyName"), ErrRequired))
 	}
 	for k, v := range o.Mapping {
 		ref := NewRefOrSpec[Schema](v)
-		errs = append(errs, ref.validateSpec(joinLoc(location, "mapping", k), opts)...)
+		errs = append(errs, ref.validateSpec(joinLoc(location, "mapping", k), validator)...)
 	}
 	return errs
 }
