@@ -53,3 +53,71 @@ func (o *Response) validateSpec(location string, opts *specValidationOptions) []
 	}
 	return errs
 }
+
+type ResponseBuilder struct {
+	spec *RefOrSpec[Extendable[Response]]
+}
+
+func NewResponseBuilder() *ResponseBuilder {
+	return &ResponseBuilder{
+		spec: NewRefOrExtSpec[Response](&Response{}),
+	}
+}
+
+func (b *ResponseBuilder) Build() *RefOrSpec[Extendable[Response]] {
+	return b.spec
+}
+
+func (b *ResponseBuilder) Extensions(v map[string]any) *ResponseBuilder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *ResponseBuilder) AddExt(name string, value any) *ResponseBuilder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *ResponseBuilder) Headers(v map[string]*RefOrSpec[Extendable[Header]]) *ResponseBuilder {
+	b.spec.Spec.Spec.Headers = v
+	return b
+}
+
+func (b *ResponseBuilder) AddHeader(key string, value *RefOrSpec[Extendable[Header]]) *ResponseBuilder {
+	if b.spec.Spec.Spec.Headers == nil {
+		b.spec.Spec.Spec.Headers = make(map[string]*RefOrSpec[Extendable[Header]], 1)
+	}
+	b.spec.Spec.Spec.Headers[key] = value
+	return b
+}
+
+func (b *ResponseBuilder) Content(v map[string]*Extendable[MediaType]) *ResponseBuilder {
+	b.spec.Spec.Spec.Content = v
+	return b
+}
+
+func (b *ResponseBuilder) AddContent(key string, value *Extendable[MediaType]) *ResponseBuilder {
+	if b.spec.Spec.Spec.Content == nil {
+		b.spec.Spec.Spec.Content = make(map[string]*Extendable[MediaType], 1)
+	}
+	b.spec.Spec.Spec.Content[key] = value
+	return b
+}
+
+func (b *ResponseBuilder) Links(v map[string]*RefOrSpec[Extendable[Link]]) *ResponseBuilder {
+	b.spec.Spec.Spec.Links = v
+	return b
+}
+
+func (b *ResponseBuilder) AddLink(key string, value *RefOrSpec[Extendable[Link]]) *ResponseBuilder {
+	if b.spec.Spec.Spec.Links == nil {
+		b.spec.Spec.Spec.Links = make(map[string]*RefOrSpec[Extendable[Link]], 1)
+	}
+	b.spec.Spec.Spec.Links[key] = value
+	return b
+}
+
+func (b *ResponseBuilder) Description(v string) *ResponseBuilder {
+	b.spec.Spec.Spec.Description = v
+	return b
+}

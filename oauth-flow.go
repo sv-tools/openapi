@@ -50,3 +50,55 @@ func (o *OAuthFlow) validateSpec(path string, opts *specValidationOptions) []*va
 	// all the validations are done in the parent object
 	return nil
 }
+
+type OAuthFlowBuilder struct {
+	spec *Extendable[OAuthFlow]
+}
+
+func NewOAuthFlowBuilder() *OAuthFlowBuilder {
+	return &OAuthFlowBuilder{
+		spec: NewExtendable[OAuthFlow](&OAuthFlow{}),
+	}
+}
+
+func (b *OAuthFlowBuilder) Build() *Extendable[OAuthFlow] {
+	return b.spec
+}
+
+func (b *OAuthFlowBuilder) Extensions(v map[string]any) *OAuthFlowBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *OAuthFlowBuilder) AddExt(name string, value any) *OAuthFlowBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *OAuthFlowBuilder) Scopes(v map[string]string) *OAuthFlowBuilder {
+	b.spec.Spec.Scopes = v
+	return b
+}
+
+func (b *OAuthFlowBuilder) AddScope(name, value string) *OAuthFlowBuilder {
+	if b.spec.Spec.Scopes == nil {
+		b.spec.Spec.Scopes = make(map[string]string, 1)
+	}
+	b.spec.Spec.Scopes[name] = value
+	return b
+}
+
+func (b *OAuthFlowBuilder) AuthorizationURL(v string) *OAuthFlowBuilder {
+	b.spec.Spec.AuthorizationURL = v
+	return b
+}
+
+func (b *OAuthFlowBuilder) TokenURL(v string) *OAuthFlowBuilder {
+	b.spec.Spec.TokenURL = v
+	return b
+}
+
+func (b *OAuthFlowBuilder) RefreshURL(v string) *OAuthFlowBuilder {
+	b.spec.Spec.RefreshURL = v
+	return b
+}

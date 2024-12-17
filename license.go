@@ -34,3 +34,42 @@ func (o *License) validateSpec(location string, opts *specValidationOptions) []*
 	}
 	return errs
 }
+
+type LicenseBuilder struct {
+	spec *Extendable[License]
+}
+
+func NewLicenseBuilder() *LicenseBuilder {
+	return &LicenseBuilder{
+		spec: NewExtendable[License](&License{}),
+	}
+}
+
+func (b *LicenseBuilder) Build() *Extendable[License] {
+	return b.spec
+}
+
+func (b *LicenseBuilder) Extensions(v map[string]any) *LicenseBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *LicenseBuilder) AddExt(name string, value any) *LicenseBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *LicenseBuilder) Name(v string) *LicenseBuilder {
+	b.spec.Spec.Name = v
+	return b
+}
+
+func (b *LicenseBuilder) Identifier(v string) *LicenseBuilder {
+	b.spec.Spec.Identifier = v
+	return b
+}
+
+func (b *LicenseBuilder) URL(v string) *LicenseBuilder {
+	b.spec.Spec.URL = v
+	return b
+}

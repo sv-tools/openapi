@@ -99,7 +99,7 @@ func TestExtendable_WithExt(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			ext := openapi.NewExtendable(&testExtendable{})
-			ext.WithExt(tt.key, tt.value)
+			ext.AddExt(tt.key, tt.value)
 			require.Equal(t, tt.expected, ext.Extensions)
 		})
 	}

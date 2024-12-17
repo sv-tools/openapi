@@ -64,3 +64,47 @@ func (o *OAuthFlows) validateSpec(location string, opts *specValidationOptions) 
 
 	return errs
 }
+
+type OAuthFlowsBuilder struct {
+	spec *Extendable[OAuthFlows]
+}
+
+func NewOAuthFlowsBuilder() *OAuthFlowsBuilder {
+	return &OAuthFlowsBuilder{
+		spec: NewExtendable[OAuthFlows](&OAuthFlows{}),
+	}
+}
+
+func (b *OAuthFlowsBuilder) Build() *Extendable[OAuthFlows] {
+	return b.spec
+}
+
+func (b *OAuthFlowsBuilder) Extensions(v map[string]any) *OAuthFlowsBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *OAuthFlowsBuilder) AddExt(name string, value any) *OAuthFlowsBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *OAuthFlowsBuilder) Implicit(v *Extendable[OAuthFlow]) *OAuthFlowsBuilder {
+	b.spec.Spec.Implicit = v
+	return b
+}
+
+func (b *OAuthFlowsBuilder) Password(v *Extendable[OAuthFlow]) *OAuthFlowsBuilder {
+	b.spec.Spec.Password = v
+	return b
+}
+
+func (b *OAuthFlowsBuilder) ClientCredentials(v *Extendable[OAuthFlow]) *OAuthFlowsBuilder {
+	b.spec.Spec.ClientCredentials = v
+	return b
+}
+
+func (b *OAuthFlowsBuilder) AuthorizationCode(v *Extendable[OAuthFlow]) *OAuthFlowsBuilder {
+	b.spec.Spec.AuthorizationCode = v
+	return b
+}

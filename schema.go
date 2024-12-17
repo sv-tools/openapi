@@ -28,9 +28,24 @@ const (
 type Schema struct {
 	// *** Core Fields ***
 
+	// The $schema keyword is used to declare which dialect of JSON Schema the schema was written for.
+	// The value of the $schema keyword is also the identifier for a schema that can be used to verify
+	// that the schema is valid according to the dialect $schema identifies.
+	// A schema that describes another schema is called a "meta-schema".
+	// $schema applies to the entire document and must be at the root level.
+	// It does not apply to externally referenced ($ref, $dynamicRef) documents.
+	// Those schemas need to declare their own $schema.
+	// If $schema is not used, an implementation might allow you to specify a value externally or
+	// it might make assumptions about which specification version should be used to evaluate the schema.
+	// It's recommended that all JSON Schemas have a $schema keyword to communicate to readers and
+	// tooling which specification version is intended.
+	//
 	// https://json-schema.org/understanding-json-schema/reference/schema#schema
 	Schema string `json:"$schema,omitempty" yaml:"$schema,omitempty"`
-	// https://json-schema.org/understanding-json-schema/structuring#dollarid
+	// The value of $id is a URI-reference without a fragment that resolves against the retrieval-uri.
+	// The resulting URI is the base URI for the schema.
+	//
+	// https://json-schema.org/understanding-json-schema/structuring#id
 	ID string `json:"$id,omitempty" yaml:"$id,omitempty"`
 	// https://json-schema.org/understanding-json-schema/structuring#dollardefs
 	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty" yaml:"$defs,omitempty"`
@@ -300,15 +315,25 @@ type Schema struct {
 	Extensions map[string]any `json:"-" yaml:"-"`
 }
 
-// WithExt sets the extension and returns the current object (self|this).
+// AddExt sets the extension and returns the current object (self|this).
 // Schema does not require special `x-` prefix.
 // The extension will be ignored if the name overlaps with a struct field during marshalling to JSON or YAML.
-func (o *Schema) WithExt(name string, value any) *Schema {
+func (o *Schema) AddExt(name string, value any) *Schema {
 	if o.Extensions == nil {
 		o.Extensions = make(map[string]any, 1)
 	}
 	o.Extensions[name] = value
 	return o
+}
+
+func (o *Schema) GetExt(name string) any {
+	if o.Extensions == nil {
+		return nil
+	}
+	if !strings.HasPrefix(name, ExtensionPrefix) {
+		name = ExtensionPrefix + name
+	}
+	return o.Extensions[name]
 }
 
 // returns the list of public fields for given tag and ignores `-` names
@@ -686,4 +711,417 @@ func (o *Schema) validateSpec(location string, opts *specValidationOptions) []*v
 		}
 	}
 	return errs
+}
+
+type SchemaBulder struct {
+	spec *RefOrSpec[Schema]
+}
+
+func NewSchemaBuilder() *SchemaBulder {
+	return &SchemaBulder{
+		spec: NewRefOrSpec[Schema](&Schema{
+			Schema: Draft202012,
+		}),
+	}
+}
+
+func (b *SchemaBulder) Build() *RefOrSpec[Schema] {
+	return b.spec
+}
+
+func (b *SchemaBulder) Extensions(v map[string]any) *SchemaBulder {
+	b.spec.Spec.Extensions = v
+	return b
+}
+
+func (b *SchemaBulder) AddExt(name string, value any) *SchemaBulder {
+	b.spec.Spec.AddExt(name, value)
+	return b
+}
+
+func (b *SchemaBulder) Schema(v string) *SchemaBulder {
+	b.spec.Spec.Schema = v
+	return b
+}
+
+func (b *SchemaBulder) ID(v string) *SchemaBulder {
+	b.spec.Spec.ID = v
+	return b
+}
+
+func (b *SchemaBulder) Defs(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Defs = v
+	return b
+}
+
+func (b *SchemaBulder) AddDef(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Spec.Defs == nil {
+		b.spec.Spec.Defs = make(map[string]*RefOrSpec[Schema], 1)
+	}
+	b.spec.Spec.Defs[name] = value
+	return b
+}
+
+func (b *SchemaBulder) DynamicRef(v string) *SchemaBulder {
+	b.spec.Spec.DynamicRef = v
+	return b
+}
+
+func (b *SchemaBulder) Vocabulary(v map[string]bool) *SchemaBulder {
+	b.spec.Spec.Vocabulary = v
+	return b
+}
+
+func (b *SchemaBulder) AddVocabulary(name string, value bool) *SchemaBulder {
+	if b.spec.Spec.Vocabulary == nil {
+		b.spec.Spec.Vocabulary = make(map[string]bool, 1)
+	}
+	b.spec.Spec.Vocabulary[name] = value
+	return b
+}
+
+func (b *SchemaBulder) DynamicAnchor(v string) *SchemaBulder {
+	b.spec.Spec.DynamicAnchor = v
+	return b
+}
+
+func (b *SchemaBulder) Type(v ...string) *SchemaBulder {
+	b.spec.Spec.Type = NewSingleOrArray[string](v...)
+	return b
+}
+
+func (b *SchemaBulder) AddType(v ...string) *SchemaBulder {
+	if b.spec.Spec.Type == nil {
+		b.spec.Spec.Type = NewSingleOrArray[string](v...)
+	} else {
+		b.spec.Spec.Type.Add(v...)
+	}
+	return b
+}
+
+func (b *SchemaBulder) Default(v any) *SchemaBulder {
+	b.spec.Spec.Default = v
+	return b
+}
+
+func (b *SchemaBulder) Title(v string) *SchemaBulder {
+	b.spec.Spec.Title = v
+	return b
+}
+
+func (b *SchemaBulder) Description(v string) *SchemaBulder {
+	b.spec.Spec.Description = v
+	return b
+}
+
+func (b *SchemaBulder) Const(v string) *SchemaBulder {
+	b.spec.Spec.Const = v
+	return b
+}
+
+func (b *SchemaBulder) Comment(v string) *SchemaBulder {
+	b.spec.Spec.Comment = v
+	return b
+}
+
+func (b *SchemaBulder) Enum(v ...any) *SchemaBulder {
+	b.spec.Spec.Enum = v
+	return b
+}
+
+func (b *SchemaBulder) AddEnum(v ...any) *SchemaBulder {
+	b.spec.Spec.Enum = append(b.spec.Spec.Enum, v...)
+	return b
+}
+
+func (b *SchemaBulder) Examples(v ...any) *SchemaBulder {
+	b.spec.Spec.Examples = v
+	return b
+}
+
+func (b *SchemaBulder) AddExamples(v ...any) *SchemaBulder {
+	b.spec.Spec.Examples = append(b.spec.Spec.Examples, v...)
+	return b
+}
+
+func (b *SchemaBulder) ReadOnly(v bool) *SchemaBulder {
+	b.spec.Spec.ReadOnly = v
+	return b
+}
+
+func (b *SchemaBulder) WriteOnly(v bool) *SchemaBulder {
+	b.spec.Spec.WriteOnly = v
+	return b
+}
+
+func (b *SchemaBulder) Deprecated(v bool) *SchemaBulder {
+	b.spec.Spec.Deprecated = v
+	return b
+}
+
+func (b *SchemaBulder) ContentSchema(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.ContentSchema = v
+	return b
+}
+
+func (b *SchemaBulder) ContentMediaType(v string) *SchemaBulder {
+	b.spec.Spec.ContentMediaType = v
+	return b
+}
+
+func (b *SchemaBulder) ContentEncoding(v string) *SchemaBulder {
+	b.spec.Spec.ContentEncoding = v
+	return b
+}
+
+func (b *SchemaBulder) Not(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Not = v
+	return b
+}
+
+func (b *SchemaBulder) AllOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.AllOf = v
+	return b
+}
+
+func (b *SchemaBulder) AddAllOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.AllOf = append(b.spec.Spec.AllOf, v...)
+	return b
+}
+
+func (b *SchemaBulder) AnyOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.AnyOf = v
+	return b
+}
+
+func (b *SchemaBulder) AddAnyOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.AnyOf = append(b.spec.Spec.AnyOf, v...)
+	return b
+}
+
+func (b *SchemaBulder) OneOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.OneOf = v
+	return b
+}
+
+func (b *SchemaBulder) AddOneOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.OneOf = append(b.spec.Spec.OneOf, v...)
+	return b
+}
+
+func (b *SchemaBulder) DependentRequired(v map[string][]string) *SchemaBulder {
+	b.spec.Spec.DependentRequired = v
+	return b
+}
+
+func (b *SchemaBulder) AddDependentRequired(name string, value ...string) *SchemaBulder {
+	if b.spec.Spec.DependentRequired == nil {
+		b.spec.Spec.DependentRequired = make(map[string][]string, 1)
+	}
+	b.spec.Spec.DependentRequired[name] = append(b.spec.Spec.DependentRequired[name], value...)
+	return b
+}
+
+func (b *SchemaBulder) DependentSchemas(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.DependentSchemas = v
+	return b
+}
+
+func (b *SchemaBulder) AddDependentSchema(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Spec.DependentSchemas == nil {
+		b.spec.Spec.DependentSchemas = make(map[string]*RefOrSpec[Schema], 1)
+	}
+	b.spec.Spec.DependentSchemas[name] = value
+	return b
+}
+
+func (b *SchemaBulder) If(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.If = v
+	return b
+}
+
+func (b *SchemaBulder) Then(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Then = v
+	return b
+}
+
+func (b *SchemaBulder) Else(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Else = v
+	return b
+}
+
+func (b *SchemaBulder) MultipleOf(v int) *SchemaBulder {
+	b.spec.Spec.MultipleOf = &v
+	return b
+}
+
+func (b *SchemaBulder) Minimum(v int) *SchemaBulder {
+	b.spec.Spec.Minimum = &v
+	return b
+}
+
+func (b *SchemaBulder) ExclusiveMinimum(v int) *SchemaBulder {
+	b.spec.Spec.ExclusiveMinimum = &v
+	return b
+}
+
+func (b *SchemaBulder) Maximum(v int) *SchemaBulder {
+	b.spec.Spec.Maximum = &v
+	return b
+}
+
+func (b *SchemaBulder) ExclusiveMaximum(v int) *SchemaBulder {
+	b.spec.Spec.ExclusiveMaximum = &v
+	return b
+}
+
+func (b *SchemaBulder) MinLength(v int) *SchemaBulder {
+	b.spec.Spec.MinLength = &v
+	return b
+}
+
+func (b *SchemaBulder) MaxLength(v int) *SchemaBulder {
+	b.spec.Spec.MaxLength = &v
+	return b
+}
+
+func (b *SchemaBulder) Pattern(v string) *SchemaBulder {
+	b.spec.Spec.Pattern = v
+	return b
+}
+
+func (b *SchemaBulder) Format(v string) *SchemaBulder {
+	b.spec.Spec.Format = v
+	return b
+}
+
+func (b *SchemaBulder) Items(v *BoolOrSchema) *SchemaBulder {
+	b.spec.Spec.Items = v
+	return b
+}
+
+func (b *SchemaBulder) MaxItems(v int) *SchemaBulder {
+	b.spec.Spec.MaxItems = &v
+	return b
+}
+
+func (b *SchemaBulder) UnevaluatedItems(v *BoolOrSchema) *SchemaBulder {
+	b.spec.Spec.UnevaluatedItems = v
+	return b
+}
+
+func (b *SchemaBulder) Contains(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Contains = v
+	return b
+}
+
+func (b *SchemaBulder) MinContains(v int) *SchemaBulder {
+	b.spec.Spec.MinContains = &v
+	return b
+}
+
+func (b *SchemaBulder) MaxContains(v int) *SchemaBulder {
+	b.spec.Spec.MaxContains = &v
+	return b
+}
+
+func (b *SchemaBulder) MinItems(v int) *SchemaBulder {
+	b.spec.Spec.MinItems = &v
+	return b
+}
+
+func (b *SchemaBulder) UniqueItems(v bool) *SchemaBulder {
+	b.spec.Spec.UniqueItems = &v
+	return b
+}
+
+func (b *SchemaBulder) PrefixItems(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.PrefixItems = v
+	return b
+}
+
+func (b *SchemaBulder) AddPrefixItems(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.PrefixItems = append(b.spec.Spec.PrefixItems, v...)
+	return b
+}
+
+func (b *SchemaBulder) Properties(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.Properties = v
+	return b
+}
+
+func (b *SchemaBulder) AddProperty(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Spec.Properties == nil {
+		b.spec.Spec.Properties = make(map[string]*RefOrSpec[Schema], 1)
+	}
+	b.spec.Spec.Properties[name] = value
+	return b
+}
+
+func (b *SchemaBulder) PatternProperties(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.PatternProperties = v
+	return b
+}
+
+func (b *SchemaBulder) AddPatternProperty(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Spec.PatternProperties == nil {
+		b.spec.Spec.PatternProperties = make(map[string]*RefOrSpec[Schema], 1)
+	}
+	b.spec.Spec.PatternProperties[name] = value
+	return b
+}
+
+func (b *SchemaBulder) AdditionalProperties(v *BoolOrSchema) *SchemaBulder {
+	b.spec.Spec.AdditionalProperties = v
+	return b
+}
+
+func (b *SchemaBulder) UnevaluatedProperties(v *BoolOrSchema) *SchemaBulder {
+	b.spec.Spec.UnevaluatedProperties = v
+	return b
+}
+
+func (b *SchemaBulder) PropertyNames(v *RefOrSpec[Schema]) *SchemaBulder {
+	b.spec.Spec.PropertyNames = v
+	return b
+}
+
+func (b *SchemaBulder) MinProperties(v int) *SchemaBulder {
+	b.spec.Spec.MinProperties = &v
+	return b
+}
+
+func (b *SchemaBulder) MaxProperties(v int) *SchemaBulder {
+	b.spec.Spec.MaxProperties = &v
+	return b
+}
+
+func (b *SchemaBulder) Required(v ...string) *SchemaBulder {
+	b.spec.Spec.Required = v
+	return b
+}
+
+func (b *SchemaBulder) AddRequired(v ...string) *SchemaBulder {
+	b.spec.Spec.Required = append(b.spec.Spec.Required, v...)
+	return b
+}
+
+func (b *SchemaBulder) Discriminator(v *Discriminator) *SchemaBulder {
+	b.spec.Spec.Discriminator = v
+	return b
+}
+
+func (b *SchemaBulder) XML(v *Extendable[XML]) *SchemaBulder {
+	b.spec.Spec.XML = v
+	return b
+}
+
+func (b *SchemaBulder) ExternalDocs(v *Extendable[ExternalDocs]) *SchemaBulder {
+	b.spec.Spec.ExternalDocs = v
+	return b
+}
+
+func (b *SchemaBulder) Example(v any) *SchemaBulder {
+	b.spec.Spec.Example = v
+	return b
 }

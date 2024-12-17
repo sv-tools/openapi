@@ -275,7 +275,7 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 			name: "correct ref and components",
 			ref:  openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet"),
 			c: openapi.NewExtendable((&openapi.Components{}).
-				WithRefOrSpec("Pet", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
+				Add("Pet", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
 			),
 			exp: &openapi.Schema{Title: "foo"},
 		},
@@ -283,8 +283,8 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 			name: "ref to ref",
 			ref:  openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet"),
 			c: openapi.NewExtendable((&openapi.Components{}).
-				WithRefOrSpec("Pet", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet2")).
-				WithRefOrSpec("Pet2", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
+				Add("Pet", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet2")).
+				Add("Pet2", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
 			),
 			exp: &openapi.Schema{Title: "foo"},
 		},
@@ -292,7 +292,7 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 			name: "ref to incorrect ref",
 			ref:  openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet"),
 			c: openapi.NewExtendable((&openapi.Components{}).
-				WithRefOrSpec("Pet", openapi.NewRefOrSpec[openapi.Schema]("fooo")),
+				Add("Pet", openapi.NewRefOrSpec[openapi.Schema]("fooo")),
 			),
 			expErr: "is not implemented",
 		},
@@ -300,8 +300,8 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 			name: "cycle ref",
 			ref:  openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet"),
 			c: openapi.NewExtendable((&openapi.Components{}).
-				WithRefOrSpec("Pet", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet2")).
-				WithRefOrSpec("Pet2", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet")),
+				Add("Pet", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet2")).
+				Add("Pet2", openapi.NewRefOrSpec[openapi.Schema]("#/components/schemas/Pet")),
 			),
 			expErr: "cycle ref",
 		},
@@ -315,7 +315,7 @@ func TestRefOrSpec_GetSpec(t *testing.T) {
 			name: "ref to unexpected component",
 			ref:  openapi.NewRefOrSpec[openapi.Operation]("#/components/schemas/Pet"),
 			c: openapi.NewExtendable((&openapi.Components{}).
-				WithRefOrSpec("Pet", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
+				Add("Pet", openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{Title: "foo"})),
 			),
 			expErr: "expected spec of type",
 		},

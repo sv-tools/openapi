@@ -30,3 +30,42 @@ func (o *Contact) validateSpec(location string, opts *specValidationOptions) []*
 	}
 	return errs
 }
+
+type ContactBuilder struct {
+	spec *Extendable[Contact]
+}
+
+func NewContactBuilder() *ContactBuilder {
+	return &ContactBuilder{
+		spec: NewExtendable(&Contact{}),
+	}
+}
+
+func (b *ContactBuilder) Build() *Extendable[Contact] {
+	return b.spec
+}
+
+func (b *ContactBuilder) Extensions(v map[string]any) *ContactBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *ContactBuilder) AddExt(name string, value any) *ContactBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *ContactBuilder) Name(v string) *ContactBuilder {
+	b.spec.Spec.Name = v
+	return b
+}
+
+func (b *ContactBuilder) URL(v string) *ContactBuilder {
+	b.spec.Spec.URL = v
+	return b
+}
+
+func (b *ContactBuilder) Email(v string) *ContactBuilder {
+	b.spec.Spec.Email = v
+	return b
+}

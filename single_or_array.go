@@ -11,8 +11,8 @@ type SingleOrArray[T any] []T
 
 // NewSingleOrArray creates SingleOrArray object.
 func NewSingleOrArray[T any](v ...T) *SingleOrArray[T] {
-	a := append(SingleOrArray[T]{}, v...)
-	return &a
+	vv := SingleOrArray[T](v)
+	return &vv
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
@@ -59,4 +59,9 @@ func (o *SingleOrArray[T]) MarshalYAML() (any, error) {
 		v = (*o)[0]
 	}
 	return v, nil
+}
+
+func (o *SingleOrArray[T]) Add(v ...T) *SingleOrArray[T] {
+	*o = append(*o, v...)
+	return o
 }

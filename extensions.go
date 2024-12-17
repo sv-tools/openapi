@@ -42,9 +42,9 @@ func NewExtendable[T any](spec *T) *Extendable[T] {
 	return &ext
 }
 
-// WithExt sets the extension and returns the current object.
-// The `x-` will be added automatically to given name.
-func (o *Extendable[T]) WithExt(name string, value any) *Extendable[T] {
+// AddExt sets the extension and returns the current object.
+// The `x-` prefix will be added automatically to given name.
+func (o *Extendable[T]) AddExt(name string, value any) *Extendable[T] {
 	if o.Extensions == nil {
 		o.Extensions = make(map[string]any, 1)
 	}
@@ -53,6 +53,18 @@ func (o *Extendable[T]) WithExt(name string, value any) *Extendable[T] {
 	}
 	o.Extensions[name] = value
 	return o
+}
+
+// GetExt returns the extension value by name.
+// The `x-` prefix will be added automatically to given name.
+func (o *Extendable[T]) GetExt(name string) any {
+	if o.Extensions == nil {
+		return nil
+	}
+	if !strings.HasPrefix(name, ExtensionPrefix) {
+		name = ExtensionPrefix + name
+	}
+	return o.Extensions[name]
 }
 
 // MarshalJSON implements json.Marshaler interface.

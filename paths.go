@@ -73,3 +73,18 @@ func (o *Paths) validateSpec(location string, opts *specValidationOptions) []*va
 	}
 	return errs
 }
+
+func (o *Paths) Add(path string, item *RefOrSpec[Extendable[PathItem]]) *Paths {
+	if item == nil {
+		return o
+	}
+	if o.Paths == nil {
+		o.Paths = make(map[string]*RefOrSpec[Extendable[PathItem]])
+	}
+	o.Paths[path] = item
+	return o
+}
+
+func NewPaths() *Extendable[Paths] {
+	return NewExtendable[Paths](&Paths{})
+}

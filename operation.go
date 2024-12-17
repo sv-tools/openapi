@@ -162,3 +162,110 @@ func (o *Operation) validateSpec(location string, opts *specValidationOptions) [
 
 	return errs
 }
+
+type OperationBuilder struct {
+	spec *Extendable[Operation]
+}
+
+func NewOperationBuilder() *OperationBuilder {
+	return &OperationBuilder{
+		spec: NewExtendable[Operation](&Operation{}),
+	}
+}
+
+func (b *OperationBuilder) Build() *Extendable[Operation] {
+	return b.spec
+}
+
+func (b *OperationBuilder) Extensions(v map[string]any) *OperationBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *OperationBuilder) AddExt(name string, value any) *OperationBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *OperationBuilder) RequestBody(v *RefOrSpec[Extendable[RequestBody]]) *OperationBuilder {
+	b.spec.Spec.RequestBody = v
+	return b
+}
+
+func (b *OperationBuilder) Callbacks(v map[string]*RefOrSpec[Extendable[Callback]]) *OperationBuilder {
+	b.spec.Spec.Callbacks = v
+	return b
+}
+
+func (b *OperationBuilder) AddCallback(name string, value *RefOrSpec[Extendable[Callback]]) *OperationBuilder {
+	if b.spec.Spec.Callbacks == nil {
+		b.spec.Spec.Callbacks = make(map[string]*RefOrSpec[Extendable[Callback]], 1)
+	}
+	b.spec.Spec.Callbacks[name] = value
+	return b
+}
+
+func (b *OperationBuilder) ExternalDocs(v *Extendable[ExternalDocs]) *OperationBuilder {
+	b.spec.Spec.ExternalDocs = v
+	return b
+}
+
+func (b *OperationBuilder) OperationID(v string) *OperationBuilder {
+	b.spec.Spec.OperationID = v
+	return b
+}
+
+func (b *OperationBuilder) Summary(v string) *OperationBuilder {
+	b.spec.Spec.Summary = v
+	return b
+}
+
+func (b *OperationBuilder) Description(v string) *OperationBuilder {
+	b.spec.Spec.Description = v
+	return b
+}
+
+func (b *OperationBuilder) Parameters(v ...*RefOrSpec[Extendable[Parameter]]) *OperationBuilder {
+	b.spec.Spec.Parameters = v
+	return b
+}
+
+func (b *OperationBuilder) AddParameters(v ...*RefOrSpec[Extendable[Parameter]]) *OperationBuilder {
+	b.spec.Spec.Parameters = append(b.spec.Spec.Parameters, v...)
+	return b
+}
+
+func (b *OperationBuilder) Tags(v ...string) *OperationBuilder {
+	b.spec.Spec.Tags = v
+	return b
+}
+
+func (b *OperationBuilder) AddTags(v ...string) *OperationBuilder {
+	b.spec.Spec.Tags = append(b.spec.Spec.Tags, v...)
+	return b
+}
+
+func (b *OperationBuilder) Security(v ...SecurityRequirement) *OperationBuilder {
+	b.spec.Spec.Security = v
+	return b
+}
+
+func (b *OperationBuilder) AddSecurity(v ...SecurityRequirement) *OperationBuilder {
+	b.spec.Spec.Security = append(b.spec.Spec.Security, v...)
+	return b
+}
+
+func (b *OperationBuilder) Servers(v ...*Extendable[Server]) *OperationBuilder {
+	b.spec.Spec.Servers = v
+	return b
+}
+
+func (b *OperationBuilder) AddServers(v ...*Extendable[Server]) *OperationBuilder {
+	b.spec.Spec.Servers = append(b.spec.Spec.Servers, v...)
+	return b
+}
+
+func (b *OperationBuilder) Deprecated(v bool) *OperationBuilder {
+	b.spec.Spec.Deprecated = v
+	return b
+}

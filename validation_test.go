@@ -57,174 +57,178 @@ func TestValidator_ValidateSpec_ManuallyCreated(t *testing.T) {
 		err  string
 	}{
 		{
-			name: "empty",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{}),
-			err:  "openapi: required",
+			name: "info required",
+			spec: openapi.NewOpenAPIBuilder().Build(),
+			err:  "/info: required",
+		},
+		{
+			name: "any of path or webhooks or components required",
+			spec: openapi.NewOpenAPIBuilder().Build(),
+			err:  "/paths||webhooks||components: required",
 		},
 		{
 			name: "minimal valid with empty paths",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Paths: openapi.NewExtendable[openapi.Paths](&openapi.Paths{}),
-			}),
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).Paths(openapi.NewPaths()).Build(),
 		},
 		{
 			name: "minimal valid with empty components",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Components: openapi.NewExtendable[openapi.Components](&openapi.Components{}),
-			}),
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).Components(openapi.NewComponents()).Build(),
 		},
 		{
 			name: "minimal valid with empty webhooks",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				WebHooks: make(map[string]*openapi.RefOrSpec[openapi.Extendable[openapi.PathItem]]),
-			}),
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).WebHooks(openapi.NewWebhooks()).Build(),
 		},
 		{
 			name: "xml component",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Components: openapi.NewExtendable[openapi.Components]((&openapi.Components{}).WithRefOrSpec(
-					"Person",
-					&openapi.Schema{
-						Type: openapi.NewSingleOrArray[string]("object"),
-						Properties: map[string]*openapi.RefOrSpec[openapi.Schema]{
-							"id": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:   openapi.NewSingleOrArray[string]("integer"),
-								Format: "int32",
-								XML: openapi.NewExtendable(&openapi.XML{
-									Attribute: true,
-								}),
-							}),
-							"name": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type: openapi.NewSingleOrArray[string]("string"),
-								XML: openapi.NewExtendable(&openapi.XML{
-									Namespace: "https://example.com/schema/sample",
-									Prefix:    "sample",
-								}),
-							}),
-						},
-					},
-				)),
-			}),
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).AddComponent("Person", openapi.NewSchemaBuilder().
+				AddType("object").
+				AddProperty("id", openapi.NewSchemaBuilder().
+					AddType("integer").
+					Format("int32").
+					XML(openapi.NewXMLBuilder().Attribute(true).Build()).
+					Build(),
+				).
+				AddProperty("name", openapi.NewSchemaBuilder().
+					AddType("string").
+					XML(openapi.NewXMLBuilder().
+						Namespace("https://example.com/schema/sample").
+						Prefix("sample").
+						Build(),
+					).
+					Build(),
+				).
+				Build(),
+			).Build(),
 			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
 		},
 		{
 			name: "properties examples",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Components: openapi.NewExtendable[openapi.Components]((&openapi.Components{}).WithRefOrSpec(
-					"Person",
-					&openapi.Schema{
-						Type: openapi.NewSingleOrArray[string]("object"),
-						Properties: map[string]*openapi.RefOrSpec[openapi.Schema]{
-							"id": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:   openapi.NewSingleOrArray[string]("integer"),
-								Format: "int32",
-							}),
-							"name": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type: openapi.NewSingleOrArray[string]("string"),
-							}),
-						},
-						Examples: []any{
-							map[string]any{
-								"id":   123,
-								"name": "John Doe 1",
-							},
-							struct {
-								ID   int    `json:"id"`
-								Name string `json:"name"`
-							}{
-								ID:   124,
-								Name: "John Doe 2",
-							},
-						},
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).AddComponent("Person", openapi.NewSchemaBuilder().
+				AddType("object").
+				AddProperty("id", openapi.NewSchemaBuilder().
+					AddType("integer").
+					Format("int32").
+					Build(),
+				).
+				AddProperty("name", openapi.NewSchemaBuilder().
+					AddType("string").
+					Build(),
+				).
+				AddExamples(
+					map[string]any{
+						"id":   123,
+						"name": "John Doe 1",
 					},
-				)),
-			}),
+					struct {
+						ID   int    `json:"id"`
+						Name string `json:"name"`
+					}{
+						ID:   124,
+						Name: "John Doe 2",
+					},
+				).Build(),
+			).Build(),
 			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+		},
+		{
+			name: "properties examples error",
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).AddComponent("Person", openapi.NewSchemaBuilder().
+				AddType("object").
+				AddProperty("id", openapi.NewSchemaBuilder().
+					AddType("integer").
+					Format("int32").
+					Build(),
+				).
+				AddProperty("name", openapi.NewSchemaBuilder().
+					AddType("string").
+					Build(),
+				).
+				AddExamples(
+					map[string]any{
+						"id":   "123",
+						"name": false,
+					},
+				).Build(),
+			).Build(),
+			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			err:  "at '/id': got string, want integer",
 		},
 		{
 			name: "properties default",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Components: openapi.NewExtendable[openapi.Components]((&openapi.Components{}).WithRefOrSpec(
-					"Person",
-					&openapi.Schema{
-						Type: openapi.NewSingleOrArray[string]("object"),
-						Properties: map[string]*openapi.RefOrSpec[openapi.Schema]{
-							"id": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:    openapi.NewSingleOrArray[string]("integer"),
-								Format:  "int32",
-								Default: 42,
-							}),
-							"name": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:    openapi.NewSingleOrArray[string]("string"),
-								Default: "John Doe",
-							}),
-						},
-					},
-				)),
-			}),
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).AddComponent("Person", openapi.NewSchemaBuilder().
+				AddType("object").
+				AddProperty("id", openapi.NewSchemaBuilder().
+					AddType("integer").
+					Format("int32").
+					Default(42).
+					Build(),
+				).
+				AddProperty("name", openapi.NewSchemaBuilder().
+					AddType("string").
+					Default("John Doe").
+					Build(),
+				).Build(),
+			).Build(),
 			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
 		},
 		{
-			name: "properties example",
-			spec: openapi.NewExtendable(&openapi.OpenAPI{
-				OpenAPI: "3.1.1",
-				Info: openapi.NewExtendable(&openapi.Info{
-					Title:   "Minimal Valid Spec",
-					Version: "1.0.0",
-				}),
-				Components: openapi.NewExtendable[openapi.Components]((&openapi.Components{}).WithRefOrSpec(
-					"Person",
-					&openapi.Schema{
-						Type: openapi.NewSingleOrArray[string]("object"),
-						Properties: map[string]*openapi.RefOrSpec[openapi.Schema]{
-							"id": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:    openapi.NewSingleOrArray[string]("integer"),
-								Format:  "int32",
-								Default: 42,
-							}),
-							"name": openapi.NewRefOrSpec[openapi.Schema](&openapi.Schema{
-								Type:    openapi.NewSingleOrArray[string]("string"),
-								Default: "John Doe",
-							}),
-						},
-						Example: map[string]any{
-							"id":   123,
-							"name": "John Doe",
-						},
-					},
-				)),
-			}),
+			name: "properties default error",
+			spec: openapi.NewOpenAPIBuilder().Info(
+				openapi.NewInfoBuilder().
+					Title("Minimal Valid Spec").
+					Version("1.0.0").
+					Build(),
+			).AddComponent("Person", openapi.NewSchemaBuilder().
+				AddType("object").
+				AddProperty("id", openapi.NewSchemaBuilder().
+					AddType("integer").
+					Format("int32").
+					Default("42").
+					Build(),
+				).
+				AddProperty("name", openapi.NewSchemaBuilder().
+					AddType("string").
+					Default(false).
+					Build(),
+				).Build(),
+			).Build(),
 			opts: []openapi.SpecValidationOption{openapi.AllowUnusedComponents()},
+			err:  "at '': got string, want integer",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

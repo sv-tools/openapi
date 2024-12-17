@@ -63,7 +63,7 @@ func TestSchema_Marshal_Unmarshal(t *testing.T) {
 	}
 }
 
-func TestSchema_WithExt(t *testing.T) {
+func TestSchema_AddExt(t *testing.T) {
 	for _, tt := range []struct {
 		name     string
 		key      string
@@ -89,7 +89,7 @@ func TestSchema_WithExt(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			ext := openapi.Schema{}
-			ext.WithExt(tt.key, tt.value)
+			ext.AddExt(tt.key, tt.value)
 			require.Equal(t, tt.expected, ext.Extensions)
 		})
 	}

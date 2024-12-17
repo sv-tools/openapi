@@ -93,3 +93,63 @@ func (o *MediaType) validateSpec(location string, opts *specValidationOptions) [
 
 	return errs
 }
+
+type MediaTypeBuilder struct {
+	spec *Extendable[MediaType]
+}
+
+func NewMediaTypeBuilder() *MediaTypeBuilder {
+	return &MediaTypeBuilder{
+		spec: NewExtendable[MediaType](&MediaType{}),
+	}
+}
+
+func (b *MediaTypeBuilder) Build() *Extendable[MediaType] {
+	return b.spec
+}
+
+func (b *MediaTypeBuilder) Extensions(v map[string]any) *MediaTypeBuilder {
+	b.spec.Extensions = v
+	return b
+}
+
+func (b *MediaTypeBuilder) AddExt(name string, value any) *MediaTypeBuilder {
+	b.spec.AddExt(name, value)
+	return b
+}
+
+func (b *MediaTypeBuilder) Schema(v *RefOrSpec[Schema]) *MediaTypeBuilder {
+	b.spec.Spec.Schema = v
+	return b
+}
+
+func (b *MediaTypeBuilder) Example(v any) *MediaTypeBuilder {
+	b.spec.Spec.Example = v
+	return b
+}
+
+func (b *MediaTypeBuilder) Examples(v map[string]*RefOrSpec[Extendable[Example]]) *MediaTypeBuilder {
+	b.spec.Spec.Examples = v
+	return b
+}
+
+func (b *MediaTypeBuilder) AddExample(name string, value *RefOrSpec[Extendable[Example]]) *MediaTypeBuilder {
+	if b.spec.Spec.Examples == nil {
+		b.spec.Spec.Examples = make(map[string]*RefOrSpec[Extendable[Example]], 1)
+	}
+	b.spec.Spec.Examples[name] = value
+	return b
+}
+
+func (b *MediaTypeBuilder) Encoding(v map[string]*Extendable[Encoding]) *MediaTypeBuilder {
+	b.spec.Spec.Encoding = v
+	return b
+}
+
+func (b *MediaTypeBuilder) AddEncoding(name string, value *Extendable[Encoding]) *MediaTypeBuilder {
+	if b.spec.Spec.Encoding == nil {
+		b.spec.Spec.Encoding = make(map[string]*Extendable[Encoding], 1)
+	}
+	b.spec.Spec.Encoding[name] = value
+	return b
+}
