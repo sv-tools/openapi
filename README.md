@@ -28,6 +28,8 @@ go get github.com/sv-tools/openapi
     * `Validator.ValidateData()` method validates the data.
     * `Validator.ValidateDataAsJSON()` method validates the data by converting it into `map[string]any` type first using `json.Marshal` and `json.Unmarshal`. 
       **WARNING**: the function is slow due to double conversion.
+  * Added `ParseObject` function to create `SchemaBuilder` by parsing an object.
+    The function supports `json`, `yaml` and `openapi` field tags for the structs.
   * Use OpenAPI `v3.1.1` by default.
 
 ## Features
