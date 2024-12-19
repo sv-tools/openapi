@@ -313,6 +313,11 @@ type Schema struct {
 	Example any `json:"example,omitempty" yaml:"example,omitempty"`
 
 	Extensions map[string]any `json:"-" yaml:"-"`
+
+	// *** Go Fields ***
+
+	// GoType is a custom field to store the Go type of the schema.
+	GoType string `json:"x-go-type,omitempty" yaml:"x-go-type,omitempty"`
 }
 
 // AddExt sets the extension and returns the current object (self|this).
@@ -1123,5 +1128,10 @@ func (b *SchemaBulder) ExternalDocs(v *Extendable[ExternalDocs]) *SchemaBulder {
 
 func (b *SchemaBulder) Example(v any) *SchemaBulder {
 	b.spec.Spec.Example = v
+	return b
+}
+
+func (b *SchemaBulder) GoType(v string) *SchemaBulder {
+	b.spec.Spec.GoType = v
 	return b
 }
