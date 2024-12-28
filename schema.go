@@ -313,6 +313,13 @@ type Schema struct {
 	Example any `json:"example,omitempty" yaml:"example,omitempty"`
 
 	Extensions map[string]any `json:"-" yaml:"-"`
+
+	// *** Go Fields ***
+
+	// GoPackage is a custom field to store the Go package of the schema.
+	GoPackage string `json:"x-go-package,omitempty" yaml:"x-go-package,omitempty"`
+	// GoType is a custom field to store the Go type of the schema.
+	GoType string `json:"x-go-type,omitempty" yaml:"x-go-type,omitempty"`
 }
 
 // AddExt sets the extension and returns the current object (self|this).
@@ -719,42 +726,77 @@ type SchemaBulder struct {
 
 func NewSchemaBuilder() *SchemaBulder {
 	return &SchemaBulder{
-		spec: NewRefOrSpec[Schema](&Schema{
-			Schema: Draft202012,
-		}),
+		spec: NewRefOrSpec[Schema](&Schema{}),
 	}
 }
 
 func (b *SchemaBulder) Build() *RefOrSpec[Schema] {
+	if b.spec.Ref != nil {
+		b.spec.Spec = nil
+	}
 	return b.spec
 }
 
 func (b *SchemaBulder) Extensions(v map[string]any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Extensions = v
 	return b
 }
 
 func (b *SchemaBulder) AddExt(name string, value any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AddExt(name, value)
 	return b
 }
 
+func (b *SchemaBulder) Ref(v string) *SchemaBulder {
+	if b.spec.Ref == nil {
+		b.spec.Ref = &Ref{
+			Summary:     b.spec.Spec.Title,
+			Description: b.spec.Spec.Description,
+		}
+		b.spec.Spec = nil
+	}
+	b.spec.Ref.Ref = v
+	return b
+}
+
+func (b *SchemaBulder) IsRef() bool {
+	return b.spec.Ref != nil
+}
+
 func (b *SchemaBulder) Schema(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Schema = v
 	return b
 }
 
 func (b *SchemaBulder) ID(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ID = v
 	return b
 }
 
 func (b *SchemaBulder) Defs(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Defs = v
 	return b
 }
 
 func (b *SchemaBulder) AddDef(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.Defs == nil {
 		b.spec.Spec.Defs = make(map[string]*RefOrSpec[Schema], 1)
 	}
@@ -763,16 +805,25 @@ func (b *SchemaBulder) AddDef(name string, value *RefOrSpec[Schema]) *SchemaBuld
 }
 
 func (b *SchemaBulder) DynamicRef(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.DynamicRef = v
 	return b
 }
 
 func (b *SchemaBulder) Vocabulary(v map[string]bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Vocabulary = v
 	return b
 }
 
 func (b *SchemaBulder) AddVocabulary(name string, value bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.Vocabulary == nil {
 		b.spec.Spec.Vocabulary = make(map[string]bool, 1)
 	}
@@ -781,16 +832,25 @@ func (b *SchemaBulder) AddVocabulary(name string, value bool) *SchemaBulder {
 }
 
 func (b *SchemaBulder) DynamicAnchor(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.DynamicAnchor = v
 	return b
 }
 
 func (b *SchemaBulder) Type(v ...string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Type = NewSingleOrArray[string](v...)
 	return b
 }
 
 func (b *SchemaBulder) AddType(v ...string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.Type == nil {
 		b.spec.Spec.Type = NewSingleOrArray[string](v...)
 	} else {
@@ -800,121 +860,195 @@ func (b *SchemaBulder) AddType(v ...string) *SchemaBulder {
 }
 
 func (b *SchemaBulder) Default(v any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Default = v
 	return b
 }
 
 func (b *SchemaBulder) Title(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		b.spec.Ref.Summary = v
+		return b
+	}
 	b.spec.Spec.Title = v
 	return b
 }
 
 func (b *SchemaBulder) Description(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		b.spec.Ref.Description = v
+		return b
+	}
 	b.spec.Spec.Description = v
 	return b
 }
 
 func (b *SchemaBulder) Const(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Const = v
 	return b
 }
 
 func (b *SchemaBulder) Comment(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Comment = v
 	return b
 }
 
 func (b *SchemaBulder) Enum(v ...any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Enum = v
 	return b
 }
 
 func (b *SchemaBulder) AddEnum(v ...any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Enum = append(b.spec.Spec.Enum, v...)
 	return b
 }
 
 func (b *SchemaBulder) Examples(v ...any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Examples = v
 	return b
 }
 
 func (b *SchemaBulder) AddExamples(v ...any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Examples = append(b.spec.Spec.Examples, v...)
 	return b
 }
 
 func (b *SchemaBulder) ReadOnly(v bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ReadOnly = v
 	return b
 }
 
 func (b *SchemaBulder) WriteOnly(v bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.WriteOnly = v
 	return b
 }
 
 func (b *SchemaBulder) Deprecated(v bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Deprecated = v
 	return b
 }
 
 func (b *SchemaBulder) ContentSchema(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ContentSchema = v
 	return b
 }
 
 func (b *SchemaBulder) ContentMediaType(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ContentMediaType = v
 	return b
 }
 
 func (b *SchemaBulder) ContentEncoding(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ContentEncoding = v
 	return b
 }
 
 func (b *SchemaBulder) Not(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Not = v
 	return b
 }
 
 func (b *SchemaBulder) AllOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AllOf = v
 	return b
 }
 
 func (b *SchemaBulder) AddAllOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AllOf = append(b.spec.Spec.AllOf, v...)
 	return b
 }
 
 func (b *SchemaBulder) AnyOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AnyOf = v
 	return b
 }
 
 func (b *SchemaBulder) AddAnyOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AnyOf = append(b.spec.Spec.AnyOf, v...)
 	return b
 }
 
 func (b *SchemaBulder) OneOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.OneOf = v
 	return b
 }
 
 func (b *SchemaBulder) AddOneOf(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.OneOf = append(b.spec.Spec.OneOf, v...)
 	return b
 }
 
 func (b *SchemaBulder) DependentRequired(v map[string][]string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.DependentRequired = v
 	return b
 }
 
 func (b *SchemaBulder) AddDependentRequired(name string, value ...string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.DependentRequired == nil {
 		b.spec.Spec.DependentRequired = make(map[string][]string, 1)
 	}
@@ -923,11 +1057,17 @@ func (b *SchemaBulder) AddDependentRequired(name string, value ...string) *Schem
 }
 
 func (b *SchemaBulder) DependentSchemas(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.DependentSchemas = v
 	return b
 }
 
 func (b *SchemaBulder) AddDependentSchema(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.DependentSchemas == nil {
 		b.spec.Spec.DependentSchemas = make(map[string]*RefOrSpec[Schema], 1)
 	}
@@ -936,121 +1076,193 @@ func (b *SchemaBulder) AddDependentSchema(name string, value *RefOrSpec[Schema])
 }
 
 func (b *SchemaBulder) If(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.If = v
 	return b
 }
 
 func (b *SchemaBulder) Then(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Then = v
 	return b
 }
 
 func (b *SchemaBulder) Else(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Else = v
 	return b
 }
 
 func (b *SchemaBulder) MultipleOf(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MultipleOf = &v
 	return b
 }
 
 func (b *SchemaBulder) Minimum(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Minimum = &v
 	return b
 }
 
 func (b *SchemaBulder) ExclusiveMinimum(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ExclusiveMinimum = &v
 	return b
 }
 
 func (b *SchemaBulder) Maximum(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Maximum = &v
 	return b
 }
 
 func (b *SchemaBulder) ExclusiveMaximum(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ExclusiveMaximum = &v
 	return b
 }
 
 func (b *SchemaBulder) MinLength(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MinLength = &v
 	return b
 }
 
 func (b *SchemaBulder) MaxLength(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MaxLength = &v
 	return b
 }
 
 func (b *SchemaBulder) Pattern(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Pattern = v
 	return b
 }
 
 func (b *SchemaBulder) Format(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Format = v
 	return b
 }
 
 func (b *SchemaBulder) Items(v *BoolOrSchema) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Items = v
 	return b
 }
 
 func (b *SchemaBulder) MaxItems(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MaxItems = &v
 	return b
 }
 
 func (b *SchemaBulder) UnevaluatedItems(v *BoolOrSchema) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.UnevaluatedItems = v
 	return b
 }
 
 func (b *SchemaBulder) Contains(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Contains = v
 	return b
 }
 
 func (b *SchemaBulder) MinContains(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MinContains = &v
 	return b
 }
 
 func (b *SchemaBulder) MaxContains(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MaxContains = &v
 	return b
 }
 
 func (b *SchemaBulder) MinItems(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MinItems = &v
 	return b
 }
 
 func (b *SchemaBulder) UniqueItems(v bool) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.UniqueItems = &v
 	return b
 }
 
 func (b *SchemaBulder) PrefixItems(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.PrefixItems = v
 	return b
 }
 
 func (b *SchemaBulder) AddPrefixItems(v ...*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.PrefixItems = append(b.spec.Spec.PrefixItems, v...)
 	return b
 }
 
 func (b *SchemaBulder) Properties(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Properties = v
 	return b
 }
 
 func (b *SchemaBulder) AddProperty(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.Properties == nil {
 		b.spec.Spec.Properties = make(map[string]*RefOrSpec[Schema], 1)
 	}
@@ -1059,11 +1271,17 @@ func (b *SchemaBulder) AddProperty(name string, value *RefOrSpec[Schema]) *Schem
 }
 
 func (b *SchemaBulder) PatternProperties(v map[string]*RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.PatternProperties = v
 	return b
 }
 
 func (b *SchemaBulder) AddPatternProperty(name string, value *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	if b.spec.Spec.PatternProperties == nil {
 		b.spec.Spec.PatternProperties = make(map[string]*RefOrSpec[Schema], 1)
 	}
@@ -1072,56 +1290,105 @@ func (b *SchemaBulder) AddPatternProperty(name string, value *RefOrSpec[Schema])
 }
 
 func (b *SchemaBulder) AdditionalProperties(v *BoolOrSchema) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.AdditionalProperties = v
 	return b
 }
 
 func (b *SchemaBulder) UnevaluatedProperties(v *BoolOrSchema) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.UnevaluatedProperties = v
 	return b
 }
 
 func (b *SchemaBulder) PropertyNames(v *RefOrSpec[Schema]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.PropertyNames = v
 	return b
 }
 
 func (b *SchemaBulder) MinProperties(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MinProperties = &v
 	return b
 }
 
 func (b *SchemaBulder) MaxProperties(v int) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.MaxProperties = &v
 	return b
 }
 
 func (b *SchemaBulder) Required(v ...string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Required = v
 	return b
 }
 
 func (b *SchemaBulder) AddRequired(v ...string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Required = append(b.spec.Spec.Required, v...)
 	return b
 }
 
 func (b *SchemaBulder) Discriminator(v *Discriminator) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Discriminator = v
 	return b
 }
 
 func (b *SchemaBulder) XML(v *Extendable[XML]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.XML = v
 	return b
 }
 
 func (b *SchemaBulder) ExternalDocs(v *Extendable[ExternalDocs]) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.ExternalDocs = v
 	return b
 }
 
 func (b *SchemaBulder) Example(v any) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
 	b.spec.Spec.Example = v
+	return b
+}
+
+func (b *SchemaBulder) GoType(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
+	b.spec.Spec.GoType = v
+	return b
+}
+
+func (b *SchemaBulder) GoPackage(v string) *SchemaBulder {
+	if b.spec.Ref != nil {
+		return b
+	}
+	b.spec.Spec.GoPackage = v
 	return b
 }
