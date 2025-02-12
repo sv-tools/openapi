@@ -78,6 +78,8 @@ func NewBoolOrSchema(v any) *BoolOrSchema {
 		return &BoolOrSchema{Allowed: v}
 	case *RefOrSpec[Schema]:
 		return &BoolOrSchema{Schema: v}
+	case *SchemaBulder:
+		return &BoolOrSchema{Schema: v.Build()}
 	default:
 		return nil
 	}
