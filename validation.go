@@ -224,13 +224,10 @@ func (v *Validator) ValidateDataAsJSON(location string, value any) error {
 	switch getKind(value) {
 	// marshal and unmarshal the value to JSON representation (map[any]struct).
 	case reflect.Struct:
-		data, err := json.Marshal(value)
+		var err error
+		value, err = ConvertToJSON(value)
 		if err != nil {
-			return fmt.Errorf("marshaling value failed: %w", err)
-		}
-		value, err = jsonschema.UnmarshalJSON(bytes.NewReader(data))
-		if err != nil {
-			return fmt.Errorf("unmarshaling value failed: %w", err)
+			return err
 		}
 	// check if the value is already a JSON, if not keep it as is.
 	case reflect.String:
@@ -240,4 +237,16 @@ func (v *Validator) ValidateDataAsJSON(location string, value any) error {
 		}
 	}
 	return v.ValidateData(location, value)
+}
+
+func ConvertToJSON(value any) (any, error) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling value failed: %w", err)
+	}
+	value, err = jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("unmarshaling value failed: %w", err)
+	}
+	return value, nil
 }

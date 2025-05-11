@@ -70,9 +70,13 @@ func GetType(v any) (string, error) {
 }
 
 func getKind(v any) reflect.Kind {
-	k := reflect.TypeOf(v).Kind()
+	t := reflect.TypeOf(v)
+	if t == nil {
+		return reflect.Invalid
+	}
+	k := t.Kind()
 	if k == reflect.Ptr {
-		k = reflect.TypeOf(v).Elem().Kind()
+		k = t.Elem().Kind()
 	}
 	return k
 }

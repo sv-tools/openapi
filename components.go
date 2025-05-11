@@ -1,5 +1,9 @@
 package openapi
 
+import (
+	"regexp"
+)
+
 // Components holds a set of reusable objects for different aspects of the OAS.
 // All objects defined within the components object will have no effect on the API unless they are explicitly referenced
 // from properties outside the components object.
@@ -160,57 +164,77 @@ func (o *Components) Add(name string, v any) *Components {
 	return o
 }
 
+var namePattern = regexp.MustCompile(`^[a-zA-Z0-9\.\-_]+$`)
+
 func (o *Components) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
-	if o.Schemas != nil {
-		for k, v := range o.Schemas {
-			errs = append(errs, v.validateSpec(joinLoc(location, "schemas", k), validator)...)
+	for k, v := range o.Schemas {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "schemas", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "schemas", k), validator)...)
 	}
-	if o.Responses != nil {
-		for k, v := range o.Responses {
-			errs = append(errs, v.validateSpec(joinLoc(location, "responses", k), validator)...)
+
+	for k, v := range o.Responses {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "responses", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "responses", k), validator)...)
 	}
-	if o.Parameters != nil {
-		for k, v := range o.Parameters {
-			errs = append(errs, v.validateSpec(joinLoc(location, "parameters", k), validator)...)
+	for k, v := range o.Parameters {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "parameters", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "parameters", k), validator)...)
 	}
-	if o.Examples != nil {
-		for k, v := range o.Examples {
-			errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), validator)...)
+
+	for k, v := range o.Examples {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "examples", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "examples", k), validator)...)
 	}
-	if o.RequestBodies != nil {
-		for k, v := range o.RequestBodies {
-			errs = append(errs, v.validateSpec(joinLoc(location, "requestBodies", k), validator)...)
+
+	for k, v := range o.RequestBodies {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "requestBodies", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "requestBodies", k), validator)...)
 	}
-	if o.Headers != nil {
-		for k, v := range o.Headers {
-			errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), validator)...)
+
+	for k, v := range o.Headers {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "headers", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "headers", k), validator)...)
 	}
-	if o.SecuritySchemes != nil {
-		for k, v := range o.SecuritySchemes {
-			errs = append(errs, v.validateSpec(joinLoc(location, "securitySchemes", k), validator)...)
+
+	for k, v := range o.SecuritySchemes {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "securitySchemes", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "securitySchemes", k), validator)...)
 	}
-	if o.Links != nil {
-		for k, v := range o.Links {
-			errs = append(errs, v.validateSpec(joinLoc(location, "links", k), validator)...)
+
+	for k, v := range o.Links {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "links", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "links", k), validator)...)
 	}
-	if o.Callbacks != nil {
-		for k, v := range o.Callbacks {
-			errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), validator)...)
+
+	for k, v := range o.Callbacks {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "callbacks", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "callbacks", k), validator)...)
 	}
-	if o.Paths != nil {
-		for k, v := range o.Paths {
-			errs = append(errs, v.validateSpec(joinLoc(location, "paths", k), validator)...)
+
+	for k, v := range o.Paths {
+		if !namePattern.MatchString(k) {
+			errs = append(errs, newValidationError(joinLoc(location, "paths", k), "invalid name %q, must match %q", k, namePattern.String()))
 		}
+		errs = append(errs, v.validateSpec(joinLoc(location, "paths", k), validator)...)
 	}
 
 	return errs
