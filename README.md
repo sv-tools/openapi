@@ -1,6 +1,6 @@
 # OpenAPI v3.1 Specification
 
-[![Code Analysis](https://github.com/sv-tools/openapi/actions/workflows/checks.yaml/badge.svg)](https://github.com/sv-tools/openapi/actions/workflows/code.yaml)
+[![Code Analysis](https://github.com/sv-tools/openapi/actions/workflows/code.yaml/badge.svg)](https://github.com/sv-tools/openapi/actions/workflows/code.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sv-tools/openapi.svg)](https://pkg.go.dev/github.com/sv-tools/openapi)
 [![codecov](https://codecov.io/gh/sv-tools/openapi/branch/main/graph/badge.svg?token=0XVOTDR1CW)](https://codecov.io/gh/sv-tools/openapi)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/sv-tools/openapi?style=flat)](https://github.com/sv-tools/openapi/releases)
