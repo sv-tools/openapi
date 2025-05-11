@@ -18,6 +18,20 @@ concurrency:
 permissions: read-all
 
 jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
+      - uses: actions/setup-go@v5.4.0 # immutable action, safe to use the versions
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: diff -u <(echo -n) <(gofmt -l . )
+      - name: show diff
+        if: ${{ failure() }}
+        run: git diff
+      - run: go vet ./...
+
   UnitTestJob:
     runs-on: ubuntu-latest
     strategy:
@@ -26,6 +40,7 @@ jobs:
           - "1.21"
           - "1.22"
           - "1.23"
+          - "1.24"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
@@ -33,17 +48,18 @@ jobs:
         uses: actions/setup-go@v5.4.0 # immutable action, safe to use the versions
         with:
           go-version: ${{ matrix.go }}
-      - name: gofmt
-        run: diff -u <(echo -n) <(gofmt -l . )
-      - name: show diff
-        if: ${{ failure() }}
-        run: git diff
-      - name: go vet
-        run: go vet ./...
-      - name: Run Unit Tests
-        run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
-      - name: Codecov
+      - run: go install github.com/jstemmer/go-junit-report/v2@latest
+      - run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
+      - run: go test -json 2>&1 | go-junit-report -parser gojson > junit.xml
+        if: always()
+      - name: Upload coverage reports to Codecov
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@f2dba722c67b86c6caa034178c6e4d35335f6706 # v1.1.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
