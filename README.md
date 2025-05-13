@@ -26,6 +26,7 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
     * `Validator.ValidateDataAsJSON()` method validates the data by converting it into `map[string]any` type first using `json.Marshal` and `json.Unmarshal`. 
       **WARNING**: the function is slow due to double conversion.
   * Use OpenAPI `v3.1.1` by default.
+  * Added support for [goccy/yaml](https://github.com/goccy/go-yaml) library.
 
 ## Features
 

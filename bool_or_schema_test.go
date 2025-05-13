@@ -2,6 +2,7 @@ package openapi_test
 
 import (
 	"encoding/json"
+	goyaml "github.com/goccy/go-yaml"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -67,7 +68,7 @@ func TestAdditionalPropertiesJSON(t *testing.T) {
 				require.JSONEq(t, tt.data, string(newJson))
 			})
 
-			t.Run("yaml", func(t *testing.T) {
+			t.Run("yaml.v3", func(t *testing.T) {
 				var v testAD
 				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &v))
 				require.Equal(t, "foo", v.Name)
@@ -79,6 +80,22 @@ func TestAdditionalPropertiesJSON(t *testing.T) {
 					require.Equal(t, tt.nilSchema, v.AP.Schema == nil)
 				}
 				newYaml, err := yaml.Marshal(&v)
+				require.NoError(t, err)
+				require.YAMLEq(t, tt.data, string(newYaml))
+			})
+
+			t.Run("goccy/go-yaml", func(t *testing.T) {
+				var v testAD
+				require.NoError(t, goyaml.Unmarshal([]byte(tt.data), &v))
+				require.Equal(t, "foo", v.Name)
+				if tt.nilAP {
+					require.Nil(t, v.AP)
+				} else {
+					require.NotNil(t, v.AP)
+					require.Equal(t, tt.allowed, v.AP.Allowed)
+					require.Equal(t, tt.nilSchema, v.AP.Schema == nil)
+				}
+				newYaml, err := goyaml.Marshal(&v)
 				require.NoError(t, err)
 				require.YAMLEq(t, tt.data, string(newYaml))
 			})
