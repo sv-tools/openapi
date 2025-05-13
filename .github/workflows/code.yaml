@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
-      - uses: actions/setup-go@v5.4.0 # immutable action, safe to use the versions
+      - uses: actions/setup-go@v5.5.0 # immutable action, safe to use the versions
         with:
           go-version-file: go.mod
       - name: gofmt
@@ -45,7 +45,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
       - name: Install Go
-        uses: actions/setup-go@v5.4.0 # immutable action, safe to use the versions
+        uses: actions/setup-go@v5.5.0 # immutable action, safe to use the versions
         with:
           go-version: ${{ matrix.go }}
       - run: go install github.com/jstemmer/go-junit-report/v2@latest
