@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 // Ref is a simple object to allow referencing other components in the OpenAPI document, internally and externally.
@@ -206,14 +204,21 @@ func (o *RefOrSpec[T]) MarshalYAML() (any, error) {
 	return v, nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *RefOrSpec[T]) UnmarshalYAML(node *yaml.Node) error {
-	if node.Decode(&o.Ref) == nil && o.Ref.Ref != "" {
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *RefOrSpec[T]) UnmarshalYAML(unmarshal func(any) error) error {
+	if o.Ref == nil {
+		o.Ref = &Ref{}
+	}
+	if unmarshal(o.Ref) == nil && o.Ref.Ref != "" {
 		return nil
 	}
 
 	o.Ref = nil
-	if err := node.Decode(&o.Spec); err != nil {
+	if o.Spec == nil {
+		o.Spec = new(T)
+	}
+	if err := unmarshal(o.Spec); err != nil {
+		o.Spec = nil
 		return fmt.Errorf("%T: %w", o.Spec, err)
 	}
 	return nil

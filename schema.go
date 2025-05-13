@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -344,7 +342,7 @@ func (o *Schema) GetExt(name string) any {
 }
 
 // returns the list of public fields for given tag and ignores `-` names
-func getFields(t reflect.Type, tag string) map[string]struct{} {
+func getFields(t reflect.Type, tags ...string) map[string]struct{} {
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
@@ -359,13 +357,19 @@ func getFields(t reflect.Type, tag string) map[string]struct{} {
 			continue
 		}
 		if f.Anonymous {
-			sub := getFields(f.Type, tag)
+			sub := getFields(f.Type, tags...)
 			for n, v := range sub {
 				ret[n] = v
 			}
 			continue
 		}
-		name, _, _ := strings.Cut(f.Tag.Get(tag), ",")
+		var name string
+		for _, tag := range tags {
+			if v, ok := f.Tag.Lookup(tag); ok {
+				name = strings.SplitN(v, ",", 2)[0]
+				break
+			}
+		}
 		if name == "-" {
 			continue
 		}
@@ -384,13 +388,18 @@ type intSchema Schema // needed to avoid recursion in marshal/unmarshal
 
 // MarshalJSON implements json.Marshaler interface.
 func (o *Schema) MarshalJSON() ([]byte, error) {
-	var raw map[string]json.RawMessage
-	exts, err := json.Marshal(&o.Extensions)
-	if err != nil {
-		return nil, fmt.Errorf("%T.Extensions: %w", o, err)
+	if o == nil {
+		return nil, nil
 	}
-	if err := json.Unmarshal(exts, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw extensions): %w", o, err)
+	var raw map[string]json.RawMessage
+	if len(o.Extensions) > 0 {
+		exts, err := json.Marshal(&o.Extensions)
+		if err != nil {
+			return nil, fmt.Errorf("%T.Extensions: %w", o, err)
+		}
+		if err := json.Unmarshal(exts, &raw); err != nil {
+			return nil, fmt.Errorf("%T(raw extensions): %w", o, err)
+		}
 	}
 	s := intSchema(*o)
 	fields, err := json.Marshal(&s)
@@ -400,6 +409,7 @@ func (o *Schema) MarshalJSON() ([]byte, error) {
 	if err := json.Unmarshal(fields, &raw); err != nil {
 		return nil, fmt.Errorf("%T(raw fields): %w", o, err)
 	}
+
 	data, err := json.Marshal(&raw)
 	if err != nil {
 		return nil, fmt.Errorf("%T(raw): %w", o, err)
@@ -422,8 +432,10 @@ func (o *Schema) UnmarshalJSON(data []byte) error {
 				return fmt.Errorf("%T.Extensions.%s: %w", o, name, err)
 			}
 			exts[name] = v
-			delete(raw, name)
 		}
+	}
+	for name := range exts {
+		delete(raw, name)
 	}
 	fields, err := json.Marshal(&raw)
 	if err != nil {
@@ -433,55 +445,49 @@ func (o *Schema) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(fields, &s); err != nil {
 		return fmt.Errorf("%T: %w", o, err)
 	}
-	s.Extensions = exts
+	if len(exts) > 0 {
+		s.Extensions = exts
+	}
 	*o = Schema(s)
 	return nil
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
 func (o *Schema) MarshalYAML() (any, error) {
-	var raw map[string]any
-	exts, err := yaml.Marshal(&o.Extensions)
-	if err != nil {
-		return nil, fmt.Errorf("%T.Extensions: %w", o, err)
-	}
-	if err := yaml.Unmarshal(exts, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw extensions): %w", o, err)
-	}
-	s := intSchema(*o)
-	fields, err := yaml.Marshal(&s)
+	data, err := json.Marshal(o)
 	if err != nil {
 		return nil, fmt.Errorf("%T: %w", o, err)
 	}
-	if err := yaml.Unmarshal(fields, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw fields): %w", o, err)
+	var raw map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("%T(raw): %w", o, err)
 	}
 	return raw, nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *Schema) UnmarshalYAML(node *yaml.Node) error {
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *Schema) UnmarshalYAML(unmarshal func(any) error) error {
 	var raw map[string]any
-	if err := node.Decode(&raw); err != nil {
+	if err := unmarshal(&raw); err != nil {
 		return fmt.Errorf("%T: %w", o, err)
 	}
 	exts := make(map[string]any)
-	keys := getFields(reflect.TypeOf(o), "json")
+	keys := getFields(reflect.TypeOf(o), "yaml", "json")
 	for name, value := range raw {
 		if _, ok := keys[name]; !ok {
 			exts[name] = value
-			delete(raw, name)
 		}
 	}
-	fields, err := yaml.Marshal(&raw)
-	if err != nil {
-		return fmt.Errorf("%T(raw): %w", o, err)
+	for name := range exts {
+		delete(raw, name)
 	}
 	var s intSchema
-	if err := yaml.Unmarshal(fields, &s); err != nil {
+	if err := unmarshal(&s); err != nil {
 		return fmt.Errorf("%T: %w", o, err)
 	}
-	s.Extensions = exts
+	if len(exts) > 0 {
+		s.Extensions = exts
+	}
 	*o = Schema(s)
 	return nil
 }
