@@ -2,8 +2,6 @@ package openapi
 
 import (
 	"encoding/json"
-
-	"gopkg.in/yaml.v3"
 )
 
 // BoolOrSchema handles Boolean or Schema type.
@@ -13,19 +11,6 @@ import (
 type BoolOrSchema struct {
 	Schema  *RefOrSpec[Schema]
 	Allowed bool
-}
-
-// UnmarshalJSON implements json.Unmarshaler interface.
-func (o *BoolOrSchema) UnmarshalJSON(data []byte) error {
-	if json.Unmarshal(data, &o.Allowed) == nil {
-		o.Schema = nil
-		return nil
-	}
-	if err := json.Unmarshal(data, &o.Schema); err != nil {
-		return err
-	}
-	o.Allowed = true
-	return nil
 }
 
 // MarshalJSON implements json.Marshaler interface.
@@ -39,13 +24,13 @@ func (o *BoolOrSchema) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&v)
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *BoolOrSchema) UnmarshalYAML(node *yaml.Node) error {
-	if node.Decode(&o.Allowed) == nil {
+// UnmarshalJSON implements json.Unmarshaler interface.
+func (o *BoolOrSchema) UnmarshalJSON(data []byte) error {
+	if json.Unmarshal(data, &o.Allowed) == nil {
 		o.Schema = nil
 		return nil
 	}
-	if err := node.Decode(&o.Schema); err != nil {
+	if err := json.Unmarshal(data, &o.Schema); err != nil {
 		return err
 	}
 	o.Allowed = true
@@ -62,6 +47,22 @@ func (o *BoolOrSchema) MarshalYAML() (any, error) {
 	}
 
 	return v, nil
+}
+
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *BoolOrSchema) UnmarshalYAML(unmarshal func(any) error) error {
+	if unmarshal(&o.Allowed) == nil {
+		o.Schema = nil
+		return nil
+	}
+	if o.Schema == nil {
+		o.Schema = &RefOrSpec[Schema]{}
+	}
+	if err := unmarshal(o.Schema); err != nil {
+		return err
+	}
+	o.Allowed = true
+	return nil
 }
 
 func (o *BoolOrSchema) validateSpec(path string, validator *Validator) []*validationError {

@@ -164,7 +164,7 @@ func (o *Components) Add(name string, v any) *Components {
 	return o
 }
 
-var namePattern = regexp.MustCompile(`^[a-zA-Z0-9\.\-_]+$`)
+var namePattern = regexp.MustCompile(`^[a-zA-Z0-9.\-_]+$`)
 
 func (o *Components) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError

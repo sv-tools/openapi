@@ -2,7 +2,6 @@ package openapi
 
 import (
 	"encoding/json"
-	"gopkg.in/yaml.v3"
 )
 
 // Callback is a map of possible out-of band callbacks related to the parent operation.
@@ -47,9 +46,9 @@ func (o *Callback) MarshalYAML() (any, error) {
 	return o.Paths, nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *Callback) UnmarshalYAML(node *yaml.Node) error {
-	return node.Decode(&o.Paths)
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *Callback) UnmarshalYAML(unmarshal func(any) error) error {
+	return unmarshal(&o.Paths)
 }
 
 func (o *Callback) validateSpec(location string, validator *Validator) []*validationError {
