@@ -48,9 +48,9 @@ type Schema struct {
 	// https://json-schema.org/understanding-json-schema/structuring#id
 	ID string `json:"$id,omitempty" yaml:"$id,omitempty"`
 	// https://json-schema.org/understanding-json-schema/structuring#dollardefs
-	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty" yaml:"$defs,omitempty"`
-	DynamicRef    string                        `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
-	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty" yaml:"$vocabulary,omitempty"`
+	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty"          yaml:"$defs,omitempty"`
+	DynamicRef    string                        `json:"$dynamicRef,omitempty"    yaml:"$dynamicRef,omitempty"`
+	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty"    yaml:"$vocabulary,omitempty"`
 	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
 	// https://json-schema.org/understanding-json-schema/reference/type#type-specific-keywords
 	Type *SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
@@ -171,7 +171,7 @@ type Schema struct {
 	DependentSchemas map[string]*RefOrSpec[Schema] `json:"dependentSchemas,omitempty" yaml:"dependentSchemas,omitempty"`
 
 	// https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else
-	If   *RefOrSpec[Schema] `json:"if,omitempty" yaml:"if,omitempty"`
+	If   *RefOrSpec[Schema] `json:"if,omitempty"   yaml:"if,omitempty"`
 	Then *RefOrSpec[Schema] `json:"then,omitempty" yaml:"then,omitempty"`
 	Else *RefOrSpec[Schema] `json:"else,omitempty" yaml:"else,omitempty"`
 
@@ -199,8 +199,8 @@ type Schema struct {
 
 	MinLength *int   `json:"minLength,omitempty" yaml:"minLength,omitempty"`
 	MaxLength *int   `json:"maxLength,omitempty" yaml:"maxLength,omitempty"`
-	Pattern   string `json:"pattern,omitempty" yaml:"pattern,omitempty"`
-	Format    string `json:"format,omitempty" yaml:"format,omitempty"`
+	Pattern   string `json:"pattern,omitempty"   yaml:"pattern,omitempty"`
+	Format    string `json:"format,omitempty"    yaml:"format,omitempty"`
 
 	// ** Array Type Fields ***
 	//
@@ -221,7 +221,7 @@ type Schema struct {
 	// to validate against one or more items in the array.
 	//
 	// https://json-schema.org/understanding-json-schema/reference/array.html#contains
-	Contains    *RefOrSpec[Schema] `json:"contains,omitempty" yaml:"contains,omitempty"`
+	Contains    *RefOrSpec[Schema] `json:"contains,omitempty"    yaml:"contains,omitempty"`
 	MinContains *int               `json:"minContains,omitempty" yaml:"minContains,omitempty"`
 	MaxContains *int               `json:"maxContains,omitempty" yaml:"maxContains,omitempty"`
 	// https://json-schema.org/understanding-json-schema/reference/array.html#length
@@ -324,7 +324,7 @@ type Schema struct {
 
 // AddExt sets the extension and returns the current object (self|this).
 // Schema does not require special `x-` prefix.
-// The extension will be ignored if the name overlaps with a struct field during marshalling to JSON or YAML.
+// The extension will be ignored if the name overlaps with a struct field during marshaling to JSON or YAML.
 func (o *Schema) AddExt(name string, value any) *Schema {
 	if o.Extensions == nil {
 		o.Extensions = make(map[string]any, 1)
@@ -353,7 +353,7 @@ func getFields(t reflect.Type, tag string) map[string]struct{} {
 	}
 	n := t.NumField()
 	ret := make(map[string]struct{})
-	for i := 0; i < n; i++ {
+	for i := range n {
 		f := t.Field(i)
 		if !f.IsExported() {
 			continue
@@ -596,123 +596,124 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 		}
 	}
 
-	if o.Type != nil {
-		for _, t := range *o.Type {
-			switch t {
-			case ArrayType: // JsonSchemaTypeArray
-				if o.Items != nil {
-					errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), validator)...)
+	if o.Type == nil {
+		return errs
+	}
+	for _, t := range *o.Type {
+		switch t {
+		case ArrayType: // JsonSchemaTypeArray
+			if o.Items != nil {
+				errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), validator)...)
+			}
+			if o.MinItems != nil && *o.MinItems < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "minItems"), "must be greater than or equal to 0"))
+			}
+			if o.MaxItems != nil && *o.MaxItems < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to 0"))
+				if o.MinItems != nil && *o.MaxItems < *o.MinItems {
+					errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to minItems"))
 				}
-				if o.MinItems != nil && *o.MinItems < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "minItems"), "must be greater than or equal to 0"))
+			}
+			if o.UnevaluatedItems != nil {
+				errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
+			}
+			if o.Contains != nil {
+				errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), validator)...)
+			}
+			if o.MinContains != nil && *o.MinContains < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "minContains"), "must be greater than or equal to 0"))
+			}
+			if o.MaxContains != nil && *o.MaxContains < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to 0"))
+				if o.MinContains != nil && *o.MaxContains < *o.MinContains {
+					errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to minContains"))
 				}
-				if o.MaxItems != nil && *o.MaxItems < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to 0"))
-					if o.MinItems != nil && *o.MaxItems < *o.MinItems {
-						errs = append(errs, newValidationError(joinLoc(location, "maxItems"), "must be greater than or equal to minItems"))
+			}
+			if len(o.PrefixItems) > 0 {
+				for i, v := range o.PrefixItems {
+					errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), validator)...)
+				}
+			}
+		case ObjectType: // JsonSchemaTypeObject
+			if o.Properties != nil {
+				for k, v := range o.Properties {
+					errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), validator)...)
+				}
+			}
+			if o.PatternProperties != nil {
+				for k, v := range o.PatternProperties {
+					errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), validator)...)
+					if _, err := regexp.Compile(k); err != nil {
+						errs = append(errs, newValidationError(joinLoc(location, "patternProperties", k), err))
 					}
 				}
-				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
+			}
+			if o.AdditionalProperties != nil {
+				errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), validator)...)
+			}
+			if o.UnevaluatedItems != nil {
+				errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
+			}
+			if o.PropertyNames != nil {
+				errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), validator)...)
+			}
+			if o.MinProperties != nil && *o.MinProperties < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "minProperties"), "must be greater than or equal to 0"))
+			}
+			if o.MaxProperties != nil && *o.MaxProperties < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to 0"))
+				if o.MinProperties != nil && *o.MaxProperties < *o.MinProperties {
+					errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to minProperties"))
 				}
-				if o.Contains != nil {
-					errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), validator)...)
-				}
-				if o.MinContains != nil && *o.MinContains < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "minContains"), "must be greater than or equal to 0"))
-				}
-				if o.MaxContains != nil && *o.MaxContains < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to 0"))
-					if o.MinContains != nil && *o.MaxContains < *o.MinContains {
-						errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to minContains"))
+			}
+			if len(o.Required) > 0 {
+				for i, v := range o.Required {
+					if _, ok := o.Properties[v]; !ok {
+						errs = append(errs, newValidationError(joinLoc(location, "required", i), "must be a property in properties"))
 					}
 				}
-				if len(o.PrefixItems) > 0 {
-					for i, v := range o.PrefixItems {
-						errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), validator)...)
-					}
+			}
+		case NumberType, IntegerType: // JsonSchemaTypeNumber
+			if o.MultipleOf != nil && *o.MultipleOf <= 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "multipleOf"), "must be greater than 0"))
+			}
+			if o.Minimum != nil && *o.Minimum < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "minimum"), "must be greater than or equal to 0"))
+			}
+			if o.Maximum != nil && *o.Maximum < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to 0"))
+				if o.Minimum != nil && *o.Maximum < *o.Minimum {
+					errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
 				}
-			case ObjectType: // JsonSchemaTypeObject
-				if o.Properties != nil {
-					for k, v := range o.Properties {
-						errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), validator)...)
-					}
+			}
+			if o.ExclusiveMinimum != nil && *o.ExclusiveMinimum < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMinimum"), "must be greater than or equal to 0"))
+			}
+			if o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to 0"))
+				if o.ExclusiveMinimum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
+					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
 				}
-				if o.PatternProperties != nil {
-					for k, v := range o.PatternProperties {
-						errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), validator)...)
-						if _, err := regexp.Compile(k); err != nil {
-							errs = append(errs, newValidationError(joinLoc(location, "patternProperties", k), err))
-						}
-					}
+			}
+			if o.Minimum != nil && o.ExclusiveMinimum != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
+			}
+			if o.Maximum != nil && o.ExclusiveMaximum != nil {
+				errs = append(errs, newValidationError(joinLoc(location, "maximum&exclusiveMaximum"), ErrMutuallyExclusive))
+			}
+		case StringType: // JsonSchemaTypeString
+			if o.MinLength != nil && *o.MinLength < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "minLength"), "must be greater than or equal to 0"))
+			}
+			if o.MaxLength != nil && *o.MaxLength < 0 {
+				errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to 0"))
+				if o.MinLength != nil && *o.MaxLength < *o.MinLength {
+					errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to minLength"))
 				}
-				if o.AdditionalProperties != nil {
-					errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), validator)...)
-				}
-				if o.UnevaluatedItems != nil {
-					errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
-				}
-				if o.PropertyNames != nil {
-					errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), validator)...)
-				}
-				if o.MinProperties != nil && *o.MinProperties < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "minProperties"), "must be greater than or equal to 0"))
-				}
-				if o.MaxProperties != nil && *o.MaxProperties < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to 0"))
-					if o.MinProperties != nil && *o.MaxProperties < *o.MinProperties {
-						errs = append(errs, newValidationError(joinLoc(location, "maxProperties"), "must be greater than or equal to minProperties"))
-					}
-				}
-				if len(o.Required) > 0 {
-					for i, v := range o.Required {
-						if _, ok := o.Properties[v]; !ok {
-							errs = append(errs, newValidationError(joinLoc(location, "required", i), "must be a property in properties"))
-						}
-					}
-				}
-			case NumberType, IntegerType: // JsonSchemaTypeNumber
-				if o.MultipleOf != nil && *o.MultipleOf <= 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "multipleOf"), "must be greater than 0"))
-				}
-				if o.Minimum != nil && *o.Minimum < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "minimum"), "must be greater than or equal to 0"))
-				}
-				if o.Maximum != nil && *o.Maximum < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to 0"))
-					if o.Minimum != nil && *o.Maximum < *o.Minimum {
-						errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
-					}
-				}
-				if o.ExclusiveMinimum != nil && *o.ExclusiveMinimum < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMinimum"), "must be greater than or equal to 0"))
-				}
-				if o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to 0"))
-					if o.ExclusiveMinimum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
-						errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
-					}
-				}
-				if o.Minimum != nil && o.ExclusiveMinimum != nil {
-					errs = append(errs, newValidationError(joinLoc(location, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
-				}
-				if o.Maximum != nil && o.ExclusiveMaximum != nil {
-					errs = append(errs, newValidationError(joinLoc(location, "maximum&exclusiveMaximum"), ErrMutuallyExclusive))
-				}
-			case StringType: // JsonSchemaTypeString
-				if o.MinLength != nil && *o.MinLength < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "minLength"), "must be greater than or equal to 0"))
-				}
-				if o.MaxLength != nil && *o.MaxLength < 0 {
-					errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to 0"))
-					if o.MinLength != nil && *o.MaxLength < *o.MinLength {
-						errs = append(errs, newValidationError(joinLoc(location, "maxLength"), "must be greater than or equal to minLength"))
-					}
-				}
-				if o.Pattern != "" {
-					if _, err := regexp.Compile(o.Pattern); err != nil {
-						errs = append(errs, newValidationError(joinLoc(location, "pattern"), err))
-					}
+			}
+			if o.Pattern != "" {
+				if _, err := regexp.Compile(o.Pattern); err != nil {
+					errs = append(errs, newValidationError(joinLoc(location, "pattern"), err))
 				}
 			}
 		}

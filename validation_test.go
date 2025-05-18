@@ -278,6 +278,8 @@ func TestNewValidator(t *testing.T) {
 }
 
 func TestValidator_ValidateData(t *testing.T) {
+	t.Parallel()
+
 	data, err := os.ReadFile(path.Join("testdata", "petstore.json"))
 	require.NoError(t, err)
 	var spec openapi.Extendable[openapi.OpenAPI]
@@ -321,7 +323,6 @@ func TestValidator_ValidateData(t *testing.T) {
 			compileError: "not found",
 		},
 	} {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

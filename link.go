@@ -92,7 +92,7 @@ func (o *Link) validateSpec(location string, validator *Validator) []*validation
 		}
 	}
 	// uncomment when JSONLookup is implemented
-	//if o.OperationRef != "" {
+	// if o.OperationRef != "" {
 	//	ref := NewRefOrExtSpec[Operation](o.OperationRef)
 	//	errs = append(errs, ref.validateSpec(joinLoc(location, "operationRef"), validator)...)
 	//}

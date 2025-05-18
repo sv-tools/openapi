@@ -21,7 +21,7 @@ type License struct {
 	URL string `json:"url,omitempty" yaml:"url,omitempty"`
 }
 
-func (o *License) validateSpec(location string, validator *Validator) []*validationError {
+func (o *License) validateSpec(location string, _ *Validator) []*validationError {
 	var errs []*validationError
 	if o.Name == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "name"), ErrRequired))

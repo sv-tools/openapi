@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"encoding/json"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -57,7 +58,7 @@ func (o *Callback) validateSpec(location string, validator *Validator) []*valida
 	for k, v := range o.Paths {
 		errs = append(errs, v.validateSpec(joinLoc(location, k), validator)...)
 	}
-	return nil
+	return errs
 }
 
 func (o *Callback) Add(expression string, item *RefOrSpec[Extendable[PathItem]]) *Callback {

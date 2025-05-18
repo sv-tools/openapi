@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:[0-9]{2}|XX)$`)
+var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:\d{2}|XX)$`)
 
 // Responses is a container for the expected responses of an operation.
 // The container maps a HTTP response code to the expected response.
