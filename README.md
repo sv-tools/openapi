@@ -7,18 +7,21 @@
 
 The implementation of OpenAPI v3.1 Specification for Go using generics.
 
+```shell
+go get github.com/sv-tools/openapi
+```
+
 ## Supported Go versions:
 
 * v1.24
 * v1.23
 * v1.22
-* v1.21
 
 ## Versions:
 
 * v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See `v0` branch.
 * v1 - The current version with the in-place validation of the specification. 
-  * The minimal version of Go is `v1.21`.
+  * The minimal version of Go is `v1.22`.
   * Everything have been moved to root folder. So, the import path is `github.com/sv-tools/openapi`.
   * Added `Validator` struct for validation of the specification and the data.
     * `Validator.ValidateSpec()` method validates the specification.
