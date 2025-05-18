@@ -49,11 +49,11 @@ func NewRefOrSpec[T any](v any) *RefOrSpec[T] {
 		o.Ref = &t
 	case string:
 		o.Ref = &Ref{Ref: t}
+	case nil:
 	case *T:
 		o.Spec = t
 	case T:
 		o.Spec = &t
-	case nil:
 	}
 	return &o
 }
@@ -68,11 +68,11 @@ func NewRefOrExtSpec[T any](v any) *RefOrSpec[Extendable[T]] {
 		o.Ref = &t
 	case string:
 		o.Ref = &Ref{Ref: t}
+	case nil:
 	case *T:
 		o.Spec = NewExtendable[T](t)
 	case T:
 		o.Spec = NewExtendable[T](&t)
-	case nil:
 	}
 	return &o
 }
@@ -89,26 +89,48 @@ func (o *RefOrSpec[T]) GetSpec(c *Extendable[Components]) (*T, error) {
 	return o.getSpec(c, make(visitedObjects))
 }
 
+const specNotFoundPrefix = "spec not found: "
+
+type SpecNotFoundError struct {
+	message        string
+	visitedObjects string
+}
+
+func (e *SpecNotFoundError) Error() string {
+	return specNotFoundPrefix + e.message + "; visited refs: " + e.visitedObjects
+}
+
+func (e *SpecNotFoundError) Is(target error) bool {
+	return strings.HasPrefix(target.Error(), specNotFoundPrefix)
+}
+
+func NewSpecNotFoundError(message string, visitedObjects visitedObjects) error {
+	return &SpecNotFoundError{
+		message:        message,
+		visitedObjects: visitedObjects.String(),
+	}
+}
+
 func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedObjects) (*T, error) {
 	// some guards
 	switch {
 	case o.Spec != nil:
 		return o.Spec, nil
 	case o.Ref == nil:
-		return nil, fmt.Errorf("spect not found; all visited refs: %s", visited)
+		return nil, NewSpecNotFoundError("nil Ref", visited)
 	case visited[o.Ref.Ref]:
-		return nil, fmt.Errorf("cycle ref %q detected; all visited refs: %s", o.Ref.Ref, visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("cycle ref %q detected", o.Ref.Ref), visited)
 	case !strings.HasPrefix(o.Ref.Ref, "#/components/"):
 		// TODO: support loading by url
-		return nil, fmt.Errorf("loading outside of components is not implemented for the ref %q; all visited refs: %s", o.Ref.Ref, visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("loading outside of components is not implemented for the ref %q", o.Ref.Ref), visited)
 	case c == nil:
-		return nil, fmt.Errorf("components is required, but got nil; all visited refs: %s", visited)
+		return nil, NewSpecNotFoundError("components is required, but got nil", visited)
 	}
 	visited[o.Ref.Ref] = true
 
 	parts := strings.SplitN(o.Ref.Ref[13:], "/", 2)
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("incorrect ref %q; all visited refs: %s", o.Ref.Ref, visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("incorrect ref %q", o.Ref.Ref), visited)
 	}
 	objName := parts[1]
 	var ref any
@@ -132,11 +154,11 @@ func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedObjects
 	case "paths":
 		ref = c.Spec.Paths[objName]
 	default:
-		return nil, fmt.Errorf("unexpected component %q; all visited refs: %s", ref, visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("unexpected component %q", ref), visited)
 	}
 	obj, ok := ref.(*RefOrSpec[T])
 	if !ok {
-		return nil, fmt.Errorf("expected spec of type %T, but got %T; all visited refs: %s", RefOrSpec[T]{}, ref, visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("expected spec of type %T, but got %T", RefOrSpec[T]{}, ref), visited)
 	}
 	if obj.Spec != nil {
 		return obj.Spec, nil
@@ -203,7 +225,7 @@ func (o *RefOrSpec[T]) validateSpec(location string, validator *Validator) []*va
 		if spec, ok := any(o.Spec).(validatable); ok {
 			errs = append(errs, spec.validateSpec(location, validator)...)
 		} else {
-			errs = append(errs, newValidationError(location, fmt.Errorf("unsupported spec type: %T", o.Spec)))
+			errs = append(errs, newValidationError(location, NewUnsupportedSpecTypeError(o.Spec)))
 		}
 	} else {
 		// do not validate already visited refs

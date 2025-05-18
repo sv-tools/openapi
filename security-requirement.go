@@ -14,7 +14,7 @@ package openapi
 //	api_key: []
 type SecurityRequirement map[string][]string
 
-func (o *SecurityRequirement) validateSpec(path string, validator *Validator) []*validationError {
+func (o *SecurityRequirement) validateSpec(_ string, validator *Validator) []*validationError { //nolint: unparam // by design
 	for k := range *o {
 		validator.visited[joinLoc("#", "components", "securitySchemes", k)] = true
 	}

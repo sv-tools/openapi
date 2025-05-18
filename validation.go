@@ -40,7 +40,7 @@ func newValidationError(location string, err any, args ...any) *validationError 
 	case error:
 		return &validationError{location: location, err: e}
 	case string:
-		return &validationError{location: location, err: fmt.Errorf(e, args...)}
+		return &validationError{location: location, err: fmt.Errorf(e, args...)} //nolint:err113 // by design
 	default:
 		// unreachable
 		panic(fmt.Sprintf("unsupported error type: %T", e))
@@ -129,6 +129,9 @@ func NewValidator(spec *Extendable[OpenAPI], opts ...ValidationOption) (*Validat
 		return nil, fmt.Errorf("marshaling spec failed: %w", err)
 	}
 	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("unmarshaling spec failed: %w", err)
+	}
 	compiler := jsonschema.NewCompiler()
 	compiler.DefaultDraft(jsonschema.Draft2020)
 	if err := compiler.AddResource(specPrefix, doc); err != nil {

@@ -70,14 +70,28 @@ func checkUnusedComponent[T any](name string, m map[string]T, validator *Validat
 	return errs
 }
 
+const unsupportedVersionPrefix = "unsupported version: "
+
+type UnsupportedVersionError string
+
+func (e UnsupportedVersionError) Error() string {
+	return unsupportedVersionPrefix + string(e)
+}
+
+func (e UnsupportedVersionError) Is(err error) bool {
+	return strings.HasPrefix(err.Error(), unsupportedVersionPrefix)
+}
+
+func NewUnsupportedVersionError(version string) error {
+	return UnsupportedVersionError(version)
+}
+
 func (o *OpenAPI) validateSpec(location string, validator *Validator) []*validationError {
 	var errs []*validationError
 	if o.OpenAPI == "" {
 		errs = append(errs, newValidationError(joinLoc(location, "openapi"), ErrRequired))
-	} else {
-		if !strings.HasPrefix(o.OpenAPI, "3.1.") {
-			errs = append(errs, newValidationError(joinLoc(location, "openapi"), fmt.Errorf("unsupported version: %s", o.OpenAPI)))
-		}
+	} else if !strings.HasPrefix(o.OpenAPI, "3.1.") {
+		errs = append(errs, newValidationError(joinLoc(location, "openapi"), NewUnsupportedVersionError(o.OpenAPI)))
 	}
 	if o.Info == nil {
 		errs = append(errs, newValidationError(joinLoc(location, "info"), ErrRequired))

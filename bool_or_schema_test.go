@@ -11,7 +11,7 @@ import (
 )
 
 type testAD struct {
-	AP   *openapi.BoolOrSchema `json:"ap,omitempty" yaml:"ap,omitempty"`
+	AP   *openapi.BoolOrSchema `json:"ap,omitempty"   yaml:"ap,omitempty"`
 	Name string                `json:"name,omitempty" yaml:"name,omitempty"`
 }
 

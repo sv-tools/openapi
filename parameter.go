@@ -228,11 +228,12 @@ func (o *Parameter) validateSpec(location string, validator *Validator) []*valid
 		errs = append(errs, newValidationError(joinLoc(location, "style"), "invalid value, expected one of [%s, %s, %s, %s, %s, %s, %s], but got '%s'", StyleMatrix, StyleLabel, StyleForm, StyleSimple, StyleSpaceDelimited, StylePipeDelimited, StyleDeepObject, o.Style))
 	}
 
-	if o.Name == "" {
+	switch {
+	case o.Name == "":
 		errs = append(errs, newValidationError(joinLoc(location, "name"), ErrRequired))
-	} else if o.In == InPath && !PathNamePattern.MatchString(o.Name) {
+	case o.In == InPath && !PathNamePattern.MatchString(o.Name):
 		errs = append(errs, newValidationError(joinLoc(location, "name"), "must match pattern '%s', but got '%s'", PathNamePattern, o.Name))
-	} else if !o.AllowReserved && o.In == InQuery && strings.ContainsAny(o.Name, ReservedCharacters) {
+	case !o.AllowReserved && o.In == InQuery && strings.ContainsAny(o.Name, ReservedCharacters):
 		errs = append(errs, newValidationError(joinLoc(location, "name"), "'%s' contains reserved characters: '%s'", o.Name, ReservedCharacters))
 	}
 
@@ -260,28 +261,30 @@ func (o *Parameter) validateSpec(location string, validator *Validator) []*valid
 			break
 		}
 	}
-	if schemaRef != "'" {
-		if o.Example != nil {
-			if e := validator.ValidateData(joinLoc(location, "schema"), o.Example); e != nil {
-				errs = append(errs, newValidationError(joinLoc(location, "example"), e))
-			}
-		}
-		if len(o.Examples) > 0 {
-			for k, v := range o.Examples {
-				example, err := v.GetSpec(validator.spec.Spec.Components)
-				if err != nil {
-					// do not add the error, because it is already validated earlier
-					continue
-				}
-				if value := example.Spec.Value; value != nil {
-					if e := validator.ValidateData(joinLoc(location, "schema"), value); e != nil {
-						errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
-					}
-				}
-			}
-		}
-	} else {
+
+	if schemaRef == "'" {
 		errs = append(errs, newValidationError(location, "unable to validate examples without schema or content"))
+		return errs
+	}
+
+	if o.Example != nil {
+		if e := validator.ValidateData(joinLoc(location, "schema"), o.Example); e != nil {
+			errs = append(errs, newValidationError(joinLoc(location, "example"), e))
+		}
+	}
+	if len(o.Examples) > 0 {
+		for k, v := range o.Examples {
+			example, err := v.GetSpec(validator.spec.Spec.Components)
+			if err != nil {
+				// do not add the error, because it is already validated earlier
+				continue
+			}
+			if value := example.Spec.Value; value != nil {
+				if e := validator.ValidateData(joinLoc(location, "schema"), value); e != nil {
+					errs = append(errs, newValidationError(joinLoc(location, "examples", k), e))
+				}
+			}
+		}
 	}
 	return errs
 }

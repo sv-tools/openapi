@@ -11,16 +11,20 @@ import (
 func TestComponents_Add(t *testing.T) {
 	for _, tt := range []struct {
 		name   string
-		create func() (string, any)
+		create func(tb testing.TB) (string, any)
 		check  func(tb testing.TB, c *openapi.Components)
 	}{
 		{
 			name: "schema ref or spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewSchemaBuilder().Title("test").Build()
 				return "testSchema", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Schemas, 1)
 				require.NotNil(tb, c.Schemas["testSchema"])
 				require.NotNil(tb, c.Schemas["testSchema"].Spec)
@@ -29,11 +33,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "response spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewResponseBuilder().Description("test").Build()
 				return "testResponse", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Responses, 1)
 				require.NotNil(tb, c.Responses["testResponse"])
 				require.NotNil(tb, c.Responses["testResponse"].Spec)
@@ -43,11 +51,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "parameter spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewParameterBuilder().Description("test").Build()
 				return "testParameter", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Parameters, 1)
 				require.NotNil(tb, c.Parameters["testParameter"])
 				require.NotNil(tb, c.Parameters["testParameter"].Spec)
@@ -57,11 +69,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "examples spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewExampleBuilder().Description("test").Build()
 				return "testExamples", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Examples, 1)
 				require.NotNil(tb, c.Examples["testExamples"])
 				require.NotNil(tb, c.Examples["testExamples"].Spec)
@@ -71,11 +87,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "request body spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewRequestBodyBuilder().Description("test").Build()
 				return "testRequestBodies", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.RequestBodies, 1)
 				require.NotNil(tb, c.RequestBodies["testRequestBodies"])
 				require.NotNil(tb, c.RequestBodies["testRequestBodies"].Spec)
@@ -85,11 +105,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "headers spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewHeaderBuilder().Description("test").Build()
 				return "testHeader", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Headers, 1)
 				require.NotNil(tb, c.Headers["testHeader"])
 				require.NotNil(tb, c.Headers["testHeader"].Spec)
@@ -99,13 +123,17 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "security schemes spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := &openapi.SecurityScheme{
 					Description: "test",
 				}
 				return "testSecurityScheme", openapi.NewRefOrExtSpec[openapi.SecurityScheme](o)
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.SecuritySchemes, 1)
 				require.NotNil(tb, c.SecuritySchemes["testSecurityScheme"])
 				require.NotNil(tb, c.SecuritySchemes["testSecurityScheme"].Spec)
@@ -115,11 +143,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "link spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewLinkBuilder().Description("test").Build()
 				return "testLink", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Links, 1)
 				require.NotNil(tb, c.Links["testLink"])
 				require.NotNil(tb, c.Links["testLink"].Spec)
@@ -129,7 +161,9 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "callback spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewCallbackBuilder().AddPathItem(
 					"testPath",
 					openapi.NewPathItemBuilder().Description("test").Build(),
@@ -137,6 +171,8 @@ func TestComponents_Add(t *testing.T) {
 				return "testCallback", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Callbacks, 1)
 				require.NotNil(tb, c.Callbacks["testCallback"])
 				require.NotNil(tb, c.Callbacks["testCallback"].Spec)
@@ -151,11 +187,15 @@ func TestComponents_Add(t *testing.T) {
 		},
 		{
 			name: "path item spec",
-			create: func() (string, any) {
+			create: func(tb testing.TB) (string, any) {
+				tb.Helper()
+
 				o := openapi.NewPathItemBuilder().Description("test").Build()
 				return "testPathItem", o
 			},
 			check: func(tb testing.TB, c *openapi.Components) {
+				tb.Helper()
+
 				require.Len(tb, c.Paths, 1)
 				require.NotNil(tb, c.Paths["testPathItem"])
 				require.NotNil(tb, c.Paths["testPathItem"].Spec)
@@ -165,7 +205,7 @@ func TestComponents_Add(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			name, obj := tt.create()
+			name, obj := tt.create(t)
 			tt.check(t, (&openapi.Components{}).Add(name, obj))
 		})
 	}

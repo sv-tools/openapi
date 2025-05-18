@@ -144,7 +144,6 @@ func (o *Operation) validateSpec(location string, validator *Validator) []*valid
 		for i, t := range o.Tags {
 			if !validator.opts.allowUndefinedTagsInOperation && !validator.visited[joinLoc("tags", t)] {
 				errs = append(errs, newValidationError(joinLoc(location, "tags", i), "'%s' not found", t))
-
 			}
 			validator.visited[joinLoc("tags", t, "used")] = true
 		}

@@ -3,6 +3,7 @@ package openapi
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 const (
@@ -81,6 +82,22 @@ func getKind(v any) reflect.Kind {
 	return k
 }
 
+const unsupportedTypePrefix = "unsupported type: "
+
+type UnsupportedTypeError string
+
+func (e UnsupportedTypeError) Error() string {
+	return unsupportedTypePrefix + string(e)
+}
+
+func (e UnsupportedTypeError) Is(target error) bool {
+	return strings.HasPrefix(target.Error(), unsupportedTypePrefix)
+}
+
+func NewUnsupportedTypeError(v reflect.Kind) error {
+	return UnsupportedTypeError(fmt.Sprintf("%T", v))
+}
+
 func kindToType(k reflect.Kind) (string, error) {
 	switch k {
 	case reflect.String:
@@ -96,6 +113,6 @@ func kindToType(k reflect.Kind) (string, error) {
 	case reflect.Slice, reflect.Array:
 		return ArrayType, nil
 	default:
-		return "", fmt.Errorf("unsupported type: %s", k.String())
+		return "", NewUnsupportedTypeError(k)
 	}
 }
