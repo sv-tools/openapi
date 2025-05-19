@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -199,7 +200,7 @@ func TestRefOrSpec_Marshal_Unmarshal(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("json", func(t *testing.T) {
-				var v *openapi.RefOrSpec[testRefOrSpec]
+				var v openapi.RefOrSpec[testRefOrSpec]
 				require.NoError(t, json.Unmarshal([]byte(tt.data), &v))
 				if tt.nilRef {
 					require.Nil(t, v.Ref)
@@ -219,8 +220,8 @@ func TestRefOrSpec_Marshal_Unmarshal(t *testing.T) {
 				require.JSONEq(t, tt.expected, string(data))
 			})
 
-			t.Run("yaml", func(t *testing.T) {
-				var v *openapi.RefOrSpec[testRefOrSpec]
+			t.Run("yaml.v3", func(t *testing.T) {
+				var v openapi.RefOrSpec[testRefOrSpec]
 				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &v))
 				if tt.nilRef {
 					require.Nil(t, v.Ref)
@@ -233,6 +234,27 @@ func TestRefOrSpec_Marshal_Unmarshal(t *testing.T) {
 					require.NotNil(t, v.Spec)
 				}
 				data, err := yaml.Marshal(&v)
+				require.NoError(t, err)
+				if tt.expected == "" {
+					tt.expected = tt.data
+				}
+				require.YAMLEq(t, tt.expected, string(data))
+			})
+
+			t.Run("goccy/go-yaml", func(t *testing.T) {
+				var v openapi.RefOrSpec[testRefOrSpec]
+				require.NoError(t, goyaml.Unmarshal([]byte(tt.data), &v))
+				if tt.nilRef {
+					require.Nil(t, v.Ref)
+				} else {
+					require.NotNil(t, v.Ref)
+				}
+				if tt.nilSpec {
+					require.Nil(t, v.Spec)
+				} else {
+					require.NotNil(t, v.Spec)
+				}
+				data, err := goyaml.Marshal(&v)
 				require.NoError(t, err)
 				if tt.expected == "" {
 					tt.expected = tt.data

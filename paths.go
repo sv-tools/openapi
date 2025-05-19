@@ -3,8 +3,6 @@ package openapi
 import (
 	"encoding/json"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 // Paths holds the relative paths to the individual endpoints and their operations.
@@ -44,9 +42,9 @@ func (o *Paths) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&o.Paths)
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *Paths) UnmarshalYAML(node *yaml.Node) error {
-	return node.Decode(&o.Paths)
+// UnmarshalJSON implements json.Unmarshaler interface.
+func (o *Paths) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &o.Paths)
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
@@ -54,9 +52,9 @@ func (o *Paths) MarshalYAML() (any, error) {
 	return o.Paths, nil
 }
 
-// UnmarshalJSON implements json.Unmarshaler interface.
-func (o *Paths) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &o.Paths)
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *Paths) UnmarshalYAML(unmarshal func(any) error) error {
+	return unmarshal(&o.Paths)
 }
 
 func (o *Paths) validateSpec(location string, validator *Validator) []*validationError {

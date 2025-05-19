@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -40,7 +41,7 @@ func TestExtendable_Marshal_Unmarshal(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("json", func(t *testing.T) {
-				var v *openapi.Extendable[testExtendable]
+				var v openapi.Extendable[testExtendable]
 				require.NoError(t, json.Unmarshal([]byte(tt.data), &v))
 				if tt.emptyExtensions {
 					require.Empty(t, v.Extensions)
@@ -54,8 +55,8 @@ func TestExtendable_Marshal_Unmarshal(t *testing.T) {
 				}
 				require.JSONEq(t, tt.expected, string(data))
 			})
-			t.Run("yaml", func(t *testing.T) {
-				var v *openapi.Extendable[testExtendable]
+			t.Run("yaml.v3", func(t *testing.T) {
+				var v openapi.Extendable[testExtendable]
 				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &v))
 				if tt.emptyExtensions {
 					require.Empty(t, v.Extensions)
@@ -63,6 +64,21 @@ func TestExtendable_Marshal_Unmarshal(t *testing.T) {
 					require.NotEmpty(t, v.Extensions)
 				}
 				data, err := yaml.Marshal(&v)
+				require.NoError(t, err)
+				if tt.expected == "" {
+					tt.expected = tt.data
+				}
+				require.YAMLEq(t, tt.expected, string(data))
+			})
+			t.Run("goccy/go-yaml", func(t *testing.T) {
+				var v openapi.Extendable[testExtendable]
+				require.NoError(t, goyaml.Unmarshal([]byte(tt.data), &v))
+				if tt.emptyExtensions {
+					require.Empty(t, v.Extensions)
+				} else {
+					require.NotEmpty(t, v.Extensions)
+				}
+				data, err := goyaml.Marshal(&v)
 				require.NoError(t, err)
 				if tt.expected == "" {
 					tt.expected = tt.data

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 const ExtensionPrefix = "x-"
@@ -69,20 +67,30 @@ func (o *Extendable[T]) GetExt(name string) any {
 
 // MarshalJSON implements json.Marshaler interface.
 func (o *Extendable[T]) MarshalJSON() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
 	var raw map[string]json.RawMessage
-	exts, err := json.Marshal(&o.Extensions)
-	if err != nil {
-		return nil, fmt.Errorf("%T.Extensions: %w", o.Spec, err)
+	if len(o.Extensions) > 0 {
+		exts, err := json.Marshal(&o.Extensions)
+		if err != nil {
+			return nil, fmt.Errorf("%T.Extensions: %w", o.Spec, err)
+		}
+		if err := json.Unmarshal(exts, &raw); err != nil {
+			return nil, fmt.Errorf("%T(raw extensions): %w", o.Spec, err)
+		}
 	}
-	if err := json.Unmarshal(exts, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw extensions): %w", o.Spec, err)
+	if o.Spec != nil {
+		fields, err := json.Marshal(o.Spec)
+		if err != nil {
+			return nil, fmt.Errorf("%T: %w", o.Spec, err)
+		}
+		if err := json.Unmarshal(fields, &raw); err != nil {
+			return nil, fmt.Errorf("%T(raw fields): %w", o.Spec, err)
+		}
 	}
-	fields, err := json.Marshal(&o.Spec)
-	if err != nil {
-		return nil, fmt.Errorf("%T: %w", o.Spec, err)
-	}
-	if err := json.Unmarshal(fields, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw fields): %w", o.Spec, err)
+	if len(raw) == 0 {
+		return nil, nil
 	}
 	data, err := json.Marshal(&raw)
 	if err != nil {
@@ -97,14 +105,19 @@ func (o *Extendable[T]) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return fmt.Errorf("%T: %w", o.Spec, err)
 	}
-	o.Extensions = make(map[string]any)
+	exts := make(map[string]any)
 	for name, value := range raw {
 		if strings.HasPrefix(name, ExtensionPrefix) {
 			var v any
 			if err := json.Unmarshal(value, &v); err != nil {
 				return fmt.Errorf("%T.Extensions.%s: %w", o.Spec, name, err)
 			}
-			o.Extensions[name] = v
+			exts[name] = v
+		}
+	}
+	if len(exts) > 0 {
+		o.Extensions = exts
+		for name := range exts {
 			delete(raw, name)
 		}
 	}
@@ -121,28 +134,21 @@ func (o *Extendable[T]) UnmarshalJSON(data []byte) error {
 
 // MarshalYAML implements yaml.Marshaler interface.
 func (o *Extendable[T]) MarshalYAML() (any, error) {
-	var raw map[string]any
-	exts, err := yaml.Marshal(&o.Extensions)
-	if err != nil {
-		return nil, fmt.Errorf("%T.Extensions: %w", o.Spec, err)
-	}
-	if err := yaml.Unmarshal(exts, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw extensions): %w", o.Spec, err)
-	}
-	fields, err := yaml.Marshal(&o.Spec)
+	data, err := json.Marshal(o)
 	if err != nil {
 		return nil, fmt.Errorf("%T: %w", o.Spec, err)
 	}
-	if err := yaml.Unmarshal(fields, &raw); err != nil {
-		return nil, fmt.Errorf("%T(raw fields): %w", o.Spec, err)
+	var raw map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("%T(raw): %w", o.Spec, err)
 	}
 	return raw, nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *Extendable[T]) UnmarshalYAML(node *yaml.Node) error {
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *Extendable[T]) UnmarshalYAML(unmarshal func(any) error) error {
 	var raw map[string]any
-	if err := node.Decode(&raw); err != nil {
+	if err := unmarshal(&raw); err != nil {
 		return fmt.Errorf("%T: %w", o.Spec, err)
 	}
 	o.Extensions = make(map[string]any)
@@ -152,14 +158,13 @@ func (o *Extendable[T]) UnmarshalYAML(node *yaml.Node) error {
 			delete(raw, name)
 		}
 	}
-	fields, err := yaml.Marshal(&raw)
-	if err != nil {
-		return fmt.Errorf("%T(raw): %w", o.Spec, err)
+	if o.Spec == nil {
+		o.Spec = new(T)
 	}
-	if err := yaml.Unmarshal(fields, &o.Spec); err != nil {
+	if err := unmarshal(o.Spec); err != nil {
+		o.Spec = nil
 		return fmt.Errorf("%T: %w", o.Spec, err)
 	}
-
 	return nil
 }
 

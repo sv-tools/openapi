@@ -3,8 +3,6 @@ package openapi
 import (
 	"encoding/json"
 	"regexp"
-
-	"gopkg.in/yaml.v3"
 )
 
 var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:\d{2}|XX)$`)
@@ -49,88 +47,58 @@ type Responses struct {
 
 // MarshalJSON implements json.Marshaler interface.
 func (o *Responses) MarshalJSON() ([]byte, error) {
-	var raw map[string]json.RawMessage
-	data, err := json.Marshal(&o.Response)
-	if err != nil {
-		return nil, err
+	fields := make(map[string]*RefOrSpec[Extendable[Response]], len(o.Response)+1)
+	for k, v := range o.Response {
+		fields[k] = v
 	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return nil, err
-	}
-
 	if o.Default != nil {
-		data, err = json.Marshal(&o.Default)
-		if err != nil {
-			return nil, err
-		}
-		if raw == nil {
-			raw = make(map[string]json.RawMessage, 1)
-		}
-		raw["default"] = data
+		fields["default"] = o.Default
 	}
-	return json.Marshal(&raw)
+	return json.Marshal(&fields)
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (o *Responses) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var fields map[string]*RefOrSpec[Extendable[Response]]
+	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
-	if v, ok := raw["default"]; ok {
-		if err := json.Unmarshal(v, &o.Default); err != nil {
-			return err
-		}
-		delete(raw, "default")
+	if v, ok := fields["default"]; ok {
+		delete(fields, "default")
+		o.Default = v
 	}
-	data, err := json.Marshal(&raw)
-	if err != nil {
-		return err
+	if len(fields) > 0 {
+		o.Response = fields
 	}
-	return json.Unmarshal(data, &o.Response)
+	return nil
 }
 
 // MarshalYAML implements yaml.Marshaler interface.
 func (o *Responses) MarshalYAML() (any, error) {
-	var raw map[string]any
-	data, err := yaml.Marshal(&o.Response)
-	if err != nil {
-		return nil, err
+	fields := make(map[string]*RefOrSpec[Extendable[Response]], len(o.Response)+1)
+	for k, v := range o.Response {
+		fields[k] = v
 	}
-	if err := yaml.Unmarshal(data, &raw); err != nil {
-		return nil, err
-	}
-
 	if o.Default != nil {
-		if raw == nil {
-			raw = make(map[string]any, 1)
-		}
-		raw["default"] = o.Default
+		fields["default"] = o.Default
 	}
-	return raw, nil
+	return fields, nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler interface.
-func (o *Responses) UnmarshalYAML(node *yaml.Node) error {
-	var raw map[string]any
-	if err := node.Decode(&raw); err != nil {
+// UnmarshalYAML implements yaml.obsoleteUnmarshaler and goyaml.InterfaceUnmarshaler interfaces.
+func (o *Responses) UnmarshalYAML(unmarshal func(any) error) error {
+	var fields map[string]*RefOrSpec[Extendable[Response]]
+	if err := unmarshal(&fields); err != nil {
 		return err
 	}
-	if v, ok := raw["default"]; ok {
-		data, err := yaml.Marshal(&v)
-		if err != nil {
-			return err
-		}
-		if err := yaml.Unmarshal(data, &o.Default); err != nil {
-			return err
-		}
-		delete(raw, "default")
+	if v, ok := fields["default"]; ok {
+		delete(fields, "default")
+		o.Default = v
 	}
-	data, err := yaml.Marshal(&raw)
-	if err != nil {
-		return err
+	if len(fields) > 0 {
+		o.Response = fields
 	}
-	return yaml.Unmarshal(data, &o.Response)
+	return nil
 }
 
 func (o *Responses) validateSpec(location string, validator *Validator) []*validationError {

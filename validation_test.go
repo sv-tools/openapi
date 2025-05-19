@@ -6,6 +6,7 @@ import (
 	"path"
 	"testing"
 
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -24,13 +25,21 @@ func TestValidator_ValidateSpec(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			data, err := os.ReadFile(path.Join("testdata", name))
 			require.NoError(t, err)
-			var o *openapi.Extendable[openapi.OpenAPI]
+			var o openapi.Extendable[openapi.OpenAPI]
 			switch path.Ext(name) {
 			case ".yaml":
-				require.NoError(t, yaml.Unmarshal(data, &o))
-				newData, err := yaml.Marshal(&o)
-				require.NoError(t, err)
-				require.YAMLEq(t, string(data), string(newData))
+				t.Run("yaml.v3", func(t *testing.T) {
+					require.NoError(t, yaml.Unmarshal(data, &o))
+					newData, err := yaml.Marshal(&o)
+					require.NoError(t, err)
+					require.YAMLEq(t, string(data), string(newData))
+				})
+				t.Run("goccy/go-yaml", func(t *testing.T) {
+					require.NoError(t, goyaml.Unmarshal(data, &o))
+					newData, err := goyaml.Marshal(&o)
+					require.NoError(t, err)
+					require.YAMLEq(t, string(data), string(newData))
+				})
 			case ".json":
 				require.NoError(t, json.Unmarshal(data, &o))
 				newData, err := json.Marshal(&o)
@@ -40,7 +49,7 @@ func TestValidator_ValidateSpec(t *testing.T) {
 				t.Fatal("wrong file")
 			}
 			v, err := openapi.NewValidator(
-				o,
+				&o,
 				openapi.AllowUndefinedTagsInOperation(),
 				openapi.ValidateStringDataAsJSON(),
 			)

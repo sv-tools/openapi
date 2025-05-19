@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -14,23 +15,25 @@ func TestSchema_Marshal_Unmarshal(t *testing.T) {
 	for _, tt := range []struct {
 		name            string
 		data            string
-		expected        string
+		expected        *openapi.Schema
 		emptyExtensions bool
 	}{
 		{
 			name:            "spec only",
 			data:            `{"title": "foo"}`,
+			expected:        openapi.NewSchemaBuilder().Title("foo").Build().Spec,
 			emptyExtensions: true,
 		},
 		{
 			name:            "spec with extension field",
 			data:            `{"title": "foo", "b": "bar"}`,
+			expected:        openapi.NewSchemaBuilder().Title("foo").AddExt("b", "bar").Build().Spec,
 			emptyExtensions: false,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("json", func(t *testing.T) {
-				var v *openapi.Schema
+				var v openapi.Schema
 				require.NoError(t, json.Unmarshal([]byte(tt.data), &v))
 				if tt.emptyExtensions {
 					require.Empty(t, v.Extensions)
@@ -39,13 +42,11 @@ func TestSchema_Marshal_Unmarshal(t *testing.T) {
 				}
 				data, err := json.Marshal(&v)
 				require.NoError(t, err)
-				if tt.expected == "" {
-					tt.expected = tt.data
-				}
-				require.JSONEq(t, tt.expected, string(data))
+				require.JSONEq(t, tt.data, string(data))
+				require.Equal(t, *tt.expected, v)
 			})
-			t.Run("yaml", func(t *testing.T) {
-				var v *openapi.Schema
+			t.Run("yaml.v3", func(t *testing.T) {
+				var v openapi.Schema
 				require.NoError(t, yaml.Unmarshal([]byte(tt.data), &v))
 				if tt.emptyExtensions {
 					require.Empty(t, v.Extensions)
@@ -54,10 +55,21 @@ func TestSchema_Marshal_Unmarshal(t *testing.T) {
 				}
 				data, err := yaml.Marshal(&v)
 				require.NoError(t, err)
-				if tt.expected == "" {
-					tt.expected = tt.data
+				require.YAMLEq(t, tt.data, string(data))
+				require.Equal(t, *tt.expected, v)
+			})
+			t.Run("goccy/go-yaml", func(t *testing.T) {
+				var v openapi.Schema
+				require.NoError(t, goyaml.Unmarshal([]byte(tt.data), &v))
+				if tt.emptyExtensions {
+					require.Empty(t, v.Extensions)
+				} else {
+					require.NotEmpty(t, v.Extensions)
 				}
-				require.YAMLEq(t, tt.expected, string(data))
+				data, err := goyaml.Marshal(&v)
+				require.NoError(t, err)
+				require.YAMLEq(t, tt.data, string(data))
+				require.Equal(t, *tt.expected, v)
 			})
 		})
 	}
