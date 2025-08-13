@@ -21,7 +21,7 @@ jobs:
   Lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
+      - uses: actions/checkout@v5.0.0 # immutable action, safe to use the versions
       - uses: actions/setup-go@v5.5.0 # immutable action, safe to use the versions
         with:
           go-version-file: go.mod
@@ -39,7 +39,7 @@ jobs:
           - "1.24"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2 # immutable action, safe to use the versions
+        uses: actions/checkout@v5.0.0 # immutable action, safe to use the versions
       - name: Install Go
         uses: actions/setup-go@v5.5.0 # immutable action, safe to use the versions
         with:
