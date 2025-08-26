@@ -11,22 +11,23 @@ The implementation of OpenAPI v3.1 Specification for Go using generics.
 go get github.com/sv-tools/openapi
 ```
 
-## Supported Go versions:
+## Supported Go versions
 
+* v1.25
 * v1.24
 * v1.23
 * v1.22
 
-## Versions:
+## Versions
 
-* v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See `v0` branch.
-* v1 - The current version with the in-place validation of the specification. 
-  * The minimal version of Go is `v1.22`.
-  * Everything have been moved to root folder. So, the import path is `github.com/sv-tools/openapi`.
+* v0 - **Deprecated**. The initial version with the full implementation of the v3.1 Specification using generics. See the `v0` branch.
+* v1 - The current version with the in-place validation of the specification.
+  * The minimum version of Go is `v1.22`.
+  * Everything has been moved to the root folder. So, the import path is `github.com/sv-tools/openapi`.
   * Added `Validator` struct for validation of the specification and the data.
     * `Validator.ValidateSpec()` method validates the specification.
     * `Validator.ValidateData()` method validates the data.
-    * `Validator.ValidateDataAsJSON()` method validates the data by converting it into `map[string]any` type first using `json.Marshal` and `json.Unmarshal`. 
+    * `Validator.ValidateDataAsJSON()` method validates the data by converting it into `map[string]any` type first using `json.Marshal` and `json.Unmarshal`.
       **WARNING**: the function is slow due to double conversion.
   * Added `ParseObject` function to create `SchemaBuilder` by parsing an object.
     The function supports `json`, `yaml` and `openapi` field tags for the structs.
@@ -35,7 +36,8 @@ go get github.com/sv-tools/openapi
 ## Features
 
 * The official v3.0 and v3.1 [examples](https://github.com/OAI/OpenAPI-Specification/tree/main/examples) are tested.
-  In most cases v3.0 specification can be converted to v3.1 by changing the version's parameter only.
+  In most cases, the v3.0 specification can be converted to v3.1 by changing only the version parameter.
+
   ```diff
   @@ -1,4 +1,4 @@
   -openapi: "3.0.0"

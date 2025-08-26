@@ -6,8 +6,3 @@ component_management:
         target: auto
         branches:
           - main
-  individual_components:
-    - component_id: spec
-      name: Specification
-      paths:
-        - spec/**
