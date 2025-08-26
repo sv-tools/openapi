@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // Paths holds the relative paths to the individual endpoints and their operations.

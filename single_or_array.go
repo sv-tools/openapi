@@ -3,7 +3,7 @@ package openapi
 import (
 	"encoding/json"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // SingleOrArray holds list or single value
