@@ -35,7 +35,7 @@ jobs:
     outputs:
       matrix: ${{ steps.versions.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5.0.0 # immutable action, safe to use the versions
       - uses: arnested/go-version-action@81f730770833dd20e6365d535ce7efcb3b136e7d #v1.1.21
         id: versions
 
