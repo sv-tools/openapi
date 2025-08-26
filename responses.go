@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"regexp"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 var ResponseCodePattern = regexp.MustCompile(`^[1-5](?:\d{2}|XX)$`)

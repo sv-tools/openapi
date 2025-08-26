@@ -3,7 +3,7 @@ package openapi
 import (
 	"encoding/json"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // Callback is a map of possible out-of band callbacks related to the parent operation.
