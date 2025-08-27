@@ -4,14 +4,19 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+  - package-ecosystem: gomod
+    directory: ".github/tools/"
+    schedule:
+      interval: weekly
+    groups:
+      ci-tools:
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     groups:
-      golangci-lint:
-        patterns:
-          - "golangci*"
       ci:
         patterns:
           - "*"
