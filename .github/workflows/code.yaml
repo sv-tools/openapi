@@ -50,9 +50,8 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: ${{ matrix.go }}
-      - run: go install github.com/jstemmer/go-junit-report/v2@latest
       - run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
-      - run: go test -json 2>&1 | go-junit-report -parser gojson > junit.xml
+      - run: go test -json 2>&1 | go tool -modfile=".github/tools/go.mod" go-junit-report -parser gojson > junit.xml
         if: always()
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
