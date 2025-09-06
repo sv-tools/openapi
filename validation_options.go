@@ -9,6 +9,7 @@ type validationOptions struct {
 	allowRequestBodyForDelete       bool
 	allowUndefinedTagsInOperation   bool
 	allowUnusedComponents           bool
+	allowUnusedTags                 bool
 	doNotValidateExamples           bool
 	doNotValidateDefaultValues      bool
 	validateDataAsJSON              bool
@@ -57,6 +58,13 @@ func AllowUndefinedTagsInOperation() ValidationOption {
 func AllowUnusedComponents() ValidationOption {
 	return func(v *validationOptions) {
 		v.allowUnusedComponents = true
+	}
+}
+
+// AllowUnusedTags is a validation option to allow declared but unused tags.
+func AllowUnusedTags() ValidationOption {
+	return func(v *validationOptions) {
+		v.allowUnusedTags = true
 	}
 }
 

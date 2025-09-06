@@ -343,3 +343,27 @@ func TestValidator_ValidateData(t *testing.T) {
 		})
 	}
 }
+
+func TestValidator_UnusedTagsOption(t *testing.T) {
+	// Spec with one declared tag but unused
+	base := func() *openapi.Extendable[openapi.OpenAPI] {
+		return openapi.NewOpenAPIBuilder().
+			Info(openapi.NewInfoBuilder().Title("Spec").Version("1.0.0").Build()).
+			Paths(openapi.NewPaths()).
+			Tags(openapi.NewTagBuilder().Name("unused").Build()).
+			Build()
+	}
+
+	t.Run("unused tag error by default", func(t *testing.T) {
+		v, err := openapi.NewValidator(base())
+		require.NoError(t, err)
+		err = v.ValidateSpec()
+		require.ErrorContains(t, err, "unused")
+	})
+
+	t.Run("unused tag allowed when option set", func(t *testing.T) {
+		v, err := openapi.NewValidator(base(), openapi.AllowUnusedTags())
+		require.NoError(t, err)
+		require.NoError(t, v.ValidateSpec())
+	})
+}

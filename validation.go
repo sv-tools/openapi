@@ -113,7 +113,7 @@ const specPrefix = "http://spec"
 
 // NewValidator creates an instance of Validator struct.
 //
-// The function creates new jsonschema comppiler and adds the given spec to the compiler.
+// The function creates new jsonschema compiler and adds the given spec to the compiler.
 func NewValidator(spec *Extendable[OpenAPI], opts ...ValidationOption) (*Validator, error) {
 	options := &validationOptions{}
 	for _, opt := range opts {
