@@ -154,7 +154,7 @@ func (o *RefOrSpec[T]) getSpec(c *Extendable[Components], visited visitedObjects
 	case "paths":
 		ref = c.Spec.Paths[objName]
 	default:
-		return nil, NewSpecNotFoundError(fmt.Sprintf("unexpected component %q", ref), visited)
+		return nil, NewSpecNotFoundError(fmt.Sprintf("unexpected component name %q in ref %q", parts[0], o.Ref.Ref), visited)
 	}
 	obj, ok := ref.(*RefOrSpec[T])
 	if !ok {
