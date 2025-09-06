@@ -138,9 +138,11 @@ func (o *OpenAPI) validateSpec(location string, validator *Validator) []*validat
 	}
 
 	// check for unused
-	for i, t := range o.Tags {
-		if !validator.visited[joinLoc("tags", t.Spec.Name, "used")] {
-			errs = append(errs, newValidationError(joinLoc(location, "tags", i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
+	if !validator.opts.allowUnusedTags {
+		for i, t := range o.Tags {
+			if !validator.visited[joinLoc("tags", t.Spec.Name, "used")] {
+				errs = append(errs, newValidationError(joinLoc(location, "tags", i), fmt.Errorf("'%s': %w", t.Spec.Name, ErrUnused)))
+			}
 		}
 	}
 	if o.Components != nil && !validator.opts.allowUnusedComponents {
