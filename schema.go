@@ -746,7 +746,7 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 				errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
 			}
 			if o.ExclusiveMinimum != nil && o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
-				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
+				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than exclusiveMinimum"))
 			}
 			if o.Minimum != nil && o.ExclusiveMinimum != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
