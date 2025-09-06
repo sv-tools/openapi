@@ -599,7 +599,7 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 		for i, oi := range o.Enum {
 			for j, oj := range o.Enum[i+1:] {
 				if reflect.DeepEqual(oi, oj) {
-					errs = append(errs, newValidationError(joinLoc(location, "enum", j), "duplicate value found in enum: %v", oj))
+					errs = append(errs, newValidationError(joinLoc(location, "enum", i+1+j), "duplicate value found in enum: %v", oj))
 					break
 				}
 			}
