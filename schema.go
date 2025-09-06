@@ -3,6 +3,7 @@ package openapi
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -24,7 +25,7 @@ const (
 // OAS also defers the definition of semantics to the application consuming the OpenAPI document.
 //
 // https://spec.openapis.org/oas/v3.1.1#schema-object
-// https://json-schema.org/understanding-json-schema/index.html
+// https://json-schema.org/understanding-json-schema/about
 type Schema struct {
 	// *** Core Fields ***
 
@@ -51,7 +52,7 @@ type Schema struct {
 	Defs          map[string]*RefOrSpec[Schema] `json:"$defs,omitempty"          yaml:"$defs,omitempty"`
 	DynamicRef    string                        `json:"$dynamicRef,omitempty"    yaml:"$dynamicRef,omitempty"`
 	Vocabulary    map[string]bool               `json:"$vocabulary,omitempty"    yaml:"$vocabulary,omitempty"`
-	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"dynamicAnchor,omitempty"`
+	DynamicAnchor string                        `json:"$dynamicAnchor,omitempty" yaml:"$dynamicAnchor,omitempty"`
 	// https://json-schema.org/understanding-json-schema/reference/type#type-specific-keywords
 	Type *SingleOrArray[string] `json:"type,omitempty" yaml:"type,omitempty"`
 
@@ -74,7 +75,7 @@ type Schema struct {
 	// The const keyword is used to restrict a value to a single value.
 	//
 	// https://json-schema.org/understanding-json-schema/reference/const
-	Const string `json:"const,omitempty" yaml:"const,omitempty"`
+	Const any `json:"const,omitempty" yaml:"const,omitempty"`
 	// The $comment keyword is strictly intended for adding comments to a schema.
 	// Its value must always be a string.
 	// Unlike the annotations title, description, and examples, JSON schema implementations aren’t allowed
@@ -183,15 +184,15 @@ type Schema struct {
 	// It may be set to any positive number.
 	//
 	// https://json-schema.org/understanding-json-schema/reference/numeric.html#multiples
-	MultipleOf *int `json:"multipleOf,omitempty" yaml:"multipleOf,omitempty"`
+	MultipleOf *float64 `json:"multipleOf,omitempty" yaml:"multipleOf,omitempty"`
 	// x ≥ minimum
-	Minimum *int `json:"minimum,omitempty" yaml:"minimum,omitempty"`
+	Minimum *float64 `json:"minimum,omitempty" yaml:"minimum,omitempty"`
 	// x > exclusiveMinimum
-	ExclusiveMinimum *int `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
+	ExclusiveMinimum *float64 `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
 	// x ≤ maximum
-	Maximum *int `json:"maximum,omitempty" yaml:"maximum,omitempty"`
+	Maximum *float64 `json:"maximum,omitempty" yaml:"maximum,omitempty"`
 	// x < exclusiveMaximum
-	ExclusiveMaximum *int `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
+	ExclusiveMaximum *float64 `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
 
 	// *** String Type Fields ***
 	//
@@ -526,9 +527,11 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 		}
 	}
 
-	// JsonSchemaCore
-	if o.Schema != "" && o.Schema != Draft202012 {
-		errs = append(errs, newValidationError(joinLoc(location, "schema"), "must be '%s', but got '%s'", Draft202012, o.Schema))
+	// JsonSchemaCore: only verify $schema is an absolute URI when present (no longer force Draft202012)
+	if o.Schema != "" {
+		if u, err := url.Parse(o.Schema); err != nil || u == nil || u.Scheme == "" {
+			errs = append(errs, newValidationError(joinLoc(location, "schema"), "must be an absolute URI, got '%s'", o.Schema))
+		}
 	}
 	if len(o.Defs) > 0 {
 		for k, v := range o.Defs {
@@ -574,6 +577,9 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 				errs = append(errs, newValidationError(joinLoc(location, "default"), e))
 			}
 		}
+		if o.Const != nil && !reflect.DeepEqual(o.Default, o.Const) {
+			errs = append(errs, newValidationError(joinLoc(location, "default"), "invalid value, expected to be equal to const value: %v", o.Const))
+		}
 		if len(o.Enum) > 0 {
 			var found bool
 			for _, v := range o.Enum {
@@ -588,6 +594,22 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 		}
 	}
 
+	if len(o.Enum) > 0 {
+		// use O(n^2) reflect.DeepEqual comparison to safely handle non-comparable types (slices, maps, etc.)
+		for i, oi := range o.Enum {
+			for j, oj := range o.Enum[i+1:] {
+				if reflect.DeepEqual(oi, oj) {
+					errs = append(errs, newValidationError(joinLoc(location, "enum", i+1+j), "duplicate value found in enum: %v", oj))
+					break
+				}
+			}
+		}
+	}
+
+	if o.Const != nil && len(o.Enum) > 0 {
+		errs = append(errs, newValidationError(joinLoc(location, "const"), "cannot be used together with enum"))
+	}
+
 	if len(o.Examples) > 0 && !validator.opts.doNotValidateExamples {
 		for k, v := range o.Examples {
 			if e := validator.ValidateData(location, v); e != nil {
@@ -596,7 +618,47 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 		}
 	}
 
+	// Traverse nested subschemas for object/array related keywords even when type is unspecified (spec allows omitting "type").
+	// Do NOT enforce type-specific numeric/string constraints unless the type explicitly includes them.
 	if o.Type == nil {
+		// object-like keywords
+		if o.Properties != nil {
+			for k, v := range o.Properties {
+				errs = append(errs, v.validateSpec(joinLoc(location, "properties", k), validator)...)
+			}
+		}
+		if o.PatternProperties != nil {
+			for k, v := range o.PatternProperties {
+				errs = append(errs, v.validateSpec(joinLoc(location, "patternProperties", k), validator)...)
+				if _, err := regexp.Compile(k); err != nil {
+					errs = append(errs, newValidationError(joinLoc(location, "patternProperties", k), err))
+				}
+			}
+		}
+		if o.AdditionalProperties != nil {
+			errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), validator)...)
+		}
+		if o.UnevaluatedProperties != nil {
+			errs = append(errs, o.UnevaluatedProperties.validateSpec(joinLoc(location, "unevaluatedProperties"), validator)...)
+		}
+		if o.PropertyNames != nil {
+			errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), validator)...)
+		}
+		// array-like keywords
+		if o.Items != nil {
+			errs = append(errs, o.Items.validateSpec(joinLoc(location, "items"), validator)...)
+		}
+		if o.UnevaluatedItems != nil {
+			errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
+		}
+		if o.Contains != nil {
+			errs = append(errs, o.Contains.validateSpec(joinLoc(location, "contains"), validator)...)
+		}
+		if len(o.PrefixItems) > 0 {
+			for i, v := range o.PrefixItems {
+				errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), validator)...)
+			}
+		}
 		return errs
 	}
 	for _, t := range *o.Type {
@@ -629,6 +691,9 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 					errs = append(errs, newValidationError(joinLoc(location, "maxContains"), "must be greater than or equal to minContains"))
 				}
 			}
+			if (o.MinContains != nil || o.MaxContains != nil) && o.Contains == nil {
+				errs = append(errs, newValidationError(joinLoc(location, "contains"), "'contains' keyword is required when using minContains or maxContains"))
+			}
 			if len(o.PrefixItems) > 0 {
 				for i, v := range o.PrefixItems {
 					errs = append(errs, v.validateSpec(joinLoc(location, "prefixItems", i), validator)...)
@@ -651,8 +716,8 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 			if o.AdditionalProperties != nil {
 				errs = append(errs, o.AdditionalProperties.validateSpec(joinLoc(location, "additionalProperties"), validator)...)
 			}
-			if o.UnevaluatedItems != nil {
-				errs = append(errs, o.UnevaluatedItems.validateSpec(joinLoc(location, "unevaluatedItems"), validator)...)
+			if o.UnevaluatedProperties != nil {
+				errs = append(errs, o.UnevaluatedProperties.validateSpec(joinLoc(location, "UnevaluatedProperties"), validator)...)
 			}
 			if o.PropertyNames != nil {
 				errs = append(errs, o.PropertyNames.validateSpec(joinLoc(location, "propertyNames"), validator)...)
@@ -677,23 +742,11 @@ func (o *Schema) validateSpec(location string, validator *Validator) []*validati
 			if o.MultipleOf != nil && *o.MultipleOf <= 0 {
 				errs = append(errs, newValidationError(joinLoc(location, "multipleOf"), "must be greater than 0"))
 			}
-			if o.Minimum != nil && *o.Minimum < 0 {
-				errs = append(errs, newValidationError(joinLoc(location, "minimum"), "must be greater than or equal to 0"))
+			if o.Minimum != nil && o.Maximum != nil && *o.Maximum < *o.Minimum {
+				errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
 			}
-			if o.Maximum != nil && *o.Maximum < 0 {
-				errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to 0"))
-				if o.Minimum != nil && *o.Maximum < *o.Minimum {
-					errs = append(errs, newValidationError(joinLoc(location, "maximum"), "must be greater than or equal to minimum"))
-				}
-			}
-			if o.ExclusiveMinimum != nil && *o.ExclusiveMinimum < 0 {
-				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMinimum"), "must be greater than or equal to 0"))
-			}
-			if o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < 0 {
-				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to 0"))
-				if o.ExclusiveMinimum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
-					errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than or equal to exclusiveMinimum"))
-				}
+			if o.ExclusiveMinimum != nil && o.ExclusiveMaximum != nil && *o.ExclusiveMaximum < *o.ExclusiveMinimum {
+				errs = append(errs, newValidationError(joinLoc(location, "exclusiveMaximum"), "must be greater than exclusiveMinimum"))
 			}
 			if o.Minimum != nil && o.ExclusiveMinimum != nil {
 				errs = append(errs, newValidationError(joinLoc(location, "minimum&exclusiveMinimum"), ErrMutuallyExclusive))
@@ -886,7 +939,7 @@ func (b *SchemaBuilder) Description(v string) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) Const(v string) *SchemaBuilder {
+func (b *SchemaBuilder) Const(v any) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
@@ -1100,7 +1153,7 @@ func (b *SchemaBuilder) Else(v *RefOrSpec[Schema]) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) MultipleOf(v int) *SchemaBuilder {
+func (b *SchemaBuilder) MultipleOf(v float64) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
@@ -1108,7 +1161,7 @@ func (b *SchemaBuilder) MultipleOf(v int) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) Minimum(v int) *SchemaBuilder {
+func (b *SchemaBuilder) Minimum(v float64) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
@@ -1116,7 +1169,7 @@ func (b *SchemaBuilder) Minimum(v int) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) ExclusiveMinimum(v int) *SchemaBuilder {
+func (b *SchemaBuilder) ExclusiveMinimum(v float64) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
@@ -1124,7 +1177,7 @@ func (b *SchemaBuilder) ExclusiveMinimum(v int) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) Maximum(v int) *SchemaBuilder {
+func (b *SchemaBuilder) Maximum(v float64) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
@@ -1132,7 +1185,7 @@ func (b *SchemaBuilder) Maximum(v int) *SchemaBuilder {
 	return b
 }
 
-func (b *SchemaBuilder) ExclusiveMaximum(v int) *SchemaBuilder {
+func (b *SchemaBuilder) ExclusiveMaximum(v float64) *SchemaBuilder {
 	if b.spec.Ref != nil {
 		return b
 	}
