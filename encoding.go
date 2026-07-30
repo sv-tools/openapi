@@ -64,7 +64,7 @@ type Encoding struct {
 	// For all other styles, the default value is false.
 	// This property SHALL be ignored if the request body media type is not application/x-www-form-urlencoded or multipart/form-data.
 	// If a value is explicitly defined, then the value of contentType (implicit or explicit) SHALL be ignored.
-	Explode bool `json:"explode,omitempty" yaml:"explode,omitempty"`
+	Explode *bool `json:"explode,omitempty" yaml:"explode,omitempty"`
 	// Determines whether the parameter value SHOULD allow reserved characters, as defined by [RFC3986]
 	//   :/?#[]@!$&'()*+,;=
 	// to be included without percent-encoding.
@@ -138,7 +138,7 @@ func (b *EncodingBuilder) Style(v string) *EncodingBuilder {
 }
 
 func (b *EncodingBuilder) Explode(v bool) *EncodingBuilder {
-	b.spec.Spec.Explode = v
+	b.spec.Spec.Explode = &v
 	return b
 }
 

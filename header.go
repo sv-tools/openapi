@@ -29,7 +29,7 @@ type Header struct {
 	// For other types of parameters this property has no effect.
 	// When style is form, the default value is true.
 	// For all other styles, the default value is false.
-	Explode bool `json:"explode,omitempty" yaml:"explode,omitempty"`
+	Explode *bool `json:"explode,omitempty" yaml:"explode,omitempty"`
 	// Determines whether this header is mandatory.
 	// The property MAY be included and its default value is false.
 	Required bool `json:"required,omitempty" yaml:"required,omitempty"`
@@ -118,7 +118,7 @@ func (b *HeaderBuilder) Style(v string) *HeaderBuilder {
 }
 
 func (b *HeaderBuilder) Explode(v bool) *HeaderBuilder {
-	b.spec.Spec.Spec.Explode = v
+	b.spec.Spec.Spec.Explode = &v
 	return b
 }
 
