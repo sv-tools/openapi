@@ -54,7 +54,7 @@ func (o *Callback) UnmarshalYAML(node *yaml.Node) error {
 }
 
 func (o *Callback) validateSpec(location string, validator *Validator) []*validationError {
-	var errs []*validationError
+	errs := make([]*validationError, 0, len(o.Paths))
 	for k, v := range o.Paths {
 		errs = append(errs, v.validateSpec(joinLoc(location, k), validator)...)
 	}
