@@ -54,8 +54,12 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - run: go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
-      - run: go test -json 2>&1 | go tool -modfile=".github/tools/go.mod" go-junit-report -parser gojson > junit.xml
+      - run: go test -json 2>&1 | go -C .github/tools tool go-junit-report -parser gojson > junit.xml
         if: always()
+        env:
+          # the tools module may require a newer Go than the matrix version;
+          # `go -C` (unlike `-modfile`) lets the toolchain switch automatically
+          GOTOOLCHAIN: auto
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
