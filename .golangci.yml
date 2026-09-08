@@ -90,6 +90,7 @@ linters:
     rules:
       - path: _test\.go
         linters:
+          - goconst
           - gosec
 
 formatters:
@@ -103,4 +104,5 @@ formatters:
         - default
         - prefix(github.com/sv-tools/openapi)
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
