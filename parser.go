@@ -90,7 +90,7 @@ func parseObject(location string, t reflect.Type, components *Extendable[Compone
 		return NewSchemaBuilder().Type(NullType).GoType("nil"), nil
 	}
 	kind := t.Kind()
-	if kind == reflect.Ptr {
+	if kind == reflect.Pointer {
 		builder, err := parseObject(location, t.Elem(), components, opt)
 		if err != nil {
 			return nil, err
@@ -134,7 +134,9 @@ func parseObject(location string, t reflect.Type, components *Extendable[Compone
 	case json.Number:
 		builder.Type(NumberType).GoPackage(t.PkgPath())
 	case json.RawMessage:
-		builder.Type(StringType).ContentMediaType("application/json").GoPackage(t.PkgPath())
+		// json.RawMessage is an alias for jsontext.Value since Go 1.27,
+		// so set the package and type explicitly to keep the output stable.
+		builder.Type(StringType).ContentMediaType("application/json").GoPackage("encoding/json").GoType("json.RawMessage")
 	default:
 		switch kind {
 		case reflect.Array, reflect.Slice:
@@ -237,11 +239,11 @@ func applyTag(field *reflect.StructField, schema, parent *SchemaBuilder) (name s
 
 	tag, ok := field.Tag.Lookup("openapi")
 	if !ok {
-		return
+		return name
 	}
 	parts := strings.Split(tag, ",")
 	if len(parts) == 0 {
-		return
+		return name
 	}
 
 	if parts[0] != "" {
@@ -252,7 +254,7 @@ func applyTag(field *reflect.StructField, schema, parent *SchemaBuilder) (name s
 	}
 	parts = parts[1:]
 	if len(parts) == 0 {
-		return
+		return name
 	}
 
 	if strings.HasPrefix(parts[0], "ref:") {
@@ -315,5 +317,5 @@ func applyTag(field *reflect.StructField, schema, parent *SchemaBuilder) (name s
 		}
 	}
 
-	return
+	return name
 }

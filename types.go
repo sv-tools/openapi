@@ -76,7 +76,7 @@ func getKind(v any) reflect.Kind {
 		return reflect.Invalid
 	}
 	k := t.Kind()
-	if k == reflect.Ptr {
+	if k == reflect.Pointer {
 		k = t.Elem().Kind()
 	}
 	return k
